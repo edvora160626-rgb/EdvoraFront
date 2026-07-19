@@ -1,4 +1,4 @@
-import Select from "react-select";
+// import Select from "react-select";
 
 const PRIMARY = "#A77A95";
 const PRIMARY_HOVER = "#8F6580";
@@ -131,12 +131,12 @@ const customStyles = {
 
 function CustomSelect(props) {
   return (
-    <Select
-      styles={customStyles}
-      menuPortalTarget={typeof document !== "undefined" ? document.body : null}
-      menuPosition="fixed"
-      {...props}
-    />
+    // <Select
+    //   styles={customStyles}
+    //   menuPortalTarget={typeof document !== "undefined" ? document.body : null}
+    //   menuPosition="fixed"
+    //   {...props}
+    // />
   );
 }
 
