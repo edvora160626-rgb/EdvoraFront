@@ -88,6 +88,16 @@ svg {
   height: auto;
 }
 
+/* Clock colon blink */
+.clock-colon {
+  animation: clockBlink 1s step-start infinite;
+}
+
+@keyframes clockBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.15; }
+}
+
 /* Login pencil loader */
 .login-loader {
   --color-1: #a77a95;
