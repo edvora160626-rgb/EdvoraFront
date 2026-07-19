@@ -1,4 +1,4 @@
-// import Select from "react-select";
+import { useState, useRef, useEffect } from "react";
 
 const PRIMARY = "#A77A95";
 const PRIMARY_HOVER = "#8F6580";
@@ -7,136 +7,142 @@ const SECONDARY_SOFT = "#E8E8F0";
 const TEXT = "#735366";
 const BORDER = "#D0D5DD";
 
-const customStyles = {
-  control: (provided, state) => ({
-    ...provided,
-    minHeight: "38px",
-    height: "38px",
-    borderRadius: "8px",
-    borderColor: state.isFocused ? PRIMARY : BORDER,
-    boxShadow: state.isFocused ? `0 0 0 1px ${PRIMARY}` : "none",
-    "&:hover": {
-      borderColor: PRIMARY,
-    },
-  }),
+function CustomSelect({
+  options = [],
+  value,
+  onChange,
+  placeholder = "Select...",
+  disabled = false,
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const wrapperRef = useRef(null);
 
-  valueContainer: (provided) => ({
-    ...provided,
-    height: "38px",
-    padding: "0 12px",
-  }),
-
-  singleValue: (provided) => ({
-    ...provided,
-    color: TEXT,
-  }),
-
-  placeholder: (provided) => ({
-    ...provided,
-    color: "#98A2B3",
-  }),
-
-  input: (provided) => ({
-    ...provided,
-    margin: "0px",
-    color: TEXT,
-  }),
-
-  indicatorSeparator: () => ({
-    display: "none",
-  }),
-
-  dropdownIndicator: (provided, state) => ({
-    ...provided,
-    color: state.isFocused || state.selectProps.menuIsOpen ? PRIMARY : SECONDARY,
-    "&:hover": {
-      color: PRIMARY,
-    },
-  }),
-
-  clearIndicator: (provided) => ({
-    ...provided,
-    color: SECONDARY,
-    "&:hover": {
-      color: PRIMARY_HOVER,
-    },
-  }),
-
-  indicatorsContainer: (provided) => ({
-    ...provided,
-    height: "38px",
-  }),
-
-  menu: (provided) => ({
-    ...provided,
-    borderRadius: "12px",
-    overflow: "hidden",
-    border: `1px solid ${SECONDARY}`,
-    boxShadow: "0 10px 30px rgba(115, 83, 102, 0.15)",
-  }),
-
-  option: (provided, state) => {
-    const selected = state.isSelected;
-    const hovered = state.isFocused;
-
-    let backgroundColor = "#FFFFFF";
-    let color = TEXT;
-
-    if (selected) {
-      backgroundColor = PRIMARY;
-      color = "#FFFFFF";
-    } else if (hovered) {
-      backgroundColor = SECONDARY;
-      color = TEXT;
-    }
-
-    return {
-      ...provided,
-      backgroundColor,
-      color,
-      cursor: "pointer",
-      transition: "background-color 0.15s ease, color 0.15s ease",
-      ":active": {
-        backgroundColor: selected ? PRIMARY_HOVER : SECONDARY_SOFT,
-        color: selected ? "#FFFFFF" : TEXT,
-      },
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(event.target)
+      ) {
+        setIsOpen(false);
+      }
     };
-  },
 
-  multiValue: (provided) => ({
-    ...provided,
-    backgroundColor: SECONDARY_SOFT,
-    borderRadius: "6px",
-  }),
+    document.addEventListener("mousedown", handleClickOutside);
 
-  multiValueLabel: (provided) => ({
-    ...provided,
-    color: TEXT,
-  }),
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
-  multiValueRemove: (provided) => ({
-    ...provided,
-    color: PRIMARY,
-    ":hover": {
-      backgroundColor: PRIMARY,
-      color: "#FFFFFF",
-    },
-  }),
+  const selectedOption = options.find((item) => item.value === value);
 
-  menuPortal: (provided) => ({
-    ...provided,
-    zIndex: 100000,
-  }),
-};
+  const handleSelect = (option) => {
+    onChange?.(option);
+    setIsOpen(false);
+  };
 
-function CustomSelect(props) {
   return (
-    // <Select
-    //   styles={customStyles}
-    //   menuPortalTarget={typeof document !== "undefined" ? document.body : null}
-    //   menuPosition="fixed"
-    //   {...props}
-    // />
+    <div
+      ref={wrapperRef}
+      style={{
+        position: "relative",
+        width: "100%",
+        fontFamily: "sans-serif",
+      }}
+    >
+      {/* Select Box */}
+      <div
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        style={{
+          height: "38px",
+          border: `1px solid ${isOpen ? PRIMARY : BORDER}`,
+          borderRadius: "8px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0 12px",
+          cursor: disabled ? "not-allowed" : "pointer",
+          background: "#fff",
+          color: selectedOption ? TEXT : "#98A2B3",
+          boxShadow: isOpen ? `0 0 0 1px ${PRIMARY}` : "none",
+          transition: "0.2s",
+        }}
+      >
+        <span>
+          {selectedOption ? selectedOption.label : placeholder}
+        </span>
+
+        <span
+          style={{
+            color: SECONDARY,
+            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "0.2s",
+            fontSize: "14px",
+          }}
+        >
+          ▼
+        </span>
+      </div>
+
+      {/* Dropdown */}
+      {isOpen && (
+        <div
+          style={{
+            position: "absolute",
+            top: "42px",
+            width: "100%",
+            background: "#fff",
+            border: `1px solid ${SECONDARY}`,
+            borderRadius: "10px",
+            boxShadow: "0 10px 30px rgba(115,83,102,.15)",
+            overflow: "hidden",
+            zIndex: 1000,
+            maxHeight: "220px",
+            overflowY: "auto",
+          }}
+        >
+          {options.length === 0 ? (
+            <div
+              style={{
+                padding: "10px 12px",
+                color: "#999",
+              }}
+            >
+              No options found
+            </div>
+          ) : (
+            options.map((option) => {
+              const selected = option.value === value;
+
+              return (
+                <div
+                  key={option.value}
+                  onClick={() => handleSelect(option)}
+                  style={{
+                    padding: "10px 12px",
+                    cursor: "pointer",
+                    background: selected ? PRIMARY : "#fff",
+                    color: selected ? "#fff" : TEXT,
+                    transition: ".15s",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!selected)
+                      e.currentTarget.style.background = SECONDARY;
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!selected)
+                      e.currentTarget.style.background = "#fff";
+                  }}
+                >
+                  {option.label}
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
