@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, Plus, X, Hash, Mail, Phone, DoorClosed } from "lucide-react";
+import { Building2, Plus, X, Hash, Mail, DoorClosed } from "lucide-react";
 import CustomSelect from "../../common/CustomSelect";
 import EdvoraLoader from "../../common/EdvoraLoader";
+import PhoneInput from "../../common/PhoneInput";
 import { openSnackbar } from "../../common/snackbar/snackbar";
 import {
   createDepartment,
@@ -16,6 +17,7 @@ const EMPTY_FORM = {
   description: "",
   email: "",
   phone: "",
+  phoneCode: "91",
   roomNumber: "",
   branch: "",
   color: "#4F46E5",
@@ -52,6 +54,7 @@ function AddDepartmentModal({ onClose, onCreated }) {
         description: formData.description.trim(),
         email: formData.email.trim().toLowerCase(),
         phone: formData.phone.trim(),
+        phoneCode: formData.phoneCode,
         roomNumber: formData.roomNumber.trim(),
         branch: formData.branch.trim(),
         color: formData.color,
@@ -160,20 +163,16 @@ function AddDepartmentModal({ onClose, onCreated }) {
 
             <div>
               <label className={labelClass}>Phone</label>
-              <div className="relative">
-                <Phone
-                  size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A77A95]"
-                />
-                <input
-                  type="text"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder="Phone number"
-                  className={`${inputClass} pl-9`}
-                />
-              </div>
+              <PhoneInput
+                phone={formData.phone}
+                phoneCode={formData.phoneCode}
+                onPhoneChange={(phone) =>
+                  setFormData((prev) => ({ ...prev, phone }))
+                }
+                onPhoneCodeChange={(phoneCode) =>
+                  setFormData((prev) => ({ ...prev, phoneCode }))
+                }
+              />
             </div>
 
             <div>

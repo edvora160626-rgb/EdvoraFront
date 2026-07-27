@@ -13,9 +13,11 @@ function CustomSelect({
   onChange,
   placeholder = "Select...",
   disabled = false,
+  isDisabled = false,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef(null);
+  const controlDisabled = disabled || isDisabled;
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -35,7 +37,13 @@ function CustomSelect({
     };
   }, []);
 
-  const selectedOption = options.find((item) => item.value === value);
+  const selectedValue =
+    value !== null && typeof value === "object" ? value.value : value;
+  const valuesMatch = (optionValue) =>
+    optionValue != null &&
+    selectedValue != null &&
+    String(optionValue) === String(selectedValue);
+  const selectedOption = options.find((item) => valuesMatch(item.value));
 
   const handleSelect = (option) => {
     onChange?.(option);
@@ -53,7 +61,7 @@ function CustomSelect({
     >
       {/* Select Box */}
       <div
-        onClick={() => !disabled && setIsOpen(!isOpen)}
+        onClick={() => !controlDisabled && setIsOpen(!isOpen)}
         style={{
           height: "38px",
           border: `1px solid ${isOpen ? PRIMARY : BORDER}`,
@@ -62,14 +70,23 @@ function CustomSelect({
           alignItems: "center",
           justifyContent: "space-between",
           padding: "0 12px",
-          cursor: disabled ? "not-allowed" : "pointer",
-          background: "#fff",
+          cursor: controlDisabled ? "not-allowed" : "pointer",
+          background: controlDisabled ? "#F2F4F7" : "#fff",
           color: selectedOption ? TEXT : "#98A2B3",
           boxShadow: isOpen ? `0 0 0 1px ${PRIMARY}` : "none",
           transition: "0.2s",
         }}
       >
-        <span>
+        <span
+          title={selectedOption?.label || placeholder}
+          style={{
+            minWidth: 0,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            paddingRight: "8px",
+          }}
+        >
           {selectedOption ? selectedOption.label : placeholder}
         </span>
 
@@ -113,7 +130,7 @@ function CustomSelect({
             </div>
           ) : (
             options.map((option) => {
-              const selected = option.value === value;
+              const selected = valuesMatch(option.value);
 
               return (
                 <div

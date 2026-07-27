@@ -11,8 +11,14 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import CustomSelect from "./CustomSelect";
 import EdvoraLoader from "./EdvoraLoader";
+import PhoneInput from "./PhoneInput";
 import { openSnackbar } from "./snackbar/snackbar";
 import { normalizeRole } from "../utils/auth";
+import {
+  DEFAULT_PHONE_CODE,
+  formatPhoneDisplay,
+  normalizePhoneCode,
+} from "../utils/phone";
 import { setCurrentUser } from "../redux/slices/authSlice";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:4001";
@@ -81,7 +87,7 @@ function ProfileModal({ open, onClose }) {
     lastName: "",
     email: "",
     phone: "",
-    phoneCode: "+91",
+    phoneCode: DEFAULT_PHONE_CODE,
     gender: "",
     dob: "",
     address: "",
@@ -99,7 +105,7 @@ function ProfileModal({ open, onClose }) {
       lastName: user.lastName || "",
       email: user.email || "",
       phone: user.phone || "",
-      phoneCode: user.phoneCode || "+91",
+      phoneCode: normalizePhoneCode(user.phoneCode),
       gender: user.gender || "",
       dob: formatDob(user.dob),
       address: user.address || "",
@@ -133,7 +139,7 @@ function ProfileModal({ open, onClose }) {
         lastName: formData.lastName.trim(),
         email: formData.email.trim().toLowerCase(),
         phone: formData.phone.trim(),
-        phoneCode: formData.phoneCode.trim(),
+        phoneCode: normalizePhoneCode(formData.phoneCode),
         gender: formData.gender || "",
         dob: formData.dob || "",
         address: formData.address.trim(),
@@ -246,24 +252,19 @@ function ProfileModal({ open, onClose }) {
                   className={inputClass}
                 />
               </div>
-              <div>
-                <label className={labelClass}>Phone Code</label>
-                <input
-                  name="phoneCode"
-                  value={formData.phoneCode}
-                  onChange={handleChange}
-                  className={inputClass}
-                />
-              </div>
-              <div>
+              <div className="sm:col-span-2">
                 <label className={labelClass}>
                   Phone <span className="text-red-500">*</span>
                 </label>
-                <input
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className={inputClass}
+                <PhoneInput
+                  phone={formData.phone}
+                  phoneCode={formData.phoneCode}
+                  onPhoneChange={(phone) =>
+                    setFormData((prev) => ({ ...prev, phone }))
+                  }
+                  onPhoneCodeChange={(phoneCode) =>
+                    setFormData((prev) => ({ ...prev, phoneCode }))
+                  }
                 />
               </div>
               <div>
@@ -323,11 +324,7 @@ function ProfileModal({ open, onClose }) {
                 </p>
                 <p className="flex items-start gap-2 text-sm text-slate-700">
                   <Phone size={16} className="mt-0.5 shrink-0 text-[#A77A95]" />
-                  <span>
-                    {user.phone
-                      ? `${user.phoneCode ? `${user.phoneCode} ` : ""}${user.phone}`
-                      : "—"}
-                  </span>
+                  <span>{formatPhoneDisplay(user.phone, user.phoneCode)}</span>
                 </p>
                 <p className="flex items-start gap-2 text-sm text-slate-700">
                   <MapPin size={16} className="mt-0.5 shrink-0 text-[#A77A95]" />

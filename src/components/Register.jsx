@@ -3,6 +3,7 @@ import { X, Eye, EyeOff } from "lucide-react";
 import CustomSelect from "../common/CustomSelect";
 import CustomDatePicker from "../common/CustomDatePicker";
 import EdvoraLoader from "../common/EdvoraLoader";
+import PhoneInput from "../common/PhoneInput";
 import axios from "axios";
 import { openSnackbar } from "../common/snackbar/snackbar";
 
@@ -127,7 +128,7 @@ function RegisterModal({ onClose }) {
         );
 
         const options = (data?.data || []).map((dept) => ({
-          value: dept.departmentName,
+          value: String(dept._id),
           label: dept.departmentCode
             ? `${dept.departmentName} (${dept.departmentCode})`
             : dept.departmentName,
@@ -409,14 +410,17 @@ function RegisterModal({ onClose }) {
               <label className={labelClass}>
                 Mobile Number <span className="text-red-500">*</span>
               </label>
-
-              <input
-                type="text"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
+              <PhoneInput
+                phone={formData.phone}
+                phoneCode={formData.phonecode}
+                onPhoneChange={(phone) =>
+                  setFormData((prev) => ({ ...prev, phone }))
+                }
+                onPhoneCodeChange={(phonecode) =>
+                  setFormData((prev) => ({ ...prev, phonecode }))
+                }
                 placeholder="Mobile Number"
-                className={inputClass}
+                height={38}
               />
             </div>
 
@@ -463,7 +467,7 @@ function RegisterModal({ onClose }) {
           </div>
 
           {/* Row 3 */}
-          <div className="grid grid-cols-1 min-[640px]:grid-cols-2 min-[1024px]:grid-cols-4 gap-4 sm:gap-6 mt-4 sm:mt-6">
+          <div className="grid grid-cols-1 min-[640px]:grid-cols-2 min-[1024px]:grid-cols-[0.9fr_0.9fr_1.4fr_0.9fr] gap-4 sm:gap-6 mt-4 sm:mt-6">
 
             <div>
               <label className={labelClass}>
@@ -721,6 +725,17 @@ function RegisterModal({ onClose }) {
                 />
               </div>
 
+            </div>
+          )}
+
+          {userType === "admin" && (
+            <div className="mt-6 sm:mt-8 rounded-lg border border-[#E8D5DF] bg-[#FAEEE9] px-3.5 py-3">
+              <p className="text-sm font-semibold text-[#735366]">
+                Employee ID is generated automatically
+              </p>
+              <p className="text-xs text-slate-500 mt-1">
+                Format uses your school name initials, e.g. VVMHS_001
+              </p>
             </div>
           )}
 

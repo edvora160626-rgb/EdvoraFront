@@ -12,6 +12,7 @@ import {
 import CustomSelect from "../../common/CustomSelect";
 import EdvoraLoader from "../../common/EdvoraLoader";
 import { openSnackbar } from "../../common/snackbar/snackbar";
+import { formatPhoneDisplay } from "../../utils/phone";
 import {
   assignStaffToClass,
   getActiveStaffBySchool,
@@ -80,8 +81,7 @@ function StudentCard({ student }) {
             {student.phone ? (
               <p className="flex items-center gap-2 text-sm text-slate-600">
                 <Phone size={14} className="shrink-0 text-[#A77A95]" />
-                {student.phoneCode ? `${student.phoneCode} ` : ""}
-                {student.phone}
+                {formatPhoneDisplay(student.phone, student.phoneCode)}
               </p>
             ) : null}
           </div>
@@ -123,9 +123,10 @@ function StudentTable({ students }) {
               const fullName = [student.firstName, student.lastName]
                 .filter(Boolean)
                 .join(" ");
-              const phone = student.phone
-                ? `${student.phoneCode ? `${student.phoneCode} ` : ""}${student.phone}`
-                : "—";
+              const phone = formatPhoneDisplay(
+                student.phone,
+                student.phoneCode
+              );
 
               return (
                 <tr key={student._id} className="border-t border-slate-100">

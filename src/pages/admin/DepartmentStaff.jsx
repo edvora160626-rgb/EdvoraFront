@@ -13,6 +13,7 @@ import {
 import CustomSelect from "../../common/CustomSelect";
 import EdvoraLoader from "../../common/EdvoraLoader";
 import { openSnackbar } from "../../common/snackbar/snackbar";
+import { formatPhoneDisplay } from "../../utils/phone";
 import {
   assignStaffToDepartment,
   getDepartmentsByStatus,
@@ -67,8 +68,7 @@ function StaffCard({ staff }) {
             {staff.phone ? (
               <p className="flex items-center gap-2 text-sm text-slate-600">
                 <Phone size={14} className="shrink-0 text-[#A77A95]" />
-                {staff.phoneCode ? `${staff.phoneCode} ` : ""}
-                {staff.phone}
+                {formatPhoneDisplay(staff.phone, staff.phoneCode)}
               </p>
             ) : null}
             {staff.qualification ? (
@@ -125,9 +125,10 @@ function StaffTable({ staff }) {
                 .filter(Boolean)
                 .join(" ");
               const employeeId = member.employeeId || member.staffId || "—";
-              const phone = member.phone
-                ? `${member.phoneCode ? `${member.phoneCode} ` : ""}${member.phone}`
-                : "—";
+              const phone = formatPhoneDisplay(
+                member.phone,
+                member.phoneCode
+              );
               const subjects =
                 Array.isArray(member.subjects) && member.subjects.length > 0
                   ? member.subjects.join(", ")

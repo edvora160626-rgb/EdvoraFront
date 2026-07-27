@@ -17,6 +17,7 @@ import {
 } from "../../utils/requestsApi";
 import EdvoraLoader from "../../common/EdvoraLoader";
 import { openSnackbar } from "../../common/snackbar/snackbar";
+import { formatPhoneDisplay } from "../../utils/phone";
 
 function StatusBadge({ status }) {
   const styles = {
@@ -182,11 +183,7 @@ function RequestDetailModal({ user, onClose, onUpdated }) {
             <DetailRow label="Email" value={user.email} />
             <DetailRow
               label="Phone"
-              value={
-                user.phone
-                  ? `${user.phoneCode ? `+${user.phoneCode} ` : ""}${user.phone}`
-                  : ""
-              }
+              value={user.phone ? formatPhoneDisplay(user.phone, user.phoneCode) : ""}
             />
             <DetailRow label="Gender" value={user.gender} />
             <DetailRow
@@ -229,7 +226,7 @@ function RequestDetailModal({ user, onClose, onUpdated }) {
                 type="button"
                 disabled={submitting}
                 onClick={() => handleUpdate("INACTIVE")}
-                className="px-4 h-[42px] rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold disabled:opacity-60"
+                className="px-3 h-[30px] rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold disabled:opacity-60"
               >
                 Reject
               </button>
@@ -237,7 +234,7 @@ function RequestDetailModal({ user, onClose, onUpdated }) {
                 type="button"
                 disabled={submitting}
                 onClick={() => handleUpdate("ACTIVE")}
-                className="px-4 h-[42px] rounded-lg bg-green-600 hover:bg-green-700 text-white text-sm font-semibold disabled:opacity-60"
+                className="px-3 h-[30px] rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-semibold disabled:opacity-60"
               >
                 Accept
               </button>
@@ -273,7 +270,8 @@ function UserCard({ user, onView }) {
 
       <div className="text-sm text-slate-600">
         <p>
-          <span className="font-medium">Phone:</span> {user.phone}
+          <span className="font-medium">Phone:</span>{" "}
+          {formatPhoneDisplay(user.phone, user.phoneCode)}
         </p>
       </div>
 
@@ -312,7 +310,9 @@ function RequestTable({ users, onView }) {
                 <td className="p-3 sm:p-4 text-sm max-w-[220px] truncate">
                   {user.email}
                 </td>
-                <td className="p-3 sm:p-4 text-sm">{user.phone}</td>
+                <td className="p-3 sm:p-4 text-sm">
+                  {formatPhoneDisplay(user.phone, user.phoneCode)}
+                </td>
                 <td className="p-3 sm:p-4 text-sm">
                   <StatusBadge status={user.status} />
                 </td>
