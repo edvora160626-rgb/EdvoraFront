@@ -18,6 +18,7 @@ import {
 import EdvoraLoader from "../../common/EdvoraLoader";
 import { openSnackbar } from "../../common/snackbar/snackbar";
 import { formatPhoneDisplay } from "../../utils/phone";
+import { getDepartmentsByStatus } from "../../utils/departmentApi";
 
 function StatusBadge({ status }) {
   const styles = {
@@ -37,15 +38,17 @@ function StatusBadge({ status }) {
   );
 }
 
-function DetailRow({ label, value }) {
-  if (value === undefined || value === null || value === "") return null;
+function DetailRow({ label, value, alwaysShow = false }) {
+  if (!alwaysShow && (value === undefined || value === null || value === "")) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-3 py-2.5 border-b border-slate-100 last:border-0">
       <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500 sm:w-36 shrink-0">
         {label}
       </dt>
-      <dd className="text-sm text-slate-800 break-words">{value}</dd>
+      <dd className="text-sm text-slate-800 break-words">{value || "—"}</dd>
     </div>
   );
 }
@@ -58,13 +61,81 @@ function getClassDisplayName(grade) {
   return "";
 }
 
+function departmentDocLabel(dept) {
+  if (!dept?.departmentName) return "";
+  return dept.departmentCode
+    ? `${dept.departmentName} (${dept.departmentCode})`
+    : dept.departmentName;
+}
+
+/** Resolve department field (id / object / name string) to a display label. */
+function resolveDepartmentDisplay(department, deptById = new Map()) {
+  if (department == null || department === "") return "";
+
+  // API already returned a readable name string
+  if (typeof department === "string") {
+    if (/^[a-f\d]{24}$/i.test(department)) {
+      return departmentDocLabel(deptById.get(department)) || "";
+    }
+    return department;
+  }
+
+  const items = Array.isArray(department) ? department : [department];
+
+  return items
+    .map((dept) => {
+      if (!dept) return "";
+      if (typeof dept === "object") {
+        if (dept.departmentName) return departmentDocLabel(dept);
+        const id = String(dept._id || dept.id || "");
+        return departmentDocLabel(deptById.get(id)) || "";
+      }
+      if (typeof dept === "string") {
+        if (/^[a-f\d]{24}$/i.test(dept)) {
+          return departmentDocLabel(deptById.get(dept)) || "";
+        }
+        return dept;
+      }
+      return "";
+    })
+    .filter(Boolean)
+    .join(", ");
+}
+
+async function buildDepartmentMap() {
+  const [active, inactive] = await Promise.all([
+    getDepartmentsByStatus("ACTIVE").catch(() => ({ data: [] })),
+    getDepartmentsByStatus("INACTIVE").catch(() => ({ data: [] })),
+  ]);
+
+  const map = new Map();
+  for (const dept of [...(active.data || []), ...(inactive.data || [])]) {
+    if (dept?._id) map.set(String(dept._id), dept);
+  }
+  return map;
+}
+
+async function withResolvedDepartments(users, role) {
+  if (role !== "TEACHER" && role !== "OFFICE" && role !== "SCHOOL_ADMIN") {
+    return users;
+  }
+
+  const deptById = await buildDepartmentMap();
+  return users.map((user) => ({
+    ...user,
+    departmentDisplay: resolveDepartmentDisplay(user.department, deptById),
+  }));
+}
+
 function getRoleSpecificDetails(user) {
   const role = user.role;
+  const departmentValue =
+    user.departmentDisplay || resolveDepartmentDisplay(user.department);
 
   if (role === "TEACHER") {
     return [
       { label: "Employee ID", value: user.employeeId || user.staffId },
-      { label: "Department", value: user.department },
+      { label: "Department", value: departmentValue || "—", alwaysShow: true },
       { label: "Qualification", value: user.qualification },
       {
         label: "Experience",
@@ -111,7 +182,7 @@ function getRoleSpecificDetails(user) {
   if (role === "OFFICE" || role === "SCHOOL_ADMIN") {
     return [
       { label: "Employee ID", value: user.employeeId || user.staffId },
-      { label: "Department", value: user.department },
+      { label: "Department", value: departmentValue || "—", alwaysShow: true },
     ];
   }
 
@@ -200,7 +271,12 @@ function RequestDetailModal({ user, onClose, onUpdated }) {
             />
             <DetailRow label="Address" value={user.address} />
             {roleDetails.map((item) => (
-              <DetailRow key={item.label} label={item.label} value={item.value} />
+              <DetailRow
+                key={item.label}
+                label={item.label}
+                value={item.value}
+                alwaysShow={item.alwaysShow}
+              />
             ))}
             <DetailRow
               label="Requested On"
@@ -347,6 +423,7 @@ function UserRequests() {
   const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
+    clearRequestsCache();
     let cancelled = false;
 
     const loadCounts = async () => {
@@ -382,13 +459,13 @@ function UserRequests() {
       try {
         setListLoading(true);
         const users = await fetchRequestsForRole(activeTab, activeStatus);
+        const withRole = users.map((user) => ({
+          ...user,
+          role: user.role || activeTab,
+        }));
+        const resolved = await withResolvedDepartments(withRole, activeTab);
         if (!cancelled) {
-          setActiveUsers(
-            users.map((user) => ({
-              ...user,
-              role: user.role || activeTab,
-            }))
-          );
+          setActiveUsers(resolved);
         }
       } catch (error) {
         if (!cancelled) {
@@ -417,12 +494,11 @@ function UserRequests() {
         fetchRequestsForRole(activeTab, activeStatus),
       ]);
       setStatusCounts(counts);
-      setActiveUsers(
-        users.map((user) => ({
-          ...user,
-          role: user.role || activeTab,
-        }))
-      );
+      const withRole = users.map((user) => ({
+        ...user,
+        role: user.role || activeTab,
+      }));
+      setActiveUsers(await withResolvedDepartments(withRole, activeTab));
     } catch (error) {
       openSnackbar({
         message: error?.response?.data?.message || "Failed to refresh requests",

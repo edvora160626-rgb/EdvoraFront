@@ -8,6 +8,9 @@ export default defineConfig({
     sourcemap: true,
     minify: false,
   },
+  optimizeDeps: {
+    include: ["react-country-flag", "xlsx-js-style"],
+  },
   server: {
     // Keep HMR snappy; Lighthouse should use preview/build for scores
     warmup: {

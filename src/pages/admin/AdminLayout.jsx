@@ -39,6 +39,7 @@ const NAV_ITEMS = [
     to: "/admin/requests",
     label: "User Requests",
     icon: ClipboardList,
+    roles: ["SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER"],
   },
   {
     to: "/admin/departments",

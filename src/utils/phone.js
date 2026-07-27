@@ -44,6 +44,38 @@ export function normalizePhoneNumber(value) {
   return String(value ?? "").replace(/\D/g, "").slice(0, 15);
 }
 
+/** Prefer India when dial code is 91; otherwise first dial-code match. */
+export function findCountryOption(dialCode, iso2) {
+  const code = normalizePhoneCode(dialCode);
+  const iso = String(iso2 || "").trim().toUpperCase();
+
+  if (iso) {
+    const byIso = COUNTRY_PHONE_OPTIONS.find(
+      (country) =>
+        country.iso2 === iso && (!code || country.dialCode === code)
+    );
+    if (byIso) return byIso;
+
+    const byIsoOnly = COUNTRY_PHONE_OPTIONS.find(
+      (country) => country.iso2 === iso
+    );
+    if (byIsoOnly) return byIsoOnly;
+  }
+
+  if (code === "91") {
+    return (
+      COUNTRY_PHONE_OPTIONS.find((country) => country.iso2 === "IN") ||
+      COUNTRY_PHONE_OPTIONS[0]
+    );
+  }
+
+  return (
+    COUNTRY_PHONE_OPTIONS.find((country) => country.dialCode === code) ||
+    COUNTRY_PHONE_OPTIONS[0]
+  );
+}
+
+/** Emoji fallback — UI should prefer react-country-flag SVG (Resilink pattern). */
 export function countryFlag(iso2) {
   return String(iso2 || "")
     .toUpperCase()

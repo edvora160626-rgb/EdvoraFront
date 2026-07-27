@@ -49,6 +49,24 @@ const ROLE_CONFIG = {
     viewRoles: ["STUDENT", "PARENT"],
     actionRoles: ["STUDENT", "PARENT"],
   },
+  PARENT: {
+    portalTitle: "Parent Portal",
+    welcomeTitle: "Parent Dashboard",
+    description:
+      "Follow your child's attendance, homework, fees, and teacher messages.",
+    requestDisplayOrder: [],
+    viewRoles: [],
+    actionRoles: [],
+  },
+  STUDENT: {
+    portalTitle: "Student Portal",
+    welcomeTitle: "Student Dashboard",
+    description:
+      "Track assignments, timetable, study goals, and your learning streak.",
+    requestDisplayOrder: [],
+    viewRoles: [],
+    actionRoles: [],
+  },
 };
 
 export function getRoleConfig(role = getUserRole()) {

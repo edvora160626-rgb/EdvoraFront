@@ -18,35 +18,34 @@ import { getClassesByStatus } from "../../utils/classesApi";
 import {
   ATTENDANCE_STATUSES,
   bulkUploadAttendance,
+  formatAttendanceSheetDate,
+  getTeachersForAttendance,
   normalizeBulkRows,
   parseCsv,
   todayISO,
 } from "../../utils/attendanceApi";
+import {
+  downloadTeacherAttendanceTemplate,
+  parseExcelAttendanceFile,
+} from "../../utils/attendanceTemplate";
 import { getUserRole } from "../../utils/auth";
 
 const STATUS_HINT = ATTENDANCE_STATUSES.map((s) => s.value).join(" | ");
 
-function downloadTemplate(type) {
-  const header =
-    type === "TEACHER"
-      ? "employeeId,status,remarks"
-      : "admissionNumber,status,remarks";
-  const sample =
-    type === "TEACHER"
-      ? "EMP001,PRESENT,\nEMP002,ABSENT,Sick leave"
-      : "ADM001,PRESENT,\nADM002,LATE,Traffic";
-  const blob = new Blob([`${header}\n${sample}\n`], {
-    type: "text/csv;charset=utf-8;",
-  });
+function downloadBlob(content, filename) {
+  const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download =
-    type === "TEACHER"
-      ? "teacher-attendance-template.csv"
-      : "student-attendance-template.csv";
+  link.download = filename;
   link.click();
   URL.revokeObjectURL(url);
+}
+
+function downloadStudentTemplate() {
+  const header = "admissionNumber,status,remarks";
+  const sample = "ADM001,PRESENT,\nADM002,LATE,Traffic";
+  downloadBlob(`${header}\n${sample}\n`, "student-attendance-template.csv");
 }
 
 function BulkAttendanceUpload({ type: typeProp }) {
@@ -69,6 +68,7 @@ function BulkAttendanceUpload({ type: typeProp }) {
   const [rows, setRows] = useState([]);
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [downloadingTemplate, setDownloadingTemplate] = useState(false);
   const [result, setResult] = useState(null);
   const inputRef = useRef(null);
 
@@ -114,19 +114,30 @@ function BulkAttendanceUpload({ type: typeProp }) {
     const file = fileList?.[0];
     if (!file) return;
 
-    if (!/\.(csv|txt)$/i.test(file.name)) {
+    const isExcel = /\.(xlsx|xls)$/i.test(file.name);
+    const isCsv = /\.(csv|txt)$/i.test(file.name);
+
+    if (!isExcel && !isCsv) {
       return openSnackbar({
-        message: "Please upload a .csv file",
+        message: "Please upload a .xlsx or .csv file",
         variant: "warning",
       });
     }
 
     try {
-      const text = await file.text();
-      const parsed = normalizeBulkRows(parseCsv(text), type);
+      let rawRows = [];
+      if (isExcel) {
+        const buffer = await file.arrayBuffer();
+        rawRows = parseExcelAttendanceFile(buffer);
+      } else {
+        const text = await file.text();
+        rawRows = parseCsv(text);
+      }
+
+      const parsed = normalizeBulkRows(rawRows, type);
       if (!parsed.length) {
         return openSnackbar({
-          message: "CSV has no data rows",
+          message: "File has no data rows",
           variant: "warning",
         });
       }
@@ -139,7 +150,7 @@ function BulkAttendanceUpload({ type: typeProp }) {
       });
     } catch {
       openSnackbar({
-        message: "Could not read the CSV file",
+        message: "Could not read the attendance file",
         variant: "error",
       });
     }
@@ -152,6 +163,42 @@ function BulkAttendanceUpload({ type: typeProp }) {
     if (inputRef.current) inputRef.current.value = "";
   };
 
+  const handleDownloadTemplate = async () => {
+    if (type === "STUDENT") {
+      downloadStudentTemplate();
+      return;
+    }
+
+    try {
+      setDownloadingTemplate(true);
+      const data = await getTeachersForAttendance(date);
+      const staff = data.teachers || [];
+
+      if (!staff.length) {
+        openSnackbar({
+          message: "No active staff found to include in the template",
+          variant: "warning",
+        });
+        return;
+      }
+
+      downloadTeacherAttendanceTemplate(staff, date);
+      openSnackbar({
+        message: `Styled Excel template ready with ${staff.length} active staff for ${formatAttendanceSheetDate(date)}`,
+        variant: "success",
+      });
+    } catch (error) {
+      openSnackbar({
+        message:
+          error?.response?.data?.message ||
+          "Failed to build attendance template",
+        variant: "error",
+      });
+    } finally {
+      setDownloadingTemplate(false);
+    }
+  };
+
   const handleUpload = async () => {
     if (type === "STUDENT" && !classId) {
       return openSnackbar({
@@ -162,7 +209,7 @@ function BulkAttendanceUpload({ type: typeProp }) {
 
     if (!rows.length) {
       return openSnackbar({
-        message: "Add a CSV file first",
+        message: "Add an attendance file first",
         variant: "warning",
       });
     }
@@ -255,7 +302,7 @@ function BulkAttendanceUpload({ type: typeProp }) {
                 Target
               </p>
               <p className="mt-2 text-sm font-semibold text-[#735366]">
-                All active teachers
+                All active staff
               </p>
               <p className="mt-1 text-xs text-slate-500">
                 Match by employeeId, staffId, or email
@@ -301,15 +348,31 @@ function BulkAttendanceUpload({ type: typeProp }) {
               <CloudUpload size={28} />
             </span>
             <h2 className="mt-4 text-xl font-bold text-[#735366]">
-              Drop your CSV here
+              Drop your file here
             </h2>
             <p className="mt-2 text-sm text-slate-500 max-w-md">
-              Columns:{" "}
-              <span className="font-medium text-[#735366]">
-                {type === "TEACHER" ? "employeeId" : "admissionNumber"}
-              </span>
-              , <span className="font-medium text-[#735366]">status</span>,{" "}
-              <span className="font-medium text-[#735366]">remarks</span>
+              {type === "TEACHER" ? (
+                <>
+                  Download the styled Excel sheet — title, headers, and grid use
+                  Edvora brand colors. Upload the filled{" "}
+                  <span className="font-medium text-[#735366]">.xlsx</span> (or
+                  .csv) back here.
+                  <br />
+                  Columns:{" "}
+                  <span className="font-medium text-[#735366]">
+                    S.No, employeeId, staff name, department, Status, Remarks
+                  </span>
+                </>
+              ) : (
+                <>
+                  Columns:{" "}
+                  <span className="font-medium text-[#735366]">
+                    admissionNumber
+                  </span>
+                  , <span className="font-medium text-[#735366]">status</span>,{" "}
+                  <span className="font-medium text-[#735366]">remarks</span>
+                </>
+              )}
             </p>
 
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
@@ -323,18 +386,19 @@ function BulkAttendanceUpload({ type: typeProp }) {
               </button>
               <button
                 type="button"
-                onClick={() => downloadTemplate(type)}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 h-11 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                onClick={handleDownloadTemplate}
+                disabled={downloadingTemplate}
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 h-11 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
               >
                 <Download size={16} />
-                Download Template
+                {downloadingTemplate ? "Preparing…" : "Download Template"}
               </button>
             </div>
 
             <input
               ref={inputRef}
               type="file"
-              accept=".csv,text/csv"
+              accept=".xlsx,.xls,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
               className="hidden"
               onChange={(e) => handleFiles(e.target.files)}
             />
@@ -370,12 +434,14 @@ function BulkAttendanceUpload({ type: typeProp }) {
           <ul className="space-y-3 text-sm text-slate-600">
             <li className="flex gap-2">
               <CheckCircle2 size={16} className="text-emerald-600 mt-0.5 shrink-0" />
-              Use the template headers exactly (case-insensitive).
+              {type === "TEACHER"
+                ? "Template lists every active staff with S.No, employeeId, name, and department."
+                : "Use the template headers exactly (case-insensitive)."}
             </li>
             <li className="flex gap-2">
               <CheckCircle2 size={16} className="text-emerald-600 mt-0.5 shrink-0" />
               {type === "TEACHER"
-                ? "Identifiers: employeeId, staffId, or email."
+                ? "Fill Status / Remarks only — matching uses employeeId (or staffId / email)."
                 : "Identifiers: admissionNumber, rollNumber, or email."}
             </li>
             <li className="flex gap-2">

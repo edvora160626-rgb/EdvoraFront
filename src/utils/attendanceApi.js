@@ -229,7 +229,82 @@ export async function getAttendanceLogDetail(logId) {
 
 export { todayISO };
 
-/** Parse simple CSV text into objects using first-row headers. */
+function normalizeHeaderKey(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\./g, "")
+    .replace(/\s+/g, "");
+}
+
+function isAttendanceHeaderRow(headers) {
+  const keys = new Set(headers.map(normalizeHeaderKey));
+  const hasStatus = keys.has("status") || keys.has("attendance");
+  const hasId =
+    keys.has("employeeid") ||
+    keys.has("staffid") ||
+    keys.has("admissionnumber") ||
+    keys.has("admissionno") ||
+    keys.has("rollnumber") ||
+    keys.has("rollno") ||
+    keys.has("email") ||
+    keys.has("identifier") ||
+    keys.has("id");
+  return hasStatus && hasId;
+}
+
+/** Escape a CSV cell (quotes when needed). */
+export function escapeCsvCell(value) {
+  const text = String(value ?? "");
+  if (/[",\n\r]/.test(text)) {
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+  return text;
+}
+
+/**
+ * Build teacher attendance CSV:
+ * title row + headers + one row per active staff.
+ */
+export function buildTeacherAttendanceTemplateCsv(staff = [], date = todayISO()) {
+  const titleDate = formatAttendanceSheetDate(date);
+  const title = `Attendance sheet of ${titleDate}`;
+  const header = [
+    "S.No",
+    "employeeId",
+    "staff name",
+    "department",
+    "Status",
+    "Remarks",
+  ].join(",");
+
+  const rows = staff.map((person, index) => {
+    const name = [person.firstName, person.lastName].filter(Boolean).join(" ").trim();
+    const employeeId = person.employeeId || person.staffId || "";
+    return [
+      index + 1,
+      escapeCsvCell(employeeId),
+      escapeCsvCell(name),
+      escapeCsvCell(person.department || ""),
+      escapeCsvCell(person.attendanceStatus || ""),
+      escapeCsvCell(person.remarks || ""),
+    ].join(",");
+  });
+
+  return [`${escapeCsvCell(title)}`, header, ...rows].join("\n") + "\n";
+}
+
+export function formatAttendanceSheetDate(date = todayISO()) {
+  const parsed = new Date(`${date}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) return String(date);
+  return parsed.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+/** Parse CSV into objects. Skips title rows and finds the header line. */
 export function parseCsv(text) {
   const lines = String(text || "")
     .replace(/^\uFEFF/, "")
@@ -237,13 +312,23 @@ export function parseCsv(text) {
     .map((line) => line.trim())
     .filter(Boolean);
 
-  if (lines.length < 2) return [];
+  if (!lines.length) return [];
 
-  const headers = splitCsvLine(lines[0]).map((h) =>
-    h.trim().toLowerCase().replace(/\s+/g, "")
-  );
+  let headerIndex = -1;
+  let headers = [];
 
-  return lines.slice(1).map((line) => {
+  for (let i = 0; i < lines.length; i += 1) {
+    const candidate = splitCsvLine(lines[i]).map(normalizeHeaderKey);
+    if (isAttendanceHeaderRow(candidate)) {
+      headerIndex = i;
+      headers = candidate;
+      break;
+    }
+  }
+
+  if (headerIndex < 0 || headerIndex >= lines.length - 1) return [];
+
+  return lines.slice(headerIndex + 1).map((line) => {
     const cols = splitCsvLine(line);
     const row = {};
     headers.forEach((header, idx) => {
@@ -279,24 +364,28 @@ function splitCsvLine(line) {
 }
 
 export function normalizeBulkRows(rawRows, type) {
-  return rawRows.map((row) => {
-    const identifier =
-      row.identifier ||
-      row.employeeid ||
-      row.staffid ||
-      row.admissionnumber ||
-      row.admissionno ||
-      row.rollnumber ||
-      row.rollno ||
-      row.email ||
-      row.id ||
-      "";
+  return rawRows
+    .map((row) => {
+      const identifier =
+        row.identifier ||
+        row.employeeid ||
+        row.staffid ||
+        row.admissionnumber ||
+        row.admissionno ||
+        row.rollnumber ||
+        row.rollno ||
+        row.email ||
+        row.id ||
+        "";
 
-    return {
-      identifier: String(identifier).trim(),
-      status: String(row.status || row.attendance || "").trim(),
-      remarks: String(row.remarks || row.note || row.notes || "").trim(),
-      type,
-    };
-  });
+      return {
+        identifier: String(identifier).trim(),
+        status: String(row.status || row.attendance || "").trim(),
+        remarks: String(row.remarks || row.note || row.notes || "").trim(),
+        staffName: String(row.staffname || row.name || "").trim(),
+        department: String(row.department || "").trim(),
+        type,
+      };
+    })
+    .filter((row) => row.identifier || row.status || row.remarks);
 }
