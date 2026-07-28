@@ -25,6 +25,7 @@ const QUICK_LINKS = [
   { label: "Assignments", icon: FileText },
   { label: "Study Hub", icon: BookOpen },
   { label: "Exams", icon: GraduationCap },
+  { label: "Events", icon: CalendarDays, to: "/admin/upcoming-events" },
   { label: "Timetable", icon: CalendarDays },
   { label: "Attendance", icon: ClipboardCheck },
   { label: "AI Tutor", icon: Bot },

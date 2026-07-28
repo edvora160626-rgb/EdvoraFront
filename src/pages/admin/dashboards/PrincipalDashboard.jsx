@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import {
   Building2,
+  CalendarDays,
   ClipboardList,
   GraduationCap,
   IndianRupee,
@@ -27,6 +28,7 @@ import usePendingRequests from "./shared/usePendingRequests";
 
 const QUICK_LINKS = [
   { label: "Requests", icon: ClipboardList, to: "/admin/requests" },
+  { label: "Events", icon: CalendarDays, to: "/admin/upcoming-events" },
   { label: "School Health", icon: TrendingUp },
   { label: "Staff", icon: UserCheck },
   { label: "Students", icon: GraduationCap },

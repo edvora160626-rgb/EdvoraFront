@@ -23,11 +23,25 @@ export function getUserRole() {
 export function getSchoolId() {
   const schoolId = getCurrentUser()?.schoolId;
   if (!schoolId) return "";
-  if (typeof schoolId === "string") return schoolId;
+  if (typeof schoolId === "string") return schoolId.trim();
   if (typeof schoolId === "object") {
-    return schoolId._id?.toString?.() || schoolId.toString?.() || "";
+    const raw =
+      schoolId._id ??
+      schoolId.id ??
+      (typeof schoolId.toHexString === "function"
+        ? schoolId.toHexString()
+        : null);
+    if (raw != null && raw !== "") {
+      return String(raw).trim();
+    }
+    const asString =
+      typeof schoolId.toString === "function" ? schoolId.toString() : "";
+    if (asString && asString !== "[object Object]") {
+      return asString.trim();
+    }
+    return "";
   }
-  return String(schoolId);
+  return String(schoolId).trim();
 }
 
 export function isAuthenticated() {

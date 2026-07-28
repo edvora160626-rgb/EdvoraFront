@@ -24,6 +24,7 @@ import RiskAlerts from "./shared/RiskAlerts";
 const QUICK_LINKS = [
   { label: "My Child", icon: UserRound },
   { label: "Attendance", icon: ClipboardCheck },
+  { label: "Events", icon: CalendarDays, to: "/admin/upcoming-events" },
   { label: "Fees", icon: CreditCard },
   { label: "Messages", icon: MessageSquare },
   { label: "Timetable", icon: CalendarDays },

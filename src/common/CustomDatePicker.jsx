@@ -6,7 +6,6 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 
 const PRIMARY = "#A77A95";
 const PRIMARY_HOVER = "#8F6580";
-const DEFAULT_REFERENCE_DATE = new Date(2000, 0, 1);
 
 const datePickerTheme = createTheme({
   palette: {
@@ -136,7 +135,7 @@ function CustomDatePicker({
           views={["year", "month", "day"]}
           openTo={openTo}
           closeOnSelect
-          referenceDate={committedDate || DEFAULT_REFERENCE_DATE}
+          referenceDate={committedDate || new Date()}
           format="dd-MM-yyyy"
           maxDate={parseDate(maxDate) || undefined}
           minDate={parseDate(minDate) || undefined}
@@ -147,10 +146,87 @@ function CustomDatePicker({
               placement: "bottom-start",
             },
             desktopPaper: {
-              sx: { zIndex: 100050 },
+              sx: {
+                zIndex: 100050,
+                borderRadius: "15px !important",
+                overflow: "hidden",
+                boxShadow: "0 10px 28px rgba(115, 83, 102, 0.16) !important",
+                border: "1px solid #E8D5CE",
+              },
             },
             dialog: {
               sx: { zIndex: 100050 },
+            },
+            layout: {
+              sx: {
+                width: "250px",
+                maxWidth: "250px",
+                "& .MuiPickersCalendarHeader-root": {
+                  marginTop: "2px",
+                  marginBottom: "0",
+                  paddingLeft: "8px",
+                  paddingRight: "4px",
+                  minHeight: "36px",
+                },
+                "& .MuiPickersCalendarHeader-label": {
+                  fontSize: "0.82rem",
+                  fontWeight: 600,
+                },
+                "& .MuiDayCalendar-header": {
+                  display: "flex",
+                  justifyContent: "space-between",
+                  width: "100%",
+                  maxWidth: "234px",
+                  margin: "0 auto",
+                  paddingLeft: "0",
+                  paddingRight: "0",
+                },
+                "& .MuiDayCalendar-weekDayLabel": {
+                  width: "30px",
+                  height: "24px",
+                  margin: "0 !important",
+                  fontSize: "0.68rem",
+                  flex: "0 0 30px",
+                },
+                "& .MuiDayCalendar-slideTransition": {
+                  minHeight: "200px",
+                },
+                "& .MuiDayCalendar-weekContainer": {
+                  margin: "0 auto",
+                  justifyContent: "space-between",
+                  width: "100%",
+                  maxWidth: "234px",
+                  paddingLeft: "0",
+                  paddingRight: "0",
+                },
+                "& .MuiPickersDay-root": {
+                  width: "30px !important",
+                  height: "30px !important",
+                  minWidth: "30px !important",
+                  minHeight: "30px !important",
+                  fontSize: "0.75rem",
+                  margin: "0 !important",
+                  flex: "0 0 30px",
+                },
+                "& .MuiDateCalendar-root": {
+                  width: "250px !important",
+                  maxWidth: "250px",
+                  maxHeight: "268px",
+                  height: "auto",
+                  overflow: "visible",
+                },
+                "& .MuiYearCalendar-root": {
+                  width: "250px",
+                  maxHeight: "220px",
+                },
+                "& .MuiMonthCalendar-root": {
+                  width: "250px",
+                },
+                "& .MuiPickersYear-yearButton, & .MuiPickersMonth-monthButton": {
+                  fontSize: "0.8rem",
+                  borderRadius: "8px",
+                },
+              },
             },
             textField: {
               size: "small",
@@ -192,6 +268,7 @@ function CustomDatePicker({
             },
             day: {
               sx: {
+                borderRadius: "8px !important",
                 "&.Mui-selected": {
                   backgroundColor: `${PRIMARY} !important`,
                   color: "#fff !important",

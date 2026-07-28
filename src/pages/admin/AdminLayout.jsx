@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   BookOpen,
   Building2,
+  CalendarDays,
   ClipboardCheck,
   ClipboardList,
   GraduationCap,
@@ -64,6 +65,12 @@ const NAV_ITEMS = [
     label: "Student Attendance",
     icon: UserRoundCheck,
     roles: ["TEACHER"],
+  },
+  {
+    to: "/admin/upcoming-events",
+    label: "Upcoming Events",
+    icon: CalendarDays,
+    roles: ["SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER", "STUDENT", "PARENT"],
   },
 ];
 

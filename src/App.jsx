@@ -31,6 +31,8 @@ const BulkAttendanceUpload = lazy(
   () => import("./pages/admin/BulkAttendanceUpload")
 );
 const AttendanceLogs = lazy(() => import("./pages/admin/AttendanceLogs"));
+const UpcomingEvents = lazy(() => import("./pages/admin/UpcomingEvents"));
+const EventDetail = lazy(() => import("./pages/admin/EventDetail"));
 
 function RouteFallback() {
   return (
@@ -90,6 +92,11 @@ function App() {
             <Route
               path="student-attendance/logs"
               element={<AttendanceLogs type="STUDENT" />}
+            />
+            <Route path="upcoming-events" element={<UpcomingEvents />} />
+            <Route
+              path="upcoming-events/:eventId"
+              element={<EventDetail />}
             />
           </Route>
         </Routes>

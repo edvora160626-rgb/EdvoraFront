@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import {
   BookOpen,
   Bot,
+  CalendarDays,
   ClipboardCheck,
   ClipboardList,
   FileText,
@@ -28,6 +29,7 @@ import usePendingRequests from "./shared/usePendingRequests";
 const QUICK_LINKS = [
   { label: "Attendance", icon: ClipboardCheck, to: "/admin/student-attendance" },
   { label: "Requests", icon: ClipboardList, to: "/admin/requests" },
+  { label: "Events", icon: CalendarDays, to: "/admin/upcoming-events" },
   { label: "Class Roster", icon: Users },
   { label: "Lesson Plans", icon: BookOpen },
   { label: "Assignments", icon: FileText },
