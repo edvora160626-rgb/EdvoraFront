@@ -33,6 +33,30 @@ const BulkAttendanceUpload = lazy(
 const AttendanceLogs = lazy(() => import("./pages/admin/AttendanceLogs"));
 const UpcomingEvents = lazy(() => import("./pages/admin/UpcomingEvents"));
 const EventDetail = lazy(() => import("./pages/admin/EventDetail"));
+const TimetableDashboard = lazy(
+  () => import("./pages/admin/timetable/TimetableDashboard")
+);
+const TimetableSettings = lazy(
+  () => import("./pages/admin/timetable/TimetableSettings")
+);
+const TimetableRooms = lazy(
+  () => import("./pages/admin/timetable/TimetableRooms")
+);
+const TimetableAllocations = lazy(
+  () => import("./pages/admin/timetable/TimetableAllocations")
+);
+const ClassTimetableGrid = lazy(
+  () => import("./pages/admin/timetable/ClassTimetableGrid")
+);
+const TeacherTimetable = lazy(
+  () => import("./pages/admin/timetable/TeacherTimetable")
+);
+const RoomTimetable = lazy(
+  () => import("./pages/admin/timetable/RoomTimetable")
+);
+const MyTimetable = lazy(
+  () => import("./pages/admin/timetable/MyTimetable")
+);
 
 function RouteFallback() {
   return (
@@ -98,6 +122,23 @@ function App() {
               path="upcoming-events/:eventId"
               element={<EventDetail />}
             />
+            <Route path="timetable" element={<TimetableDashboard />} />
+            <Route path="timetable/settings" element={<TimetableSettings />} />
+            <Route path="timetable/rooms" element={<TimetableRooms />} />
+            <Route
+              path="timetable/allocations"
+              element={<TimetableAllocations />}
+            />
+            <Route
+              path="timetable/class/:classId"
+              element={<ClassTimetableGrid />}
+            />
+            <Route path="timetable/teacher" element={<TeacherTimetable />} />
+            <Route
+              path="timetable/room/:roomId"
+              element={<RoomTimetable />}
+            />
+            <Route path="timetable/my" element={<MyTimetable />} />
           </Route>
         </Routes>
       </Suspense>

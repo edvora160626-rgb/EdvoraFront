@@ -90,14 +90,34 @@ export async function getTeachersForAttendance(date = todayISO()) {
   });
 }
 
+export async function getAssignedClassesForAttendance(date = todayISO()) {
+  const schoolId = getSchoolId();
+  const teacherId = getCurrentUser()?._id;
+  const key = `assigned-classes:${schoolId}:${teacherId}:${date}`;
+
+  return cachedRequest(key, async () => {
+    const { data } = await axios.post(
+      `${API_BASE}/attendance/getAssignedClassesForAttendance`,
+      { schoolId, teacherId, date }
+    );
+
+    return {
+      date: data?.date,
+      totalClasses: data?.totalClasses || 0,
+      classes: data?.data || [],
+    };
+  });
+}
+
 export async function getStudentsForAttendance(classId, date = todayISO()) {
   const schoolId = getSchoolId();
-  const key = `students:${schoolId}:${classId}:${date}`;
+  const teacherId = getCurrentUser()?._id;
+  const key = `students:${schoolId}:${classId}:${date}:${teacherId}`;
 
   return cachedRequest(key, async () => {
     const { data } = await axios.post(
       `${API_BASE}/attendance/getStudentsForAttendance`,
-      { schoolId, classId, date }
+      { schoolId, classId, date, teacherId }
     );
 
     return {
@@ -382,8 +402,10 @@ export function normalizeBulkRows(rawRows, type) {
         identifier: String(identifier).trim(),
         status: String(row.status || row.attendance || "").trim(),
         remarks: String(row.remarks || row.note || row.notes || "").trim(),
-        staffName: String(row.staffname || row.name || "").trim(),
-        department: String(row.department || "").trim(),
+        staffName: String(
+          row.staffname || row.studentname || row.name || ""
+        ).trim(),
+        department: String(row.department || row.class || "").trim(),
         type,
       };
     })

@@ -14,39 +14,25 @@ import {
 import CustomDatePicker from "../../common/CustomDatePicker";
 import CustomSelect from "../../common/CustomSelect";
 import { openSnackbar } from "../../common/snackbar/snackbar";
-import { getClassesByStatus } from "../../utils/classesApi";
 import {
   ATTENDANCE_STATUSES,
   bulkUploadAttendance,
   formatAttendanceSheetDate,
+  getAssignedClassesForAttendance,
+  getStudentsForAttendance,
   getTeachersForAttendance,
   normalizeBulkRows,
   parseCsv,
   todayISO,
 } from "../../utils/attendanceApi";
 import {
+  downloadStudentAttendanceTemplate,
   downloadTeacherAttendanceTemplate,
   parseExcelAttendanceFile,
 } from "../../utils/attendanceTemplate";
 import { getUserRole } from "../../utils/auth";
 
 const STATUS_HINT = ATTENDANCE_STATUSES.map((s) => s.value).join(" | ");
-
-function downloadBlob(content, filename) {
-  const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
-function downloadStudentTemplate() {
-  const header = "admissionNumber,status,remarks";
-  const sample = "ADM001,PRESENT,\nADM002,LATE,Traffic";
-  downloadBlob(`${header}\n${sample}\n`, "student-attendance-template.csv");
-}
 
 function BulkAttendanceUpload({ type: typeProp }) {
   const navigate = useNavigate();
@@ -78,15 +64,23 @@ function BulkAttendanceUpload({ type: typeProp }) {
 
     const load = async () => {
       try {
-        const res = await getClassesByStatus("ACTIVE");
+        const res = await getAssignedClassesForAttendance(date);
         if (cancelled) return;
-        const list = res.data || [];
+        const list = res.classes || [];
         setClasses(list);
         if (!classId && list[0]?._id) setClassId(list[0]._id);
+        if (
+          classId &&
+          list.length &&
+          !list.some((item) => String(item._id) === String(classId))
+        ) {
+          setClassId(list[0]?._id || "");
+        }
       } catch (error) {
         openSnackbar({
           message:
-            error?.response?.data?.message || "Failed to load classes",
+            error?.response?.data?.message ||
+            "Failed to load your assigned classes",
           variant: "error",
         });
       }
@@ -96,12 +90,16 @@ function BulkAttendanceUpload({ type: typeProp }) {
     return () => {
       cancelled = true;
     };
-  }, [type]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [type, date]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const classOptions = classes.map((item) => ({
     value: item._id,
     label: `${item.className} · Sec ${item.section}`,
   }));
+
+  const selectedClass = classes.find(
+    (item) => String(item._id) === String(classId)
+  );
 
   const previewStats = useMemo(() => {
     const total = rows.length;
@@ -164,13 +162,41 @@ function BulkAttendanceUpload({ type: typeProp }) {
   };
 
   const handleDownloadTemplate = async () => {
-    if (type === "STUDENT") {
-      downloadStudentTemplate();
-      return;
-    }
-
     try {
       setDownloadingTemplate(true);
+
+      if (type === "STUDENT") {
+        if (!classId) {
+          openSnackbar({
+            message: "Select a class before downloading the template",
+            variant: "warning",
+          });
+          return;
+        }
+
+        const data = await getStudentsForAttendance(classId, date);
+        const students = data.students || [];
+
+        if (!students.length) {
+          openSnackbar({
+            message: "No active students found in this class",
+            variant: "warning",
+          });
+          return;
+        }
+
+        downloadStudentAttendanceTemplate(
+          students,
+          date,
+          data.classInfo || selectedClass
+        );
+        openSnackbar({
+          message: `Styled Excel template ready with ${students.length} students for ${formatAttendanceSheetDate(date)}`,
+          variant: "success",
+        });
+        return;
+      }
+
       const data = await getTeachersForAttendance(date);
       const staff = data.teachers || [];
 
@@ -251,8 +277,8 @@ function BulkAttendanceUpload({ type: typeProp }) {
           </h1>
           <p className="text-sm text-slate-500 mt-1">
             {type === "TEACHER"
-              ? "Import teacher attendance from a CSV sheet"
-              : "Import student attendance for a class from a CSV sheet"}
+              ? "Import teacher attendance from a styled Excel sheet"
+              : "Import student attendance for your assigned class from Excel"}
           </p>
         </div>
         <button
@@ -285,7 +311,7 @@ function BulkAttendanceUpload({ type: typeProp }) {
           {type === "STUDENT" ? (
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-[#A77A95] mb-2">
-                Step 2 · Class
+                Step 2 · My Class
               </p>
               <CustomSelect
                 options={classOptions}
@@ -293,7 +319,11 @@ function BulkAttendanceUpload({ type: typeProp }) {
                   classOptions.find((opt) => opt.value === classId) || null
                 }
                 onChange={(opt) => setClassId(opt?.value || "")}
-                placeholder="Select class"
+                placeholder={
+                  classOptions.length
+                    ? "Select assigned class"
+                    : "No assigned classes"
+                }
               />
             </div>
           ) : (
@@ -365,12 +395,16 @@ function BulkAttendanceUpload({ type: typeProp }) {
                 </>
               ) : (
                 <>
+                  Download the class roster Excel, fill Status &amp; Remarks,
+                  then upload the{" "}
+                  <span className="font-medium text-[#735366]">.xlsx</span> (or
+                  .csv).
+                  <br />
                   Columns:{" "}
                   <span className="font-medium text-[#735366]">
-                    admissionNumber
+                    S.No, admissionNumber, student name, rollNumber, Status,
+                    Remarks
                   </span>
-                  , <span className="font-medium text-[#735366]">status</span>,{" "}
-                  <span className="font-medium text-[#735366]">remarks</span>
                 </>
               )}
             </p>
@@ -387,7 +421,9 @@ function BulkAttendanceUpload({ type: typeProp }) {
               <button
                 type="button"
                 onClick={handleDownloadTemplate}
-                disabled={downloadingTemplate}
+                disabled={
+                  downloadingTemplate || (type === "STUDENT" && !classId)
+                }
                 className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 h-11 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
               >
                 <Download size={16} />
@@ -433,23 +469,35 @@ function BulkAttendanceUpload({ type: typeProp }) {
           </h3>
           <ul className="space-y-3 text-sm text-slate-600">
             <li className="flex gap-2">
-              <CheckCircle2 size={16} className="text-emerald-600 mt-0.5 shrink-0" />
+              <CheckCircle2
+                size={16}
+                className="text-emerald-600 mt-0.5 shrink-0"
+              />
               {type === "TEACHER"
                 ? "Template lists every active staff with S.No, employeeId, name, and department."
-                : "Use the template headers exactly (case-insensitive)."}
+                : "Template lists students in your assigned class with admission & roll numbers."}
             </li>
             <li className="flex gap-2">
-              <CheckCircle2 size={16} className="text-emerald-600 mt-0.5 shrink-0" />
+              <CheckCircle2
+                size={16}
+                className="text-emerald-600 mt-0.5 shrink-0"
+              />
               {type === "TEACHER"
                 ? "Fill Status / Remarks only — matching uses employeeId (or staffId / email)."
-                : "Identifiers: admissionNumber, rollNumber, or email."}
+                : "Fill Status / Remarks only — matching uses admissionNumber (or roll / email)."}
             </li>
             <li className="flex gap-2">
-              <CheckCircle2 size={16} className="text-emerald-600 mt-0.5 shrink-0" />
+              <CheckCircle2
+                size={16}
+                className="text-emerald-600 mt-0.5 shrink-0"
+              />
               Short codes work too: P, A, L, HD, LV.
             </li>
             <li className="flex gap-2">
-              <AlertCircle size={16} className="text-amber-600 mt-0.5 shrink-0" />
+              <AlertCircle
+                size={16}
+                className="text-amber-600 mt-0.5 shrink-0"
+              />
               Existing marks for matched people on this date will be updated.
             </li>
           </ul>
@@ -490,9 +538,7 @@ function BulkAttendanceUpload({ type: typeProp }) {
         <section className="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
           <div className="px-4 sm:px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
             <div>
-              <h3 className="text-lg font-semibold text-[#735366]">
-                Preview
-              </h3>
+              <h3 className="text-lg font-semibold text-[#735366]">Preview</h3>
               <p className="text-sm text-slate-500">
                 Review rows before uploading
               </p>
@@ -518,7 +564,10 @@ function BulkAttendanceUpload({ type: typeProp }) {
               </thead>
               <tbody>
                 {rows.slice(0, 50).map((row, idx) => (
-                  <tr key={`${row.identifier}-${idx}`} className="border-t border-slate-100">
+                  <tr
+                    key={`${row.identifier}-${idx}`}
+                    className="border-t border-slate-100"
+                  >
                     <td className="p-3 text-sm text-slate-500">{idx + 1}</td>
                     <td className="p-3 text-sm font-medium text-slate-800">
                       {row.identifier || (

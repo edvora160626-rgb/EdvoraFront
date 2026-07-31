@@ -1,12 +1,20 @@
 import * as XLSX from "xlsx-js-style";
 import { formatAttendanceSheetDate, todayISO } from "./attendanceApi";
 
-const COL_COUNT = 6;
-const HEADERS = [
+const TEACHER_HEADERS = [
   "S.No",
   "employeeId",
   "staff name",
   "department",
+  "Status",
+  "Remarks",
+];
+
+const STUDENT_HEADERS = [
+  "S.No",
+  "admissionNumber",
+  "student name",
+  "rollNumber",
   "Status",
   "Remarks",
 ];
@@ -61,23 +69,21 @@ function setCell(sheet, row, col, value, style) {
   };
 }
 
-/**
- * WPS/Excel-compatible attendance template.
- * Avoids styling every cell inside merges (that causes WPS 0x80004005 on save).
- */
-export function buildTeacherAttendanceTemplateWorkbook(
-  staff = [],
-  date = todayISO()
-) {
+function buildAttendanceWorkbook({
+  people = [],
+  date = todayISO(),
+  headers,
+  subtitle,
+  mapRow,
+}) {
   const titleDate = formatAttendanceSheetDate(date);
   const title = `Attendance sheet of ${titleDate}`;
-  const subtitle = "Edvora - Active staff roster - Fill Status & Remarks only";
+  const colCount = headers.length;
 
   const sheet = {};
-  const lastDataRow = 2 + staff.length; // 0-based: title=0, sub=1, header=2, data starts 3
+  const lastDataRow = 2 + people.length;
   const lastRow = Math.max(lastDataRow, 2);
 
-  // Title — value + style ONLY on A1 (merged master). Do not write B1:F1.
   setCell(
     sheet,
     0,
@@ -90,7 +96,6 @@ export function buildTeacherAttendanceTemplateWorkbook(
     })
   );
 
-  // Subtitle — value + style ONLY on A2
   setCell(
     sheet,
     1,
@@ -98,13 +103,17 @@ export function buildTeacherAttendanceTemplateWorkbook(
     subtitle,
     cellStyle({
       fill: COLORS.accentBg,
-      font: { bold: true, sz: 10, italic: true, color: { rgb: COLORS.accentText } },
+      font: {
+        bold: true,
+        sz: 10,
+        italic: true,
+        color: { rgb: COLORS.accentText },
+      },
       alignment: { horizontal: "center" },
     })
   );
 
-  // Header row
-  HEADERS.forEach((label, col) => {
+  headers.forEach((label, col) => {
     setCell(
       sheet,
       2,
@@ -118,19 +127,10 @@ export function buildTeacherAttendanceTemplateWorkbook(
     );
   });
 
-  // Data rows
-  staff.forEach((person, index) => {
+  people.forEach((person, index) => {
     const row = 3 + index;
     const zebra = index % 2 === 1;
-    const name = [person.firstName, person.lastName].filter(Boolean).join(" ").trim();
-    const values = [
-      index + 1,
-      person.employeeId || person.staffId || "",
-      name,
-      person.department || "",
-      person.attendanceStatus || "",
-      person.remarks || "",
-    ];
+    const values = mapRow(person, index);
 
     values.forEach((value, col) => {
       let fill = zebra ? COLORS.zebraBg : COLORS.white;
@@ -159,19 +159,19 @@ export function buildTeacherAttendanceTemplateWorkbook(
 
   sheet["!ref"] = XLSX.utils.encode_range({
     s: { r: 0, c: 0 },
-    e: { r: lastRow, c: COL_COUNT - 1 },
+    e: { r: lastRow, c: colCount - 1 },
   });
 
   sheet["!merges"] = [
-    { s: { r: 0, c: 0 }, e: { r: 0, c: COL_COUNT - 1 } },
-    { s: { r: 1, c: 0 }, e: { r: 1, c: COL_COUNT - 1 } },
+    { s: { r: 0, c: 0 }, e: { r: 0, c: colCount - 1 } },
+    { s: { r: 1, c: 0 }, e: { r: 1, c: colCount - 1 } },
   ];
 
   sheet["!cols"] = [
     { wch: 8 },
-    { wch: 14 },
+    { wch: 16 },
     { wch: 24 },
-    { wch: 22 },
+    { wch: 14 },
     { wch: 14 },
     { wch: 28 },
   ];
@@ -180,7 +180,7 @@ export function buildTeacherAttendanceTemplateWorkbook(
     { hpt: 30 },
     { hpt: 20 },
     { hpt: 22 },
-    ...staff.map(() => ({ hpt: 20 })),
+    ...people.map(() => ({ hpt: 20 })),
   ];
 
   const workbook = XLSX.utils.book_new();
@@ -193,18 +193,102 @@ export function buildTeacherAttendanceTemplateWorkbook(
   });
 }
 
-export function downloadTeacherAttendanceTemplate(staff, date) {
-  const buffer = buildTeacherAttendanceTemplateWorkbook(staff, date);
-  const stamp = String(date || todayISO()).replace(/-/g, "");
+function downloadWorkbookBuffer(buffer, filename) {
   const blob = new Blob([buffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `teacher-attendance-${stamp}.xlsx`;
+  link.download = filename;
   link.click();
   URL.revokeObjectURL(url);
+}
+
+/**
+ * WPS/Excel-compatible attendance template.
+ * Avoids styling every cell inside merges (that causes WPS 0x80004005 on save).
+ */
+export function buildTeacherAttendanceTemplateWorkbook(
+  staff = [],
+  date = todayISO()
+) {
+  return buildAttendanceWorkbook({
+    people: staff,
+    date,
+    headers: TEACHER_HEADERS,
+    subtitle: "Edvora - Active staff roster - Fill Status & Remarks only",
+    mapRow: (person, index) => {
+      const name = [person.firstName, person.lastName]
+        .filter(Boolean)
+        .join(" ")
+        .trim();
+      return [
+        index + 1,
+        person.employeeId || person.staffId || "",
+        name,
+        person.department || "",
+        person.attendanceStatus || "",
+        person.remarks || "",
+      ];
+    },
+  });
+}
+
+export function downloadTeacherAttendanceTemplate(staff, date) {
+  const buffer = buildTeacherAttendanceTemplateWorkbook(staff, date);
+  const stamp = String(date || todayISO()).replace(/-/g, "");
+  downloadWorkbookBuffer(buffer, `teacher-attendance-${stamp}.xlsx`);
+}
+
+export function buildStudentAttendanceTemplateWorkbook(
+  students = [],
+  date = todayISO(),
+  classInfo = null
+) {
+  const classLabel = classInfo
+    ? `${classInfo.className || "Class"} · Sec ${classInfo.section || "-"}`
+    : "Class roster";
+
+  return buildAttendanceWorkbook({
+    people: students,
+    date,
+    headers: STUDENT_HEADERS,
+    subtitle: `Edvora - ${classLabel} - Fill Status & Remarks only`,
+    mapRow: (person, index) => {
+      const name = [person.firstName, person.lastName]
+        .filter(Boolean)
+        .join(" ")
+        .trim();
+      return [
+        index + 1,
+        person.admissionNumber || "",
+        name,
+        person.rollNumber || "",
+        person.attendanceStatus || "",
+        person.remarks || "",
+      ];
+    },
+  });
+}
+
+export function downloadStudentAttendanceTemplate(students, date, classInfo) {
+  const buffer = buildStudentAttendanceTemplateWorkbook(
+    students,
+    date,
+    classInfo
+  );
+  const stamp = String(date || todayISO()).replace(/-/g, "");
+  const classSlug = classInfo
+    ? `${classInfo.className || "class"}-${classInfo.section || ""}`
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "")
+    : "class";
+  downloadWorkbookBuffer(
+    buffer,
+    `student-attendance-${classSlug}-${stamp}.xlsx`
+  );
 }
 
 /** Read .xlsx / .xls into normalized raw row objects (header keys lowercased). */

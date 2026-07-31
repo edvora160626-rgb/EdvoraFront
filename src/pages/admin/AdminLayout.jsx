@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   BookOpen,
   Building2,
+  CalendarClock,
   CalendarDays,
   ClipboardCheck,
   ClipboardList,
@@ -53,6 +54,18 @@ const NAV_ITEMS = [
     label: "Classes",
     icon: BookOpen,
     roles: ["SCHOOL_ADMIN"],
+  },
+  {
+    to: "/admin/timetable",
+    label: "Timetable",
+    icon: CalendarClock,
+    roles: ["SUPER_ADMIN", "SCHOOL_ADMIN"],
+  },
+  {
+    to: "/admin/timetable/my",
+    label: "My Timetable",
+    icon: CalendarClock,
+    roles: ["TEACHER", "STUDENT", "PARENT"],
   },
   {
     to: "/admin/teacher-attendance",
