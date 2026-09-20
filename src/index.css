@@ -1,6 +1,11 @@
 @import "tailwindcss";
+@import "./styles/responsive.css";
 
 @theme {
+  --breakpoint-xxs: 320px;
+  --breakpoint-xs: 480px;
+  --breakpoint-3xl: 2560px;
+
   --color-primary: #a77a95;
   --color-primary-hover: #8f6580;
   --color-primary-deep: #735366;

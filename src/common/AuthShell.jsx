@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import EdvoraLogo from "./EdvoraLogo";
 
 /* ─── Clock hook ──────────────────────────────────────────────────── */
 function useClock() {
@@ -173,15 +174,13 @@ function LeftPanel() {
       <div className="relative z-10 flex items-center justify-between flex-shrink-0"
         style={{ padding: "22px 28px 0" }}>
         {/* Brand */}
-        <div className="flex items-center gap-2.5">
-          <div className="flex items-center justify-center rounded-xl flex-shrink-0"
-            style={{ width: 36, height: 36, background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.22)" }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-              <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-            </svg>
-          </div>
-          <div>
+        <div className="flex items-center gap-2.5 min-w-0">
+          <EdvoraLogo
+            variant="icon"
+            decorative
+            className="h-9 w-9 flex-shrink-0 drop-shadow-sm"
+          />
+          <div className="min-w-0">
             <p style={{ color: "white", fontWeight: 700, fontSize: 14, lineHeight: 1, letterSpacing: "-0.2px" }}>Edvora</p>
             <p style={{ color: "rgba(255,255,255,0.42)", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", marginTop: 3 }}>School Portal</p>
           </div>
@@ -254,15 +253,13 @@ function MobileClock() {
   return (
     <div className="flex items-center justify-between w-full rounded-2xl mb-5 flex-shrink-0"
       style={{ background: "linear-gradient(135deg,#5c3050,#9b6a8a)", padding: "11px 16px" }}>
-      <div className="flex items-center gap-2.5">
-        <div className="flex items-center justify-center rounded-lg flex-shrink-0"
-          style={{ width: 28, height: 28, background: "rgba(255,255,255,0.18)" }}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-          </svg>
-        </div>
-        <div>
+      <div className="flex items-center gap-2.5 min-w-0">
+        <EdvoraLogo
+          variant="icon"
+          decorative
+          className="h-7 w-7 flex-shrink-0 drop-shadow-sm"
+        />
+        <div className="min-w-0">
           <p style={{ color: "white", fontWeight: 700, fontSize: 13, lineHeight: 1 }}>Edvora</p>
           <p style={{ color: "rgba(255,255,255,0.52)", fontSize: 10, marginTop: 2 }}>{day}, {date} {month}</p>
         </div>

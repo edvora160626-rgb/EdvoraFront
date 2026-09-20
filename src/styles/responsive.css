@@ -1,0 +1,269 @@
+/**
+ * Resilink-admin inspired responsive scale for Edvora exam/school UI.
+ * Stepped type, button, and spacing ladders across phone → 4K.
+ */
+
+:root {
+  --rs-page-x: 1rem;
+  --rs-page-y: 0.75rem;
+  --rs-title: clamp(1rem, 2.2vw, 1.35rem);
+  --rs-subtitle: clamp(0.75rem, 1.6vw, 0.9rem);
+  --rs-body: clamp(0.75rem, 1.5vw, 0.9375rem);
+  --rs-caption: clamp(0.625rem, 1.3vw, 0.75rem);
+  --rs-btn-h: clamp(2rem, 4.2vw, 2.75rem);
+  --rs-btn-px: clamp(0.75rem, 2vw, 1.25rem);
+  --rs-btn-text: clamp(0.6875rem, 1.5vw, 1rem);
+  --rs-input-h: clamp(2rem, 4vw, 2.75rem);
+  --rs-card-pad: clamp(0.75rem, 2vw, 1.25rem);
+  --rs-radius: clamp(0.625rem, 1.2vw, 1rem);
+}
+
+@media (min-width: 320px) and (max-width: 479px) {
+  :root {
+    --rs-page-x: 0.875rem;
+    --rs-page-y: 0.75rem;
+    --rs-title: 1rem;
+    --rs-subtitle: 0.75rem;
+    --rs-body: 0.75rem;
+    --rs-caption: 0.625rem;
+    --rs-btn-h: 2rem;
+    --rs-btn-px: 0.75rem;
+    --rs-btn-text: 0.6875rem;
+    --rs-input-h: 2.125rem;
+    --rs-card-pad: 0.75rem;
+  }
+}
+
+@media (min-width: 480px) and (max-width: 639px) {
+  :root {
+    --rs-page-x: 1rem;
+    --rs-title: 1.0625rem;
+    --rs-subtitle: 0.8125rem;
+    --rs-body: 0.8125rem;
+    --rs-btn-h: 2.25rem;
+    --rs-btn-text: 0.75rem;
+    --rs-input-h: 2.25rem;
+    --rs-card-pad: 0.875rem;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  :root {
+    --rs-page-x: 1.5rem;
+    --rs-page-y: 1.25rem;
+    --rs-title: 1.125rem;
+    --rs-subtitle: 0.875rem;
+    --rs-body: 0.875rem;
+    --rs-caption: 0.6875rem;
+    --rs-btn-h: 2.375rem;
+    --rs-btn-px: 1rem;
+    --rs-btn-text: 0.8125rem;
+    --rs-input-h: 2.375rem;
+    --rs-card-pad: 1rem;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  :root {
+    --rs-page-x: 2rem;
+    --rs-page-y: 1.5rem;
+    --rs-title: 1.25rem;
+    --rs-subtitle: 0.9rem;
+    --rs-body: 0.9rem;
+    --rs-caption: 0.75rem;
+    --rs-btn-h: 2.5rem;
+    --rs-btn-px: 1.1rem;
+    --rs-btn-text: 0.875rem;
+    --rs-input-h: 2.5rem;
+    --rs-card-pad: 1.125rem;
+  }
+}
+
+@media (min-width: 1440px) and (max-width: 1919px) {
+  :root {
+    --rs-page-x: 2.5rem;
+    --rs-page-y: 1.75rem;
+    --rs-title: 1.375rem;
+    --rs-subtitle: 0.95rem;
+    --rs-body: 0.95rem;
+    --rs-btn-h: 2.625rem;
+    --rs-btn-text: 0.9375rem;
+    --rs-input-h: 2.625rem;
+    --rs-card-pad: 1.25rem;
+  }
+}
+
+@media (min-width: 1920px) {
+  :root {
+    --rs-page-x: 3.5rem;
+    --rs-page-y: 2rem;
+    --rs-title: 1.5rem;
+    --rs-subtitle: 1rem;
+    --rs-body: 1rem;
+    --rs-caption: 0.8125rem;
+    --rs-btn-h: 2.75rem;
+    --rs-btn-px: 1.35rem;
+    --rs-btn-text: 1rem;
+    --rs-input-h: 2.75rem;
+    --rs-card-pad: 1.35rem;
+  }
+}
+
+@media (min-width: 2560px) {
+  :root {
+    --rs-page-x: 4rem;
+    --rs-title: 1.75rem;
+    --rs-subtitle: 1.125rem;
+    --rs-body: 1.0625rem;
+    --rs-btn-h: 3rem;
+    --rs-btn-text: 1.0625rem;
+    --rs-input-h: 3rem;
+    --rs-card-pad: 1.5rem;
+  }
+}
+
+.rs-page {
+  padding: var(--rs-page-y) var(--rs-page-x);
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.rs-title {
+  font-size: var(--rs-title);
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.rs-subtitle {
+  font-size: var(--rs-subtitle);
+  line-height: 1.45;
+}
+
+.rs-body {
+  font-size: var(--rs-body);
+  line-height: 1.5;
+}
+
+.rs-caption {
+  font-size: var(--rs-caption);
+  line-height: 1.4;
+}
+
+.rs-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  min-height: var(--rs-btn-h);
+  padding: 0 var(--rs-btn-px);
+  font-size: var(--rs-btn-text);
+  font-weight: 600;
+  border-radius: var(--rs-radius);
+  transition: opacity 0.15s, transform 0.15s;
+  box-sizing: border-box;
+}
+
+.rs-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.rs-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rs-btn-primary {
+  color: #fff;
+  background: linear-gradient(135deg, #a77a95 0%, #5c3050 100%);
+  box-shadow: 0 4px 14px rgba(92, 48, 80, 0.28);
+  border: none;
+}
+
+.rs-btn-primary:hover:not(:disabled) {
+  opacity: 0.95;
+}
+
+.rs-btn-ghost {
+  color: #735366;
+  background: #fff;
+  border: 1.5px solid #e0cce0;
+}
+
+.rs-btn-ghost:hover:not(:disabled) {
+  background: #f3eaf5;
+}
+
+.rs-input {
+  width: 100%;
+  min-height: var(--rs-input-h);
+  padding: 0 0.85em;
+  font-size: var(--rs-body);
+  border-radius: var(--rs-radius);
+  border: 1.5px solid #e8d5e0;
+  background: #fdf8fb;
+  color: #3d1f33;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.rs-input:focus {
+  border-color: #a77a95;
+  box-shadow: 0 0 0 3px rgba(167, 122, 149, 0.12);
+}
+
+.rs-card {
+  border-radius: calc(var(--rs-radius) + 4px);
+  border: 1px solid #e8d5e0;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 1px 2px rgba(115, 83, 102, 0.06);
+  padding: var(--rs-card-pad);
+}
+
+.rs-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 0.5rem;
+  padding: 0.15em 0.55em;
+  font-size: var(--rs-caption);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.rs-nav-item {
+  font-size: var(--rs-body);
+  min-height: var(--rs-btn-h);
+  padding: 0.55em 0.75em;
+  border-radius: var(--rs-radius);
+}
+
+.rs-hero-title {
+  font-size: clamp(1.25rem, 3.2vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.rs-hero-stat-value {
+  font-size: clamp(1.15rem, 2.8vw, 1.75rem);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.rs-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(2rem, 4.5vw, 2.5rem);
+  height: clamp(2rem, 4.5vw, 2.5rem);
+  border-radius: var(--rs-radius);
+}
+
+.rs-q-opt {
+  min-height: clamp(2.5rem, 5vw, 3.25rem);
+  padding: clamp(0.55rem, 1.5vw, 0.85rem) clamp(0.7rem, 1.8vw, 1rem);
+  font-size: var(--rs-body);
+  border-radius: var(--rs-radius);
+}

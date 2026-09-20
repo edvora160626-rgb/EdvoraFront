@@ -1,5 +1,11 @@
 import { Suspense, useEffect, useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import {
+  NavLink,
+  NavigationType,
+  Outlet,
+  useNavigate,
+  useNavigationType,
+} from "react-router-dom";
 import {
   BookOpen,
   Building2,
@@ -7,7 +13,6 @@ import {
   CalendarDays,
   ClipboardCheck,
   ClipboardList,
-  GraduationCap,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -19,9 +24,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { getUserRole } from "../../utils/auth";
 import { getRoleConfig } from "../../utils/rolePermissions";
 import EdvoraLoader from "../../common/EdvoraLoader";
+import EdvoraLogo from "../../common/EdvoraLogo";
 import LogoutModal from "../../common/LogoutModal";
 import ProfileModal from "../../common/ProfileModal";
 import { logoutUser } from "../../redux/slices/authSlice";
+import {
+  getPortalHomePath,
+  isExamPortalUser,
+  PORTAL_MODES,
+  setPortalMode,
+} from "../../utils/portalMode";
+import { openSnackbar } from "../../common/snackbar/snackbar";
 
 const ROLE_DISPLAY = {
   SUPER_ADMIN: "Principal",
@@ -136,6 +149,7 @@ function SidebarNav({ onNavigate, onOpenProfile }) {
           key={to}
           to={to}
           end={to.endsWith("/dashboard")}
+          replace
           onClick={onNavigate}
           className={({ isActive }) =>
             `group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200 ${
@@ -201,11 +215,39 @@ function UserProfile({ onLogout }) {
 
 function AdminLayout() {
   const navigate = useNavigate();
+  const navigationType = useNavigationType();
   const dispatch = useDispatch();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const { portalTitle } = getRoleConfig();
+  const { isLoggedIn, user } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setPortalMode(PORTAL_MODES.SCHOOL);
+      navigate("/", { replace: true });
+      return;
+    }
+    if (isExamPortalUser(user)) {
+      // Browser back into school routes → login (avoid exam↔school module bounce)
+      if (navigationType === NavigationType.Pop) {
+        dispatch(logoutUser());
+        setPortalMode(PORTAL_MODES.EXAMINATION);
+        navigate("/", { replace: true });
+        return;
+      }
+      openSnackbar({
+        message:
+          "Examination accounts cannot access the School portal. Switch to Examination.",
+        variant: "error",
+      });
+      setPortalMode(PORTAL_MODES.EXAMINATION);
+      navigate(getPortalHomePath(PORTAL_MODES.EXAMINATION, user), {
+        replace: true,
+      });
+    }
+  }, [isLoggedIn, user, navigate, navigationType, dispatch]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -219,6 +261,14 @@ function AdminLayout() {
   }, []);
 
   const closeSidebar = () => setSidebarOpen(false);
+
+  if (!isLoggedIn || isExamPortalUser(user)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FAEEE9]">
+        <EdvoraLoader message="Redirecting…" />
+      </div>
+    );
+  }
 
   const handleLogoutClick = () => {
     setLogoutModalOpen(true);
@@ -240,9 +290,11 @@ function AdminLayout() {
       <div className="p-5 pb-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-[#F5D69B] to-[#A77A95] border border-[#F5D69B]/50 shadow-inner">
-              <GraduationCap size={22} className="text-[#735366]" />
-            </div>
+            <EdvoraLogo
+              variant="icon"
+              decorative
+              className="h-11 w-11 shrink-0 drop-shadow-md"
+            />
             <div className="min-w-0">
               <p className="text-lg font-bold text-white leading-tight truncate">
                 Edvora
@@ -278,9 +330,11 @@ function AdminLayout() {
       <header className="sticky top-0 z-30 bg-white border-b border-[#C3C3D5] shadow-sm min-[1024px]:hidden">
         <div className="flex items-center justify-between h-14 px-4">
           <div className="flex items-center gap-2 min-w-0">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#A77A95] text-white">
-              <GraduationCap size={18} />
-            </div>
+            <EdvoraLogo
+              variant="icon"
+              decorative
+              className="h-9 w-9 shrink-0"
+            />
             <span className="text-sm font-bold text-[#735366] truncate">
               {portalTitle}
             </span>
@@ -318,7 +372,7 @@ function AdminLayout() {
         <div className="relative flex h-full flex-col">{sidebarContent}</div>
       </aside>
 
-      <main className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 min-[1024px]:p-8 min-[1024px]:pr-6 min-w-0">
+      <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden rs-page min-w-0 min-[1024px]:pr-6 [@media(min-width:1750px)]:px-16">
         <Suspense
           fallback={
             <div className="flex min-h-[50vh] items-center justify-center">

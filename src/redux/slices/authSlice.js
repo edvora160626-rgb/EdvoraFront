@@ -33,11 +33,11 @@ function readStoredAuth() {
 
 export const loginUser = createAsyncThunk(
   "auth/login",
-  async ({ emailid, password }, { rejectWithValue }) => {
+  async ({ emailid, password, portalMode = "school" }, { rejectWithValue }) => {
     try {
       const { data } = await axios.post(
         `${API_BASE}/auth/login`,
-        { emailid, password },
+        { emailid, password, portalMode },
         { withCredentials: true }
       );
 
@@ -50,8 +50,16 @@ export const loginUser = createAsyncThunk(
 
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
+      if (data.portalMode) {
+        localStorage.setItem("edvora_portal_mode", data.portalMode);
+      }
 
-      return { token, user, message: data.message || "Login successful" };
+      return {
+        token,
+        user,
+        portalMode: data.portalMode || portalMode,
+        message: data.message || "Login successful",
+      };
     } catch (error) {
       return rejectWithValue(
         error?.response?.data?.message || "Login Failed"
