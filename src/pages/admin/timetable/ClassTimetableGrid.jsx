@@ -1,6 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, X } from "lucide-react";
+import {
+  ArrowLeft,
+  BookOpen,
+  CalendarClock,
+  DoorOpen,
+  Eraser,
+  FlaskConical,
+  UserRound,
+  X,
+} from "lucide-react";
 import CustomSelect from "../../../common/CustomSelect";
 import EdvoraLoader from "../../../common/EdvoraLoader";
 import { openSnackbar } from "../../../common/snackbar/snackbar";
@@ -8,6 +17,7 @@ import { getActiveStaffBySchool } from "../../../utils/classesApi";
 import {
   classLabel,
   clearTimetableEntry,
+  dayShortLabel,
   getTimetableByClass,
   listRooms,
   publishTimetable,
@@ -18,13 +28,17 @@ import {
 import TimetableGridView from "./TimetableGridView";
 import { AcademicYearPicker, useAcademicYear } from "./useAcademicYear";
 
-const labelClass = "block text-[13px] font-semibold text-[#667085] mb-1.5";
+const labelClass =
+  "block text-[12px] font-semibold tracking-wide uppercase text-[color:var(--edvora-muted)] mb-1.5";
+const glassCard =
+  "rounded-2xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass)] shadow-[var(--edvora-glass-shadow)] backdrop-blur-[18px] saturate-[165%]";
 
 function AssignModal({
   day,
   slot,
   entry,
-  allocations,
+  subjects = [],
+  allocations = [],
   rooms,
   teachers,
   onClose,
@@ -43,11 +57,20 @@ function AssignModal({
   );
   const [isPractical, setIsPractical] = useState(Boolean(entry?.isPractical));
 
-  const subjectOptions = allocations.map((a) => ({
-    value: a.subjectId?._id || a.subjectId,
-    label: a.subjectId?.subjectName || "Subject",
-    teacherId: a.teacherId?._id || a.teacherId,
-  }));
+  const subjectOptions = (() => {
+    if (subjects.length) {
+      return subjects.map((s) => ({
+        value: s._id,
+        label: s.subjectCode
+          ? `${s.subjectName} (${s.subjectCode})`
+          : s.subjectName || "Subject",
+      }));
+    }
+    return allocations.map((a) => ({
+      value: a.subjectId?._id || a.subjectId,
+      label: a.subjectId?.subjectName || "Subject",
+    }));
+  })();
 
   const teacherOptions = teachers.map((t) => ({
     value: t._id,
@@ -73,72 +96,144 @@ function AssignModal({
     }
   };
 
+  const dayLabel = dayShortLabel?.(day) || String(day || "").slice(0, 3);
+
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-3">
-      <div className="w-full max-w-[460px] rounded-[14px] bg-white shadow-2xl">
-        <div className="flex h-14 items-center justify-between border-b px-5">
-          <div>
-            <h2 className="text-base font-semibold text-[#111827]">
-              Assign Period
-            </h2>
-            <p className="text-xs text-slate-500">
-              {day} · {slot?.name} ({slot?.startTime}–{slot?.endTime})
-            </p>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[color:var(--edvora-overlay)] backdrop-blur-md p-3 sm:p-4">
+      <div className="w-full max-w-[520px] glass-strong rounded-2xl overflow-hidden flex flex-col shadow-[var(--edvora-glass-shadow-lg)]">
+        <div className="relative px-5 sm:px-6 pt-5 pb-4 border-b border-[color:var(--edvora-glass-border-soft)]">
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 h-24 opacity-80"
+            style={{
+              background:
+                "linear-gradient(135deg, color-mix(in srgb, var(--edvora-primary) 18%, transparent), color-mix(in srgb, var(--edvora-accent) 10%, transparent) 50%, transparent 80%)",
+            }}
+          />
+          <div className="relative flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3 min-w-0">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[color:var(--edvora-primary)]/12 text-[color:var(--edvora-primary)] ring-1 ring-[color:var(--edvora-glass-border-soft)]">
+                <CalendarClock size={20} />
+              </span>
+              <div className="min-w-0">
+                <h2 className="text-lg font-semibold text-[color:var(--edvora-ink-strong)]">
+                  Assign Period
+                </h2>
+                <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center rounded-full bg-[color:var(--edvora-primary)]/12 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-[color:var(--edvora-primary)]">
+                    {dayLabel}
+                  </span>
+                  <span className="text-xs text-[color:var(--edvora-muted)] truncate">
+                    {slot?.name} · {slot?.startTime}–{slot?.endTime}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="relative w-9 h-9 rounded-full bg-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-hover)] text-white flex items-center justify-center shadow-md"
+              aria-label="Close"
+            >
+              <X size={18} />
+            </button>
           </div>
-          <button type="button" onClick={onClose}>
-            <X size={20} className="text-slate-400" />
-          </button>
         </div>
-        <div className="space-y-3 p-5">
+
+        <div className="flex-1 px-5 sm:px-6 py-5 space-y-4">
           <div>
-            <label className={labelClass}>Subject</label>
+            <label className={labelClass}>
+              <span className="inline-flex items-center gap-1.5">
+                <BookOpen size={12} />
+                Subject
+              </span>
+            </label>
             <CustomSelect
               options={subjectOptions}
               value={subjectId}
               onChange={handleSubjectChange}
-              placeholder="Select subject"
+              placeholder={
+                subjectOptions.length
+                  ? "Select subject"
+                  : "No subjects assigned to this class"
+              }
+              isSearchable
             />
+            {!subjectOptions.length ? (
+              <p className="mt-1.5 text-xs text-amber-700">
+                Assign subjects to this class in Subjects, or add them under
+                Timetable → Allocations.
+              </p>
+            ) : null}
           </div>
+
           <div>
-            <label className={labelClass}>Teacher</label>
+            <label className={labelClass}>
+              <span className="inline-flex items-center gap-1.5">
+                <UserRound size={12} />
+                Teacher
+              </span>
+            </label>
             <CustomSelect
               options={teacherOptions}
               value={teacherId}
               onChange={(opt) => setTeacherId(opt?.value || "")}
               placeholder="Select teacher"
+              isSearchable
             />
           </div>
+
           <div>
-            <label className={labelClass}>Room</label>
+            <label className={labelClass}>
+              <span className="inline-flex items-center gap-1.5">
+                <DoorOpen size={12} />
+                Room
+              </span>
+            </label>
             <CustomSelect
               options={roomOptions}
               value={roomId}
               onChange={(opt) => setRoomId(opt?.value || "")}
             />
           </div>
-          <label className="flex items-center gap-2 text-sm text-[#667085]">
+
+          <label
+            className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3.5 py-3 transition ${
+              isPractical
+                ? "border-[color:var(--edvora-primary)]/35 bg-[color:var(--edvora-primary)]/10"
+                : "border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass-soft)]"
+            }`}
+          >
             <input
               type="checkbox"
               checked={isPractical}
               onChange={(e) => setIsPractical(e.target.checked)}
+              className="h-4 w-4 accent-[color:var(--edvora-primary)]"
             />
-            Practical / lab (consecutive periods)
+            <span className="flex items-center gap-2 text-sm font-medium text-[color:var(--edvora-ink)]">
+              <FlaskConical
+                size={15}
+                className="text-[color:var(--edvora-primary)]"
+              />
+              Practical / lab (consecutive periods)
+            </span>
           </label>
         </div>
-        <div className="flex flex-wrap justify-between gap-2 border-t px-5 py-4">
+
+        <div className="px-5 sm:px-6 py-4 border-t border-[color:var(--edvora-glass-border-soft)] flex flex-wrap items-center justify-between gap-3 bg-[color:var(--edvora-glass-soft)]">
           <button
             type="button"
             disabled={saving || !entry}
             onClick={onClear}
-            className="h-[42px] rounded-lg border border-red-200 px-3 text-sm text-red-600 disabled:opacity-40"
+            className="inline-flex h-[42px] items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/5 px-3.5 text-sm font-semibold text-red-600 hover:bg-red-500/10 disabled:opacity-40"
           >
+            <Eraser size={15} />
             Clear
           </button>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="h-[42px] rounded-lg border border-[#D0D5DD] px-4 text-sm"
+              className="h-[42px] rounded-xl border border-[color:var(--edvora-glass-border-soft)] px-4 text-sm font-medium text-[color:var(--edvora-ink)] hover:bg-[color:var(--edvora-glass)]"
             >
               Cancel
             </button>
@@ -154,13 +249,14 @@ function AssignModal({
                   overwrite: true,
                 })
               }
-              className="h-[42px] rounded-lg bg-[#A77A95] px-4 text-sm font-medium text-white hover:bg-[#8F6580] disabled:opacity-60"
+              className="h-[42px] rounded-xl theme-btn-primary px-6 text-sm font-semibold disabled:opacity-60"
             >
               {saving ? "Saving…" : "Save"}
             </button>
           </div>
         </div>
       </div>
+      {saving && <EdvoraLoader overlay message="Updating period…" />}
     </div>
   );
 }
@@ -335,61 +431,77 @@ export default function ClassTimetableGrid() {
   const status = tt?.status || "DRAFT";
 
   return (
-    <div>
-      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <Link
-            to="/admin/timetable"
-            className="mb-2 inline-flex items-center gap-1 text-sm text-[#A77A95] hover:underline"
-          >
-            <ArrowLeft size={14} /> Back to dashboard
-          </Link>
-          <h1 className="text-xl font-semibold text-[#735366] sm:text-2xl">
-            {classLabel(tt?.classId) || "Class Timetable"}
-          </h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Click a cell to assign subject, teacher, and room.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <AcademicYearPicker
-            yearId={yearId}
-            yearOptions={yearOptions}
-            onChange={setYearId}
-          />
-          <span
-            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-              status === "PUBLISHED"
-                ? "bg-emerald-50 text-emerald-700"
-                : "bg-amber-50 text-amber-700"
-            }`}
-          >
-            {status}
-          </span>
-          {status === "PUBLISHED" ? (
-            <button
-              type="button"
-              disabled={saving}
-              onClick={handleUnpublish}
-              className="h-[42px] rounded-lg border border-[#E8D5CE] px-4 text-sm font-medium text-[#735366]"
+    <div className="space-y-5 sm:space-y-6">
+      <section className={`relative overflow-hidden ${glassCard} p-5 sm:p-6`}>
+        <div
+          className="pointer-events-none absolute -right-16 -top-20 h-52 w-52 rounded-full blur-2xl"
+          style={{
+            background:
+              "radial-gradient(circle, color-mix(in srgb, var(--edvora-primary) 28%, transparent), transparent 70%)",
+          }}
+        />
+        <div className="relative flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0">
+            <Link
+              to="/admin/timetable"
+              className="mb-2 inline-flex items-center gap-1.5 text-sm font-medium text-[color:var(--edvora-primary)] hover:underline"
             >
-              Unpublish
-            </button>
-          ) : (
-            <button
-              type="button"
-              disabled={saving || !yearId}
-              onClick={handlePublish}
-              className="h-[42px] rounded-lg bg-[#A77A95] px-4 text-sm font-medium text-white hover:bg-[#8F6580] disabled:opacity-60"
+              <ArrowLeft size={14} /> Back to dashboard
+            </Link>
+            <div className="inline-flex items-center gap-2 rounded-full bg-[color:var(--edvora-glass-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[color:var(--edvora-primary)] ring-1 ring-[color:var(--edvora-glass-border-soft)]">
+              <CalendarClock size={13} />
+              Class schedule
+            </div>
+            <h1 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-[color:var(--edvora-ink-strong)]">
+              {classLabel(tt?.classId) || "Class Timetable"}
+            </h1>
+            <p className="mt-1.5 text-sm text-[color:var(--edvora-muted)]">
+              Click a cell to assign subject, teacher, and room.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <AcademicYearPicker
+              yearId={yearId}
+              yearOptions={yearOptions}
+              onChange={setYearId}
+            />
+            <span
+              className={`rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide ring-1 ${
+                status === "PUBLISHED"
+                  ? "bg-emerald-500/10 text-emerald-700 ring-emerald-500/15"
+                  : "bg-amber-500/10 text-amber-700 ring-amber-500/15"
+              }`}
             >
-              Publish
-            </button>
-          )}
+              {status}
+            </span>
+            {status === "PUBLISHED" ? (
+              <button
+                type="button"
+                disabled={saving}
+                onClick={handleUnpublish}
+                className="h-[44px] rounded-2xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass-soft)] px-4 text-sm font-semibold text-[color:var(--edvora-ink)]"
+              >
+                Unpublish
+              </button>
+            ) : (
+              <button
+                type="button"
+                disabled={saving || !yearId}
+                onClick={handlePublish}
+                className="h-[44px] rounded-2xl theme-btn-primary px-5 text-sm font-semibold disabled:opacity-60"
+              >
+                Publish
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      </section>
 
       {!yearId ? (
-        <p className="text-sm text-amber-700">Select an academic year.</p>
+        <div className={`${glassCard} p-6 text-sm text-amber-700`}>
+          Select an academic year.
+        </div>
       ) : (
         <TimetableGridView
           workingDays={workingDays}
@@ -405,6 +517,7 @@ export default function ClassTimetableGrid() {
           day={cell.day}
           slot={cell.slot}
           entry={cell.entry}
+          subjects={payload?.subjects || []}
           allocations={payload?.allocations || []}
           rooms={rooms}
           teachers={teachers}

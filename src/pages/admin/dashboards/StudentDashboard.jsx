@@ -67,10 +67,10 @@ function StudentDashboard() {
         <div className="rounded-2xl bg-white border border-slate-100 shadow-sm p-5 flex flex-col justify-between">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs font-medium text-[#A77A95]">Level progress</p>
-              <p className="text-xl font-bold text-[#735366] mt-1">Explorer · Lvl 7</p>
+              <p className="text-xs font-medium text-[color:var(--edvora-primary)]">Level progress</p>
+              <p className="text-xl font-bold text-[color:var(--edvora-ink-strong)] mt-1">Explorer · Lvl 7</p>
             </div>
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-linear-to-br from-[#F5D69B] to-[#D4B87A] text-[#735366]">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-linear-to-br from-[#F5D69B] to-[#D4B87A] text-[color:var(--edvora-ink-strong)]">
               <Trophy size={20} />
             </span>
           </div>
@@ -79,7 +79,7 @@ function StudentDashboard() {
               <span>840 / 1000 XP</span>
               <span>160 to Lvl 8</span>
             </div>
-            <div className="h-2.5 rounded-full bg-[#FAEEE9] overflow-hidden">
+            <div className="h-2.5 rounded-full bg-[color:var(--edvora-primary-soft)] overflow-hidden">
               <div
                 className="h-full rounded-full bg-linear-to-r from-[#A77A95] to-[#F5D69B] transition-all duration-700"
                 style={{ width: "84%" }}
@@ -107,7 +107,7 @@ function StudentDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
             <SectionCard title="My Subject Scores" subtitle="You vs class top">
               <div className="flex items-center gap-4 mb-3 text-[11px] text-slate-500">
-                <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#A77A95]" /> You</span>
+                <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[color:var(--edvora-primary)]" /> You</span>
                 <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#F5D69B]" /> Top</span>
               </div>
               <BarChart data={SUBJECTS} />
@@ -125,10 +125,10 @@ function StudentDashboard() {
                         }`}
                       />
                       <span className="min-w-0">
-                        <span className={`block font-medium ${q.done ? "text-slate-400 line-through" : "text-[#735366]"}`}>
+                        <span className={`block font-medium ${q.done ? "text-slate-400 line-through" : "text-[color:var(--edvora-ink-strong)]"}`}>
                           {q.title}
                         </span>
-                        <span className="text-[11px] text-[#A77A95]">{q.xp}</span>
+                        <span className="text-[11px] text-[color:var(--edvora-primary)]">{q.xp}</span>
                       </span>
                     </li>
                   ))}
@@ -141,13 +141,13 @@ function StudentDashboard() {
             <ul className="space-y-3">
               {[
                 { subject: "Mathematics", title: "Quadratic equations worksheet", due: "Tonight · 8 PM", tone: "bg-amber-50 text-amber-700" },
-                { subject: "Science", title: "Lab report — Optics", due: "Jul 29", tone: "bg-[#FAEEE9] text-[#8F6580]" },
+                { subject: "Science", title: "Lab report — Optics", due: "Jul 29", tone: "bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-muted)]" },
                 { subject: "English", title: "Essay: Climate & Community", due: "Aug 1", tone: "bg-slate-100 text-slate-600" },
               ].map((a) => (
                 <li key={a.title} className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/70 p-3">
                   <div className="min-w-0 flex-1">
-                    <p className="text-[11px] font-semibold text-[#A77A95]">{a.subject}</p>
-                    <p className="text-sm font-semibold text-[#735366] truncate">{a.title}</p>
+                    <p className="text-[11px] font-semibold text-[color:var(--edvora-primary)]">{a.subject}</p>
+                    <p className="text-sm font-semibold text-[color:var(--edvora-ink-strong)] truncate">{a.title}</p>
                   </div>
                   <span className={`shrink-0 text-[10px] font-bold px-2 py-1 rounded-full ${a.tone}`}>
                     {a.due}
@@ -162,14 +162,14 @@ function StudentDashboard() {
               <Sparkles size={22} />
             </span>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-[#735366]">AI Study Buddy</p>
+              <p className="text-sm font-bold text-[color:var(--edvora-ink-strong)]">AI Study Buddy</p>
               <p className="text-xs text-slate-500 mt-0.5">
                 Stuck on Math? Get a step-by-step hint without spoiling the answer.
               </p>
             </div>
             <button
               type="button"
-              className="rounded-xl bg-[#A77A95] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#8F6580] transition shrink-0"
+              className="rounded-xl bg-[color:var(--edvora-primary)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[color:var(--edvora-primary-hover)] transition shrink-0"
             >
               Ask AI Tutor
             </button>

@@ -38,7 +38,7 @@ const GENDER_OPTIONS = [
 ];
 
 const inputClass =
-  "w-full h-[42px] rounded-lg border border-[#D0D5DD] bg-white px-3 text-[14px] text-[#344054] outline-none focus:border-[#A77A95]";
+  "w-full h-[42px] rounded-lg border border-[#D0D5DD] bg-white px-3 text-[14px] text-[#344054] outline-none focus:border-[color:var(--edvora-primary)]";
 const labelClass = "block text-[13px] font-semibold text-[#667085] mb-1.5";
 
 function getInitials(firstName = "", lastName = "") {
@@ -67,7 +67,7 @@ function displayDob(value) {
 function InfoRow({ label, value }) {
   return (
     <div className="min-w-0">
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-[#A77A95]">
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-[color:var(--edvora-primary)]">
         {label}
       </p>
       <p className="mt-1 text-sm font-medium text-[#344054] break-words">
@@ -178,7 +178,7 @@ function ProfileModal({ open, onClose }) {
       >
         <div className="h-14 sm:h-16 px-4 sm:px-6 flex items-center justify-between border-b border-gray-200 shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#FAEEE9] text-[#A77A95]">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)]">
               <UserRound size={18} />
             </span>
             <h2
@@ -207,7 +207,7 @@ function ProfileModal({ open, onClose }) {
               )}
             </div>
             <div className="min-w-0">
-              <p className="text-lg font-semibold text-[#735366] truncate">
+              <p className="text-lg font-semibold text-[color:var(--edvora-ink-strong)] truncate">
                 {editing
                   ? [formData.firstName, formData.lastName]
                       .filter(Boolean)
@@ -301,13 +301,13 @@ function ProfileModal({ open, onClose }) {
                   value={formData.address}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full rounded-lg border border-[#D0D5DD] bg-white px-3 py-2.5 text-[14px] text-[#344054] outline-none focus:border-[#A77A95] resize-none"
+                  className="w-full rounded-lg border border-[#D0D5DD] bg-white px-3 py-2.5 text-[14px] text-[#344054] outline-none focus:border-[color:var(--edvora-primary)] resize-none"
                 />
               </div>
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-xl border border-slate-100 bg-[#FAEEE9]/40 p-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-xl border border-slate-100 bg-[color:var(--edvora-primary-soft)]/40 p-4">
                 <InfoRow label="First Name" value={user.firstName} />
                 <InfoRow label="Last Name" value={user.lastName} />
                 <InfoRow label="Role" value={displayRole} />
@@ -319,15 +319,15 @@ function ProfileModal({ open, onClose }) {
 
               <div className="space-y-3 rounded-xl border border-slate-100 bg-white p-4">
                 <p className="flex items-start gap-2 text-sm text-slate-700">
-                  <Mail size={16} className="mt-0.5 shrink-0 text-[#A77A95]" />
+                  <Mail size={16} className="mt-0.5 shrink-0 text-[color:var(--edvora-primary)]" />
                   <span className="break-all">{user.email || "—"}</span>
                 </p>
                 <p className="flex items-start gap-2 text-sm text-slate-700">
-                  <Phone size={16} className="mt-0.5 shrink-0 text-[#A77A95]" />
+                  <Phone size={16} className="mt-0.5 shrink-0 text-[color:var(--edvora-primary)]" />
                   <span>{formatPhoneDisplay(user.phone, user.phoneCode)}</span>
                 </p>
                 <p className="flex items-start gap-2 text-sm text-slate-700">
-                  <MapPin size={16} className="mt-0.5 shrink-0 text-[#A77A95]" />
+                  <MapPin size={16} className="mt-0.5 shrink-0 text-[color:var(--edvora-primary)]" />
                   <span>{user.address || "—"}</span>
                 </p>
               </div>
@@ -350,7 +350,7 @@ function ProfileModal({ open, onClose }) {
                 type="button"
                 onClick={handleSave}
                 disabled={submitting}
-                className="px-6 h-[42px] rounded-lg bg-[#A77A95] hover:bg-[#8F6580] text-white text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+                className="px-6 h-[42px] rounded-lg bg-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-hover)] text-white text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {submitting ? "Saving…" : "Save Changes"}
               </button>
@@ -367,7 +367,7 @@ function ProfileModal({ open, onClose }) {
               <button
                 type="button"
                 onClick={() => setEditing(true)}
-                className="inline-flex items-center gap-2 px-6 h-[42px] rounded-lg bg-[#A77A95] hover:bg-[#8F6580] text-white text-sm font-semibold"
+                className="inline-flex items-center gap-2 px-6 h-[42px] rounded-lg bg-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-hover)] text-white text-sm font-semibold"
               >
                 <Pencil size={15} />
                 Edit

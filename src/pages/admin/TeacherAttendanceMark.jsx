@@ -25,7 +25,7 @@ const StatusChip = memo(function StatusChip({ status, active, onClick }) {
       className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${
         active
           ? meta.color + " ring-2 ring-offset-1 ring-[#A77A95]/40"
-          : "bg-white text-slate-500 border-slate-200 hover:border-[#A77A95]/40"
+          : "bg-white text-slate-500 border-slate-200 hover:border-[color:var(--edvora-primary)]/40"
       }`}
     >
       {active ? <Check size={12} /> : null}
@@ -155,7 +155,7 @@ function TeacherAttendanceMark() {
     <div className="space-y-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#735366]">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[color:var(--edvora-ink-strong)]">
             Mark Teacher Attendance
           </h1>
           <p className="text-sm text-slate-500 mt-1">
@@ -175,7 +175,7 @@ function TeacherAttendanceMark() {
           <button
             type="button"
             onClick={() => navigate("/admin/teacher-attendance")}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-[#A77A95] hover:bg-[#FAEEE9]"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-soft)]"
             aria-label="Back"
           >
             <ArrowLeft size={18} />
@@ -215,7 +215,7 @@ function TeacherAttendanceMark() {
                 startTransition(() => setDeferredQuery(value));
               }}
               placeholder="Search teacher, ID, or email…"
-              className="w-full h-10 rounded-lg border border-[#D0D5DD] bg-white pl-9 pr-3 text-sm outline-none focus:border-[#A77A95]"
+              className="w-full h-10 rounded-lg border border-[#D0D5DD] bg-white pl-9 pr-3 text-sm outline-none focus:border-[color:var(--edvora-primary)]"
             />
           </div>
           <p className="text-sm text-slate-500">
@@ -236,7 +236,7 @@ function TeacherAttendanceMark() {
                 className="flex flex-col gap-3 px-4 sm:px-5 py-4 lg:flex-row lg:items-center lg:justify-between"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#FAEEE9] text-[#A77A95]">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)]">
                     <UserRound size={18} />
                   </span>
                   <div className="min-w-0">
@@ -290,7 +290,7 @@ function TeacherAttendanceMark() {
             type="button"
             onClick={handleSave}
             disabled={saving || !teachers.length}
-            className="px-6 h-11 rounded-xl bg-[#A77A95] hover:bg-[#8F6580] text-white text-sm font-semibold disabled:opacity-60"
+            className="px-6 h-11 rounded-xl bg-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-hover)] text-white text-sm font-semibold disabled:opacity-60"
           >
             {saving ? "Saving…" : "Save Attendance"}
           </button>
@@ -298,7 +298,7 @@ function TeacherAttendanceMark() {
       </div>
 
       {(loading || saving) && (
-        <div className="fixed bottom-4 right-4 z-40 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-[#735366] shadow-lg border border-slate-100">
+        <div className="fixed bottom-4 right-4 z-40 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-[color:var(--edvora-ink-strong)] shadow-lg border border-slate-100">
           {saving ? "Saving…" : "Loading…"}
         </div>
       )}

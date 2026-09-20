@@ -19,6 +19,17 @@ export const SLOT_TYPES = [
   { value: "LUNCH", label: "Lunch" },
 ];
 
+/** Empty / missing days = applies to every working day (legacy slots). */
+export function slotAppliesToDay(slot, day) {
+  const days = slot?.days;
+  if (!Array.isArray(days) || days.length === 0) return true;
+  return days.includes(day);
+}
+
+export function dayShortLabel(dayValue) {
+  return DAYS.find((d) => d.value === dayValue)?.label?.slice(0, 3) || dayValue;
+}
+
 export const ROOM_TYPES = [
   { value: "CLASSROOM", label: "Classroom" },
   { value: "LAB", label: "Lab" },

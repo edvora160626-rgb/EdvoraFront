@@ -6,26 +6,32 @@ const RISK_TONES = {
 
 function RiskAlerts({ items = [], title = "AI Student Risk Alerts" }) {
   return (
-    <div className="rounded-2xl bg-white border border-slate-100 shadow-sm p-4 sm:p-5">
-      <h3 className="text-base font-semibold text-[#735366]">{title}</h3>
-      <p className="text-xs text-slate-500 mt-0.5 mb-4">
+    <div className="rounded-2xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-card)] shadow-[var(--edvora-glass-shadow)] p-4 sm:p-5">
+      <h3 className="text-base font-semibold text-[color:var(--edvora-ink-strong)]">
+        {title}
+      </h3>
+      <p className="mt-0.5 mb-4 text-xs text-[color:var(--edvora-muted)]">
         Early-warning signals from attendance & performance patterns
       </p>
       <ul className="space-y-3">
         {items.map((item) => (
           <li
             key={item.name}
-            className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/70 p-3"
+            className="flex items-center gap-3 rounded-xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass-soft)] p-3"
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#A77A95] to-[#735366] text-white text-xs font-bold">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[color:var(--edvora-primary)] text-xs font-bold text-white">
               {item.initials}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-[#735366] truncate">{item.name}</p>
-              <p className="text-xs text-slate-500 truncate">{item.reason}</p>
+              <p className="truncate text-sm font-semibold text-[color:var(--edvora-ink-strong)]">
+                {item.name}
+              </p>
+              <p className="truncate text-xs text-[color:var(--edvora-muted)]">
+                {item.reason}
+              </p>
             </div>
             <span
-              className={`shrink-0 text-[10px] font-bold px-2 py-1 rounded-full border ${
+              className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-bold ${
                 RISK_TONES[item.level] || RISK_TONES.Low
               }`}
             >

@@ -272,7 +272,7 @@ function BulkAttendanceUpload({ type: typeProp }) {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#735366]">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[color:var(--edvora-ink-strong)]">
             Bulk Attendance Upload
           </h1>
           <p className="text-sm text-slate-500 mt-1">
@@ -284,7 +284,7 @@ function BulkAttendanceUpload({ type: typeProp }) {
         <button
           type="button"
           onClick={() => navigate(backPath)}
-          className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-[#A77A95] hover:bg-[#FAEEE9]"
+          className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-soft)]"
           aria-label="Back"
         >
           <ArrowLeft size={18} />
@@ -292,12 +292,12 @@ function BulkAttendanceUpload({ type: typeProp }) {
       </div>
 
       <section className="relative overflow-hidden rounded-[28px] border border-[#E8D9D0] bg-linear-to-br from-[#FAEEE9] via-white to-[#F8F4F7] p-6 sm:p-8 shadow-sm">
-        <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[#A77A95]/10" />
+        <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[color:var(--edvora-primary)]/10" />
         <div className="pointer-events-none absolute bottom-0 left-1/3 h-24 w-24 rounded-full bg-[#F5D69B]/30" />
 
         <div className="relative grid grid-cols-1 lg:grid-cols-3 gap-5">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#A77A95] mb-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[color:var(--edvora-primary)] mb-2">
               Step 1 · Date
             </p>
             <CustomDatePicker
@@ -310,7 +310,7 @@ function BulkAttendanceUpload({ type: typeProp }) {
 
           {type === "STUDENT" ? (
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-[#A77A95] mb-2">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[color:var(--edvora-primary)] mb-2">
                 Step 2 · My Class
               </p>
               <CustomSelect
@@ -328,10 +328,10 @@ function BulkAttendanceUpload({ type: typeProp }) {
             </div>
           ) : (
             <div className="rounded-2xl border border-[#E8D9D0] bg-white/70 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[#A77A95]">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[color:var(--edvora-primary)]">
                 Target
               </p>
-              <p className="mt-2 text-sm font-semibold text-[#735366]">
+              <p className="mt-2 text-sm font-semibold text-[color:var(--edvora-ink-strong)]">
                 All active staff
               </p>
               <p className="mt-1 text-xs text-slate-500">
@@ -341,7 +341,7 @@ function BulkAttendanceUpload({ type: typeProp }) {
           )}
 
           <div className="rounded-2xl border border-[#E8D9D0] bg-white/70 p-4">
-            <div className="flex items-center gap-2 text-[#A77A95]">
+            <div className="flex items-center gap-2 text-[color:var(--edvora-primary)]">
               <Sparkles size={16} />
               <p className="text-xs font-semibold uppercase tracking-wider">
                 Allowed statuses
@@ -368,16 +368,16 @@ function BulkAttendanceUpload({ type: typeProp }) {
           }}
           className={`relative overflow-hidden rounded-[24px] border-2 border-dashed p-6 sm:p-8 transition ${
             dragging
-              ? "border-[#A77A95] bg-[#FAEEE9]"
+              ? "border-[color:var(--edvora-primary)] bg-[color:var(--edvora-primary-soft)]"
               : "border-[#D8C4CE] bg-white"
           }`}
         >
           <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-[#F5D69B] via-[#A77A95] to-[#735366]" />
           <div className="flex flex-col items-center text-center">
-            <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#FAEEE9] text-[#A77A95] shadow-inner">
+            <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)] shadow-inner">
               <CloudUpload size={28} />
             </span>
-            <h2 className="mt-4 text-xl font-bold text-[#735366]">
+            <h2 className="mt-4 text-xl font-bold text-[color:var(--edvora-ink-strong)]">
               Drop your file here
             </h2>
             <p className="mt-2 text-sm text-slate-500 max-w-md">
@@ -385,11 +385,11 @@ function BulkAttendanceUpload({ type: typeProp }) {
                 <>
                   Download the styled Excel sheet — title, headers, and grid use
                   Edvora brand colors. Upload the filled{" "}
-                  <span className="font-medium text-[#735366]">.xlsx</span> (or
+                  <span className="font-medium text-[color:var(--edvora-ink-strong)]">.xlsx</span> (or
                   .csv) back here.
                   <br />
                   Columns:{" "}
-                  <span className="font-medium text-[#735366]">
+                  <span className="font-medium text-[color:var(--edvora-ink-strong)]">
                     S.No, employeeId, staff name, department, Status, Remarks
                   </span>
                 </>
@@ -397,11 +397,11 @@ function BulkAttendanceUpload({ type: typeProp }) {
                 <>
                   Download the class roster Excel, fill Status &amp; Remarks,
                   then upload the{" "}
-                  <span className="font-medium text-[#735366]">.xlsx</span> (or
+                  <span className="font-medium text-[color:var(--edvora-ink-strong)]">.xlsx</span> (or
                   .csv).
                   <br />
                   Columns:{" "}
-                  <span className="font-medium text-[#735366]">
+                  <span className="font-medium text-[color:var(--edvora-ink-strong)]">
                     S.No, admissionNumber, student name, rollNumber, Status,
                     Remarks
                   </span>
@@ -413,7 +413,7 @@ function BulkAttendanceUpload({ type: typeProp }) {
               <button
                 type="button"
                 onClick={() => inputRef.current?.click()}
-                className="inline-flex items-center gap-2 rounded-xl bg-[#A77A95] hover:bg-[#8F6580] px-5 h-11 text-sm font-semibold text-white"
+                className="inline-flex items-center gap-2 rounded-xl bg-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-hover)] px-5 h-11 text-sm font-semibold text-white"
               >
                 <UploadCloud size={16} />
                 Choose File
@@ -440,10 +440,10 @@ function BulkAttendanceUpload({ type: typeProp }) {
             />
 
             {fileName ? (
-              <div className="mt-6 flex items-center gap-3 rounded-2xl border border-[#E8D9D0] bg-[#FAEEE9] px-4 py-3 text-left w-full max-w-md">
-                <FileSpreadsheet className="text-[#A77A95] shrink-0" size={20} />
+              <div className="mt-6 flex items-center gap-3 rounded-2xl border border-[#E8D9D0] bg-[color:var(--edvora-primary-soft)] px-4 py-3 text-left w-full max-w-md">
+                <FileSpreadsheet className="text-[color:var(--edvora-primary)] shrink-0" size={20} />
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-[#735366] truncate">
+                  <p className="text-sm font-semibold text-[color:var(--edvora-ink-strong)] truncate">
                     {fileName}
                   </p>
                   <p className="text-xs text-slate-500">
@@ -464,7 +464,7 @@ function BulkAttendanceUpload({ type: typeProp }) {
         </div>
 
         <div className="rounded-[24px] border border-slate-100 bg-white p-5 sm:p-6 shadow-sm space-y-4">
-          <h3 className="text-lg font-semibold text-[#735366]">
+          <h3 className="text-lg font-semibold text-[color:var(--edvora-ink-strong)]">
             Upload checklist
           </h3>
           <ul className="space-y-3 text-sm text-slate-600">
@@ -503,9 +503,9 @@ function BulkAttendanceUpload({ type: typeProp }) {
           </ul>
 
           <div className="grid grid-cols-3 gap-2 pt-2">
-            <div className="rounded-xl bg-[#FAEEE9] px-3 py-3 text-center">
-              <p className="text-xs text-[#735366]/80">Rows</p>
-              <p className="text-xl font-bold text-[#735366]">
+            <div className="rounded-xl bg-[color:var(--edvora-primary-soft)] px-3 py-3 text-center">
+              <p className="text-xs text-[color:var(--edvora-ink-strong)]/80">Rows</p>
+              <p className="text-xl font-bold text-[color:var(--edvora-ink-strong)]">
                 {previewStats.total}
               </p>
             </div>
@@ -527,7 +527,7 @@ function BulkAttendanceUpload({ type: typeProp }) {
             type="button"
             onClick={handleUpload}
             disabled={uploading || !rows.length}
-            className="w-full h-12 rounded-xl bg-[#A77A95] hover:bg-[#8F6580] text-white text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full h-12 rounded-xl bg-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-hover)] text-white text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {uploading ? "Uploading…" : "Validate & Upload"}
           </button>
@@ -538,7 +538,7 @@ function BulkAttendanceUpload({ type: typeProp }) {
         <section className="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
           <div className="px-4 sm:px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
             <div>
-              <h3 className="text-lg font-semibold text-[#735366]">Preview</h3>
+              <h3 className="text-lg font-semibold text-[color:var(--edvora-ink-strong)]">Preview</h3>
               <p className="text-sm text-slate-500">
                 Review rows before uploading
               </p>
@@ -599,7 +599,7 @@ function BulkAttendanceUpload({ type: typeProp }) {
         <section className="rounded-2xl border border-slate-100 bg-white p-5 sm:p-6 shadow-sm space-y-4">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="text-emerald-600" size={18} />
-            <h3 className="text-lg font-semibold text-[#735366]">
+            <h3 className="text-lg font-semibold text-[color:var(--edvora-ink-strong)]">
               Upload result
             </h3>
           </div>
@@ -616,9 +616,9 @@ function BulkAttendanceUpload({ type: typeProp }) {
                 {result?.summary?.invalid ?? result?.errors?.length ?? 0}
               </p>
             </div>
-            <div className="rounded-xl bg-[#FAEEE9] px-3 py-3">
-              <p className="text-xs text-[#735366]">Present</p>
-              <p className="text-xl font-bold text-[#735366]">
+            <div className="rounded-xl bg-[color:var(--edvora-primary-soft)] px-3 py-3">
+              <p className="text-xs text-[color:var(--edvora-ink-strong)]">Present</p>
+              <p className="text-xl font-bold text-[color:var(--edvora-ink-strong)]">
                 {result?.summary?.PRESENT ?? 0}
               </p>
             </div>
@@ -648,7 +648,7 @@ function BulkAttendanceUpload({ type: typeProp }) {
           <button
             type="button"
             onClick={() => navigate(backPath)}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#A77A95] hover:bg-[#8F6580] px-5 h-11 text-sm font-semibold text-white"
+            className="inline-flex items-center gap-2 rounded-xl bg-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-hover)] px-5 h-11 text-sm font-semibold text-white"
           >
             Back to attendance
           </button>
@@ -656,7 +656,7 @@ function BulkAttendanceUpload({ type: typeProp }) {
       ) : null}
 
       {uploading ? (
-        <div className="fixed bottom-4 right-4 z-40 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-[#735366] shadow-lg border border-slate-100">
+        <div className="fixed bottom-4 right-4 z-40 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-[color:var(--edvora-ink-strong)] shadow-lg border border-slate-100">
           Uploading…
         </div>
       ) : null}

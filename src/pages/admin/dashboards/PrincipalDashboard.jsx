@@ -89,7 +89,7 @@ function PrincipalDashboard() {
               <div className="flex items-center gap-5">
                 <DonutChart value={91} label="Collected" color="#D4B87A" />
                 <div className="space-y-2 text-sm flex-1">
-                  <div className="flex justify-between"><span className="text-slate-500">Collected</span><span className="font-semibold text-[#735366]">₹1.20Cr</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Collected</span><span className="font-semibold text-[color:var(--edvora-ink-strong)]">₹1.20Cr</span></div>
                   <div className="flex justify-between"><span className="text-slate-500">Outstanding</span><span className="font-semibold text-amber-600">₹11.8L</span></div>
                   <div className="flex justify-between"><span className="text-slate-500">Defaulters</span><span className="font-semibold text-red-500">47</span></div>
                 </div>
@@ -98,7 +98,7 @@ function PrincipalDashboard() {
 
             <SectionCard title="School Performance" subtitle="Grade average vs top score">
               <div className="flex items-center gap-4 mb-3 text-[11px] text-slate-500">
-                <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#A77A95]" /> Avg</span>
+                <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[color:var(--edvora-primary)]" /> Avg</span>
                 <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#F5D69B]" /> Top</span>
               </div>
               <BarChart data={SCHOOL_PERF} />
@@ -112,12 +112,12 @@ function PrincipalDashboard() {
                 {stats.map((s) => (
                   <li key={s.role} className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-sm font-semibold text-[#735366]">{ROLE_LABELS[s.role] || s.role}</p>
+                      <p className="text-sm font-semibold text-[color:var(--edvora-ink-strong)]">{ROLE_LABELS[s.role] || s.role}</p>
                       <p className="text-[11px] text-slate-500">
                         {s.actionable ? "Approve / reject" : "Visibility only"}
                       </p>
                     </div>
-                    <span className={`text-lg font-bold ${s.actionable ? "text-[#A77A95]" : "text-slate-400"}`}>
+                    <span className={`text-lg font-bold ${s.actionable ? "text-[color:var(--edvora-primary)]" : "text-slate-400"}`}>
                       {s.count}
                     </span>
                   </li>
@@ -131,11 +131,11 @@ function PrincipalDashboard() {
               <ul className="space-y-2.5">
                 {recentRequests.map((r) => (
                   <li key={r._id} className="flex items-center gap-3 rounded-xl bg-slate-50/80 border border-slate-100 p-3">
-                    <div className="h-9 w-9 rounded-full bg-[#FAEEE9] text-[#A77A95] flex items-center justify-center text-xs font-bold">
+                    <div className="h-9 w-9 rounded-full bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)] flex items-center justify-center text-xs font-bold">
                       {r.firstName?.[0]}{r.lastName?.[0] || ""}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-[#735366] truncate">{r.firstName} {r.lastName}</p>
+                      <p className="text-sm font-semibold text-[color:var(--edvora-ink-strong)] truncate">{r.firstName} {r.lastName}</p>
                       <p className="text-xs text-slate-500">{ROLE_LABELS[r.role] || r.role}</p>
                     </div>
                     {r.actionable ? (

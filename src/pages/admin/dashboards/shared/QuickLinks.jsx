@@ -1,40 +1,29 @@
 import { Link } from "react-router-dom";
 
-const TONES = [
-  "from-[#A77A95] to-[#735366]",
-  "from-[#F5D69B] to-[#D4B87A]",
-  "from-[#C3C3D5] to-[#A77A95]",
-  "from-[#8F6580] to-[#735366]",
-  "from-[#D4B87A] to-[#A77A95]",
-  "from-[#A77A95] to-[#C3C3D5]",
-  "from-[#735366] to-[#8F6580]",
-];
-
 function QuickLinks({ items = [] }) {
   if (!items.length) return null;
 
   return (
     <section>
-      <h2 className="text-sm font-semibold text-slate-500 mb-3">Quick Links</h2>
+      <h2 className="text-sm font-semibold text-[color:var(--edvora-muted)] mb-3">
+        Quick Links
+      </h2>
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-        {items.map((item, index) => {
+        {items.map((item) => {
           const Icon = item.icon;
-          const tone = TONES[index % TONES.length];
           const content = (
             <>
-              <span
-                className={`flex h-11 w-11 items-center justify-center rounded-xl bg-linear-to-br ${tone} text-white shadow-md mb-2 group-hover:scale-105 transition`}
-              >
+              <span className="mb-2 flex h-11 w-11 items-center justify-center rounded-xl bg-[color:var(--edvora-primary)] text-white shadow-md transition group-hover:scale-105">
                 {Icon ? <Icon size={18} /> : null}
               </span>
-              <span className="text-xs font-semibold text-[#735366] text-center leading-tight">
+              <span className="text-center text-xs font-semibold leading-tight text-[color:var(--edvora-ink-strong)]">
                 {item.label}
               </span>
             </>
           );
 
           const className =
-            "group flex flex-col items-center justify-center rounded-2xl bg-white border border-slate-100 shadow-sm p-3 hover:shadow-md hover:-translate-y-0.5 transition min-h-[96px]";
+            "group flex min-h-[96px] flex-col items-center justify-center rounded-2xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-card)] p-3 shadow-[var(--edvora-glass-shadow)] transition hover:-translate-y-0.5 hover:shadow-md";
 
           if (item.to) {
             return (
@@ -45,7 +34,7 @@ function QuickLinks({ items = [] }) {
           }
 
           return (
-            <div key={item.label} className={`${className} opacity-80 cursor-default`}>
+            <div key={item.label} className={`${className} cursor-default opacity-80`}>
               {content}
             </div>
           );

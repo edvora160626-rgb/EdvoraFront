@@ -16,13 +16,13 @@ import {
 function variantStyles(variant) {
   switch (variant) {
     case "success":
-      return "bg-[#A77A95] text-white border border-[#8F6580] shadow-lg";
+      return "bg-[color:var(--edvora-primary)] text-white border border-[#8F6580] shadow-lg";
     case "error":
       return "bg-red-600 text-white border border-red-700 shadow-lg";
     case "warning":
-      return "bg-amber-400 text-[#735366] border border-amber-500 shadow-lg";
+      return "bg-amber-400 text-[color:var(--edvora-ink-strong)] border border-amber-500 shadow-lg";
     case "info":
-      return "bg-[#C3C3D5] text-[#735366] border border-[#A77A95] shadow-lg";
+      return "bg-[#C3C3D5] text-[color:var(--edvora-ink-strong)] border border-[color:var(--edvora-primary)] shadow-lg";
     default:
       return "bg-[#735366] text-white border border-[#8F6580] shadow-lg";
   }

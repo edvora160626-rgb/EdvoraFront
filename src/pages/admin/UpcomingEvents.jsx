@@ -32,7 +32,7 @@ const EMPTY_FORM = {
 };
 
 const inputClass =
-  "w-full h-[42px] rounded-lg border border-[#D0D5DD] bg-white px-3 text-[14px] text-[#344054] outline-none focus:border-[#A77A95]";
+  "w-full h-[42px] rounded-lg border border-[#D0D5DD] bg-white px-3 text-[14px] text-[#344054] outline-none focus:border-[color:var(--edvora-primary)]";
 const labelClass = "block text-[13px] font-semibold text-[#667085] mb-1.5";
 
 const STATUS_STYLES = {
@@ -96,7 +96,7 @@ function AddEventModal({ onClose, onCreated }) {
       <div className="w-full max-w-[760px] max-h-[90dvh] bg-white rounded-[14px] shadow-2xl overflow-hidden flex flex-col">
         <div className="h-14 sm:h-16 px-4 sm:px-6 flex items-center justify-between border-b border-gray-200 shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#FAEEE9] text-[#A77A95]">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)]">
               <CalendarDays size={18} />
             </span>
             <h2 className="text-base sm:text-[18px] font-semibold text-[#111827] truncate">
@@ -137,7 +137,7 @@ function AddEventModal({ onClose, onCreated }) {
                 onChange={handleChange}
                 rows={3}
                 placeholder="Brief description of the event"
-                className="w-full rounded-lg border border-[#D0D5DD] bg-white px-3 py-2.5 text-[14px] text-[#344054] outline-none focus:border-[#A77A95] resize-y min-h-[90px]"
+                className="w-full rounded-lg border border-[#D0D5DD] bg-white px-3 py-2.5 text-[14px] text-[#344054] outline-none focus:border-[color:var(--edvora-primary)] resize-y min-h-[90px]"
               />
             </div>
 
@@ -214,7 +214,7 @@ function AddEventModal({ onClose, onCreated }) {
             type="button"
             disabled={submitting}
             onClick={handleSubmit}
-            className="h-[42px] px-5 rounded-lg bg-[#A77A95] hover:bg-[#8F6580] text-white text-sm font-semibold disabled:opacity-60"
+            className="h-[42px] px-5 rounded-lg bg-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-hover)] text-white text-sm font-semibold disabled:opacity-60"
           >
             {submitting ? "Creating…" : "Create Event"}
           </button>
@@ -229,10 +229,10 @@ function EventCard({ event, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="text-left bg-white rounded-xl border border-slate-100 shadow-sm p-4 hover:border-[#A77A95]/40 hover:shadow-md transition"
+      className="text-left bg-white rounded-xl border border-slate-100 shadow-sm p-4 hover:border-[color:var(--edvora-primary)]/40 hover:shadow-md transition"
     >
       <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#FAEEE9] text-[#A77A95]">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)]">
           <CalendarDays size={18} />
         </span>
         <div className="min-w-0 flex-1">
@@ -275,7 +275,7 @@ function EventCard({ event, onClick }) {
             </span>
             {typeof event.myRegistrationCount === "number" &&
             event.myRegistrationCount > 0 ? (
-              <span className="inline-flex items-center gap-1 text-[#A77A95] font-medium">
+              <span className="inline-flex items-center gap-1 text-[color:var(--edvora-primary)] font-medium">
                 You: {event.myRegistrationCount}
               </span>
             ) : null}
@@ -358,7 +358,7 @@ function UpcomingEvents() {
     <div>
       <div className="mb-6 sm:mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#735366]">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[color:var(--edvora-ink-strong)]">
             Upcoming Events
           </h1>
           <p className="text-slate-500 mt-2 text-sm sm:text-base">
@@ -380,8 +380,8 @@ function UpcomingEvents() {
                   onClick={() => setActiveStatus(item.value)}
                   className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-semibold transition ${
                     activeStatus === item.value
-                      ? "bg-[#A77A95] text-white"
-                      : "bg-white text-[#735366] border border-[#E8D5CE] hover:border-[#A77A95]"
+                      ? "bg-[color:var(--edvora-primary)] text-white"
+                      : "bg-white text-[color:var(--edvora-ink-strong)] border border-[color:var(--edvora-border)] hover:border-[color:var(--edvora-primary)]"
                   }`}
                 >
                   {item.label}
@@ -389,7 +389,7 @@ function UpcomingEvents() {
                     className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                       activeStatus === item.value
                         ? "bg-white/20 text-white"
-                        : "bg-[#FAEEE9] text-[#735366]"
+                        : "bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-ink-strong)]"
                     }`}
                   >
                     {counts[item.value] ?? 0}
@@ -404,7 +404,7 @@ function UpcomingEvents() {
           <button
             type="button"
             onClick={() => setShowModal(true)}
-            className="inline-flex items-center gap-2 px-4 h-[42px] rounded-lg bg-[#A77A95] hover:bg-[#8F6580] text-white text-sm font-semibold shadow-sm"
+            className="inline-flex items-center gap-2 px-4 h-[42px] rounded-lg bg-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-hover)] text-white text-sm font-semibold shadow-sm"
           >
             <Plus size={18} />
             Create Event
@@ -416,7 +416,7 @@ function UpcomingEvents() {
         <EdvoraLoader message="Loading events…" />
       ) : events.length === 0 ? (
         <div className="bg-white rounded-xl shadow p-10 text-center border border-slate-100">
-          <span className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#FAEEE9] text-[#A77A95]">
+          <span className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)]">
             <CalendarDays size={22} />
           </span>
           <p className="text-slate-700 font-medium">No events found</p>

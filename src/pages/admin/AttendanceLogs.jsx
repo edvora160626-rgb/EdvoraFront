@@ -97,7 +97,7 @@ function LogDetailModal({ logId, onClose }) {
       <div className="w-full sm:max-w-3xl max-h-[92dvh] bg-white rounded-t-[18px] sm:rounded-[16px] shadow-2xl overflow-hidden flex flex-col">
         <div className="h-14 sm:h-16 px-4 sm:px-6 flex items-center justify-between border-b border-gray-200 shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#FAEEE9] text-[#A77A95]">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)]">
               <ScrollText size={18} />
             </span>
             <div className="min-w-0">
@@ -116,7 +116,7 @@ function LogDetailModal({ logId, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-[#A77A95] hover:bg-[#8F6580] text-white flex items-center justify-center"
+            className="w-9 h-9 rounded-full bg-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-hover)] text-white flex items-center justify-center"
             aria-label="Close"
           >
             <X size={18} />
@@ -131,9 +131,9 @@ function LogDetailModal({ logId, onClose }) {
           ) : (
             <>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="rounded-xl bg-[#FAEEE9] px-3 py-3">
-                  <p className="text-xs text-[#735366]/80">Marked by</p>
-                  <p className="text-sm font-semibold text-[#735366] mt-1 truncate">
+                <div className="rounded-xl bg-[color:var(--edvora-primary-soft)] px-3 py-3">
+                  <p className="text-xs text-[color:var(--edvora-ink-strong)]/80">Marked by</p>
+                  <p className="text-sm font-semibold text-[color:var(--edvora-ink-strong)] mt-1 truncate">
                     {log?.markedByName || "—"}
                   </p>
                 </div>
@@ -331,11 +331,11 @@ function AttendanceLogs({ type: typeProp = "TEACHER" }) {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="inline-flex items-center gap-2 rounded-full bg-[#FAEEE9] px-3 py-1 text-xs font-semibold text-[#A77A95]">
+          <div className="inline-flex items-center gap-2 rounded-full bg-[color:var(--edvora-primary-soft)] px-3 py-1 text-xs font-semibold text-[color:var(--edvora-primary)]">
             <ClipboardList size={14} />
             Audit trail
           </div>
-          <h1 className="mt-3 text-2xl sm:text-3xl font-bold text-[#735366]">
+          <h1 className="mt-3 text-2xl sm:text-3xl font-bold text-[color:var(--edvora-ink-strong)]">
             {type === "TEACHER"
               ? "Teacher Attendance Logs"
               : "Student Attendance Logs"}
@@ -347,7 +347,7 @@ function AttendanceLogs({ type: typeProp = "TEACHER" }) {
         <button
           type="button"
           onClick={() => navigate(backPath)}
-          className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-[#A77A95] hover:bg-[#FAEEE9]"
+          className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-soft)]"
           aria-label="Back"
         >
           <ArrowLeft size={18} />
@@ -403,10 +403,10 @@ function AttendanceLogs({ type: typeProp = "TEACHER" }) {
               />
             </div>
           ) : (
-            <div className="rounded-xl bg-[#FAEEE9] px-4 py-3 flex items-center gap-3 sm:col-span-2">
-              <UserRound size={18} className="text-[#A77A95]" />
+            <div className="rounded-xl bg-[color:var(--edvora-primary-soft)] px-4 py-3 flex items-center gap-3 sm:col-span-2">
+              <UserRound size={18} className="text-[color:var(--edvora-primary)]" />
               <div>
-                <p className="text-sm font-semibold text-[#735366]">
+                <p className="text-sm font-semibold text-[color:var(--edvora-ink-strong)]">
                   {totalLogs} log entries
                 </p>
                 <p className="text-xs text-slate-500">
@@ -425,7 +425,7 @@ function AttendanceLogs({ type: typeProp = "TEACHER" }) {
           </div>
         ) : logs.length === 0 ? (
           <div className="rounded-2xl border border-slate-100 bg-white px-5 py-16 text-center shadow-sm">
-            <span className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[#FAEEE9] text-[#A77A95]">
+            <span className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)]">
               <ScrollText size={22} />
             </span>
             <p className="font-medium text-slate-700">No logs yet</p>
@@ -445,7 +445,7 @@ function AttendanceLogs({ type: typeProp = "TEACHER" }) {
                 key={log._id}
                 type="button"
                 onClick={() => setSelectedLogId(log._id)}
-                className="w-full text-left rounded-2xl border border-slate-100 bg-white p-4 sm:p-5 shadow-sm hover:border-[#A77A95]/35 hover:shadow-md transition"
+                className="w-full text-left rounded-2xl border border-slate-100 bg-white p-4 sm:p-5 shadow-sm hover:border-[color:var(--edvora-primary)]/35 hover:shadow-md transition"
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
@@ -455,7 +455,7 @@ function AttendanceLogs({ type: typeProp = "TEACHER" }) {
                       >
                         {action.label}
                       </span>
-                      <span className="text-sm font-semibold text-[#735366]">
+                      <span className="text-sm font-semibold text-[color:var(--edvora-ink-strong)]">
                         {formatDate(log.attendanceDate)}
                       </span>
                       {log.classLabel ? (
@@ -483,7 +483,7 @@ function AttendanceLogs({ type: typeProp = "TEACHER" }) {
                     </p>
                   </div>
 
-                  <span className="inline-flex items-center gap-1.5 self-start rounded-xl bg-[#FAEEE9] px-3 py-2 text-xs font-semibold text-[#A77A95]">
+                  <span className="inline-flex items-center gap-1.5 self-start rounded-xl bg-[color:var(--edvora-primary-soft)] px-3 py-2 text-xs font-semibold text-[color:var(--edvora-primary)]">
                     <Eye size={14} />
                     View
                   </span>

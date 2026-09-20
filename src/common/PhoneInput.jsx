@@ -80,7 +80,7 @@ function PhoneInput({
   return (
     <div
       ref={rootRef}
-      className={`relative flex w-full rounded-lg border border-[#D0D5DD] bg-white transition focus-within:border-[#A77A95] ${
+      className={`relative flex w-full rounded-lg border border-[#D0D5DD] bg-white transition focus-within:border-[color:var(--edvora-primary)] ${
         disabled ? "opacity-60" : ""
       }`}
       style={{ height }}
@@ -94,7 +94,7 @@ function PhoneInput({
         onClick={() => {
           if (!disabled) setOpen((prev) => !prev);
         }}
-        className="flex w-[118px] shrink-0 items-center gap-1.5 rounded-l-lg border-0 border-r border-[#D0D5DD] bg-[#FAEEE9]/50 px-2.5 text-sm font-medium text-[#735366] outline-none disabled:cursor-not-allowed"
+        className="flex w-[118px] shrink-0 items-center gap-1.5 rounded-l-lg border-0 border-r border-[#D0D5DD] bg-[color:var(--edvora-primary-soft)]/50 px-2.5 text-sm font-medium text-[color:var(--edvora-ink-strong)] outline-none disabled:cursor-not-allowed"
       >
         <ReactCountryFlag
           countryCode={selectedCountry.iso2}
@@ -106,7 +106,7 @@ function PhoneInput({
         <span className="truncate">+{selectedCountry.dialCode}</span>
         <ChevronDown
           size={14}
-          className={`ml-auto shrink-0 text-[#A77A95] transition ${open ? "rotate-180" : ""}`}
+          className={`ml-auto shrink-0 text-[color:var(--edvora-primary)] transition ${open ? "rotate-180" : ""}`}
         />
       </button>
 
@@ -126,14 +126,14 @@ function PhoneInput({
       {open ? (
         <div className="absolute left-0 top-[calc(100%+6px)] z-50 w-[min(100%,320px)] overflow-hidden rounded-xl border border-[#C3C3D5] bg-white shadow-xl">
           <div className="flex items-center gap-2 border-b border-slate-100 px-3 py-2">
-            <Search size={14} className="text-[#A77A95] shrink-0" />
+            <Search size={14} className="text-[color:var(--edvora-primary)] shrink-0" />
             <input
               ref={searchRef}
               type="text"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search country or code"
-              className="min-w-0 flex-1 bg-transparent text-sm text-[#735366] outline-none placeholder:text-slate-400"
+              className="min-w-0 flex-1 bg-transparent text-sm text-[color:var(--edvora-ink-strong)] outline-none placeholder:text-slate-400"
             />
           </div>
 
@@ -149,9 +149,9 @@ function PhoneInput({
                     <button
                       type="button"
                       onClick={() => selectCountry(country)}
-                      className={`flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition hover:bg-[#FAEEE9] ${
+                      className={`flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition hover:bg-[color:var(--edvora-primary-soft)] ${
                         active
-                          ? "bg-[#FAEEE9] text-[#735366] border-l-4 border-[#A77A95]"
+                          ? "bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-ink-strong)] border-l-4 border-[color:var(--edvora-primary)]"
                           : "text-slate-700 border-l-4 border-transparent"
                       }`}
                     >
@@ -161,7 +161,7 @@ function PhoneInput({
                         style={{ width: "1.35em", height: "1.35em", borderRadius: 2 }}
                         title={country.name}
                       />
-                      <span className="font-semibold text-[#735366] shrink-0">
+                      <span className="font-semibold text-[color:var(--edvora-ink-strong)] shrink-0">
                         +{country.dialCode}
                       </span>
                       <span className="truncate text-slate-500 text-xs sm:text-sm">

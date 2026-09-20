@@ -173,7 +173,7 @@ function CustomTimePicker({
 
       {open ? (
         <div
-          className="absolute z-[100050] mt-1.5 left-0 w-[220px] rounded-xl border border-[#E8D5CE] bg-white overflow-hidden"
+          className="absolute z-[100050] mt-1.5 left-0 w-[220px] rounded-xl border border-[color:var(--edvora-border)] bg-white overflow-hidden"
           style={{ boxShadow: "0 10px 28px rgba(115, 83, 102, 0.18)" }}
         >
           <div
@@ -217,7 +217,7 @@ function CustomTimePicker({
                       onClick={() => setDraft((prev) => ({ ...prev, period }))}
                       className={`h-6 px-2 rounded text-[10px] font-bold ${
                         active
-                          ? "bg-white text-[#735366]"
+                          ? "bg-white text-[color:var(--edvora-ink-strong)]"
                           : "bg-white/15 text-white/80"
                       }`}
                     >
@@ -236,8 +236,8 @@ function CustomTimePicker({
                 onClick={() => setMode("hour")}
                 className={`h-6 px-2.5 rounded-full text-[10px] font-semibold ${
                   mode === "hour"
-                    ? "bg-[#A77A95] text-white"
-                    : "bg-[#FAEEE9] text-[#735366]"
+                    ? "bg-[color:var(--edvora-primary)] text-white"
+                    : "bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-ink-strong)]"
                 }`}
               >
                 Hour
@@ -247,8 +247,8 @@ function CustomTimePicker({
                 onClick={() => setMode("minute")}
                 className={`h-6 px-2.5 rounded-full text-[10px] font-semibold ${
                   mode === "minute"
-                    ? "bg-[#A77A95] text-white"
-                    : "bg-[#FAEEE9] text-[#735366]"
+                    ? "bg-[color:var(--edvora-primary)] text-white"
+                    : "bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-ink-strong)]"
                 }`}
               >
                 Minute

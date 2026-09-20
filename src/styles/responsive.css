@@ -177,8 +177,13 @@
 
 .rs-btn-primary {
   color: #fff;
-  background: linear-gradient(135deg, #a77a95 0%, #5c3050 100%);
-  box-shadow: 0 4px 14px rgba(92, 48, 80, 0.28);
+  background: linear-gradient(
+    135deg,
+    var(--edvora-primary) 0%,
+    var(--edvora-primary-deep) 100%
+  );
+  box-shadow: 0 4px 14px
+    color-mix(in srgb, var(--edvora-primary-deep) 28%, transparent);
   border: none;
 }
 
@@ -187,13 +192,15 @@
 }
 
 .rs-btn-ghost {
-  color: #735366;
-  background: #fff;
-  border: 1.5px solid #e0cce0;
+  color: var(--edvora-ink);
+  background: var(--edvora-glass);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border: 1.5px solid var(--edvora-glass-border-soft);
 }
 
 .rs-btn-ghost:hover:not(:disabled) {
-  background: #f3eaf5;
+  background: var(--edvora-glass-strong);
 }
 
 .rs-input {
@@ -202,23 +209,30 @@
   padding: 0 0.85em;
   font-size: var(--rs-body);
   border-radius: var(--rs-radius);
-  border: 1.5px solid #e8d5e0;
-  background: #fdf8fb;
-  color: #3d1f33;
+  border: 1.5px solid var(--edvora-glass-border-soft);
+  background: var(--edvora-glass);
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  color: var(--edvora-ink-strong);
   outline: none;
   box-sizing: border-box;
 }
 
 .rs-input:focus {
-  border-color: #a77a95;
-  box-shadow: 0 0 0 3px rgba(167, 122, 149, 0.12);
+  border-color: var(--edvora-primary);
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--edvora-primary) 16%, transparent);
 }
 
 .rs-card {
   border-radius: calc(var(--rs-radius) + 4px);
-  border: 1px solid #e8d5e0;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 1px 2px rgba(115, 83, 102, 0.06);
+  border: 1px solid var(--edvora-glass-border-soft);
+  background: var(--edvora-glass);
+  backdrop-filter: blur(var(--edvora-glass-blur))
+    saturate(var(--edvora-glass-saturate));
+  -webkit-backdrop-filter: blur(var(--edvora-glass-blur))
+    saturate(var(--edvora-glass-saturate));
+  box-shadow: var(--edvora-glass-shadow);
   padding: var(--rs-card-pad);
 }
 

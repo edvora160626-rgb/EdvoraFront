@@ -178,3 +178,23 @@ export async function assignStaffToDepartment(departmentId, teacherId) {
 
   return data;
 }
+
+export async function createStaffMember(payload) {
+  const schoolId = getSchoolId();
+
+  if (!schoolId) {
+    throw new Error("School ID is missing. Please sign in again.");
+  }
+
+  const { data } = await axios.post(
+    `${API_BASE}/auth/createStudentTeacherParentSchoolAdmin`,
+    {
+      ...payload,
+      schoolId,
+      role: "TEACHER",
+      status: "ACTIVE",
+    }
+  );
+
+  return data;
+}

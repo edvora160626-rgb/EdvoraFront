@@ -11,14 +11,14 @@ function EdvoraLoader({
     >
       <div className="login-loader" />
       {message ? (
-        <p className="mt-8 text-sm font-medium text-[#735366]">{message}</p>
+        <p className="mt-8 text-sm font-medium text-[color:var(--edvora-ink-strong)]">{message}</p>
       ) : null}
     </div>
   );
 
   if (overlay) {
     return (
-      <div className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-[#FAEEE9]/55">
+      <div className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-[color:var(--edvora-primary-soft)]/55">
         {content}
       </div>
     );

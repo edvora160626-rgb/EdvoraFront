@@ -92,20 +92,20 @@ function TeacherDashboard() {
               <BookOpen size={22} />
             </span>
             <div>
-              <p className="text-sm font-semibold text-[#735366]">AI Lesson Planner</p>
+              <p className="text-sm font-semibold text-[color:var(--edvora-ink-strong)]">AI Lesson Planner</p>
               <p className="text-xs text-slate-500">Draft next week’s physics plan</p>
             </div>
             <Sparkles size={16} className="ml-auto text-[#D4B87A]" />
           </div>
           <div className="rounded-2xl bg-white border border-slate-100 shadow-sm p-4 flex items-center gap-3 hover:shadow-md transition">
-            <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-[#F5D69B] to-[#D4B87A] text-[#735366]">
+            <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-[#F5D69B] to-[#D4B87A] text-[color:var(--edvora-ink-strong)]">
               <Bot size={22} />
             </span>
             <div>
-              <p className="text-sm font-semibold text-[#735366]">AI Content Generator</p>
+              <p className="text-sm font-semibold text-[color:var(--edvora-ink-strong)]">AI Content Generator</p>
               <p className="text-xs text-slate-500">Worksheets, quizzes & summaries</p>
             </div>
-            <LayoutGrid size={16} className="ml-auto text-[#A77A95]" />
+            <LayoutGrid size={16} className="ml-auto text-[color:var(--edvora-primary)]" />
           </div>
         </div>
       </div>
@@ -126,12 +126,12 @@ function TeacherDashboard() {
               <ul className="space-y-3">
                 {ACTIVITIES.map((a) => (
                   <li key={a.title} className="flex items-center gap-3">
-                    <span className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-[#FAEEE9] text-[#8F6580] text-[10px] font-bold leading-tight">
+                    <span className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-muted)] text-[10px] font-bold leading-tight">
                       {a.date.split(" ")[0]}
                       <span className="text-sm">{a.date.split(" ")[1]}</span>
                     </span>
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-[#735366] truncate">{a.title}</p>
+                      <p className="text-sm font-semibold text-[color:var(--edvora-ink-strong)] truncate">{a.title}</p>
                       <p className="text-xs text-slate-500">{a.meta}</p>
                     </div>
                   </li>
@@ -143,8 +143,8 @@ function TeacherDashboard() {
               <div className="flex items-center gap-5">
                 <DonutChart value={76} />
                 <div className="space-y-2 text-sm flex-1">
-                  <div className="flex justify-between"><span className="text-slate-500">Assigned</span><span className="font-semibold text-[#735366]">48</span></div>
-                  <div className="flex justify-between"><span className="text-slate-500">Submitted</span><span className="font-semibold text-[#A77A95]">36</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Assigned</span><span className="font-semibold text-[color:var(--edvora-ink-strong)]">48</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Submitted</span><span className="font-semibold text-[color:var(--edvora-primary)]">36</span></div>
                   <div className="flex justify-between"><span className="text-slate-500">Overdue</span><span className="font-semibold text-amber-600">7</span></div>
                 </div>
               </div>
@@ -155,7 +155,7 @@ function TeacherDashboard() {
             <RiskAlerts items={RISK} />
             <SectionCard title="Student Performance" subtitle="Class average vs top score">
               <div className="flex items-center gap-4 mb-3 text-[11px] text-slate-500">
-                <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#A77A95]" /> Avg %</span>
+                <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[color:var(--edvora-primary)]" /> Avg %</span>
                 <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#F5D69B]" /> Top %</span>
               </div>
               <BarChart data={PERFORMANCE} />
@@ -167,14 +167,14 @@ function TeacherDashboard() {
               <ul className="space-y-2.5">
                 {recentRequests.map((r) => (
                   <li key={r._id} className="flex items-center gap-3 rounded-xl bg-slate-50/80 border border-slate-100 p-3">
-                    <div className="h-9 w-9 rounded-full bg-[#FAEEE9] text-[#A77A95] flex items-center justify-center text-xs font-bold">
+                    <div className="h-9 w-9 rounded-full bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)] flex items-center justify-center text-xs font-bold">
                       {r.firstName?.[0]}{r.lastName?.[0] || ""}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-[#735366] truncate">{r.firstName} {r.lastName}</p>
+                      <p className="text-sm font-semibold text-[color:var(--edvora-ink-strong)] truncate">{r.firstName} {r.lastName}</p>
                       <p className="text-xs text-slate-500">{ROLE_LABELS[r.role] || r.role}</p>
                     </div>
-                    <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-[#FAEEE9] text-[#8F6580]">
+                    <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-muted)]">
                       {r.actionable ? "Action" : "View"}
                     </span>
                   </li>
@@ -198,7 +198,7 @@ function TeacherDashboard() {
           />
           <Link
             to="/admin/student-attendance"
-            className="block rounded-2xl bg-linear-to-br from-[#FAEEE9] to-white border border-[#C3C3D5] p-4 text-center text-sm font-semibold text-[#8F6580] hover:shadow-md transition"
+            className="block rounded-2xl bg-linear-to-br from-[#FAEEE9] to-white border border-[#C3C3D5] p-4 text-center text-sm font-semibold text-[color:var(--edvora-muted)] hover:shadow-md transition"
           >
             Open Student Attendance →
           </Link>

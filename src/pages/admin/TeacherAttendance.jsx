@@ -144,15 +144,15 @@ function TeacherAttendance() {
           onClick={() =>
             navigate(`/admin/teacher-attendance/mark?date=${date}`)
           }
-          className="group text-left rounded-2xl border border-slate-100 bg-white p-5 sm:p-6 shadow-sm hover:shadow-md hover:border-[#A77A95]/35 transition"
+          className="group text-left rounded-2xl border border-slate-100 bg-white p-5 sm:p-6 shadow-sm hover:shadow-md hover:border-[color:var(--edvora-primary)]/35 transition"
         >
           <div className="flex items-start gap-4">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FAEEE9] text-[#A77A95] group-hover:scale-105 transition">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)] group-hover:scale-105 transition">
               <ClipboardCheck size={22} />
             </span>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-lg font-semibold text-[#735366]">
+                <h2 className="text-lg font-semibold text-[color:var(--edvora-ink-strong)]">
                   Mark Attendance
                 </h2>
                 {summary?.isMarked ? (
@@ -169,7 +169,7 @@ function TeacherAttendance() {
               <p className="mt-1 text-sm text-slate-500">
                 Take roll call for all active teachers on the selected date.
               </p>
-              <p className="mt-4 text-sm font-semibold text-[#A77A95]">
+              <p className="mt-4 text-sm font-semibold text-[color:var(--edvora-primary)]">
                 Open mark sheet →
               </p>
             </div>
@@ -178,20 +178,20 @@ function TeacherAttendance() {
 
         <Link
           to={`/admin/teacher-attendance/bulk-upload?date=${date}`}
-          className="group rounded-2xl border border-slate-100 bg-white p-5 sm:p-6 shadow-sm hover:shadow-md hover:border-[#A77A95]/35 transition"
+          className="group rounded-2xl border border-slate-100 bg-white p-5 sm:p-6 shadow-sm hover:shadow-md hover:border-[color:var(--edvora-primary)]/35 transition"
         >
           <div className="flex items-start gap-4">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FAEEE9] text-[#A77A95] group-hover:scale-105 transition">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)] group-hover:scale-105 transition">
               <CloudUpload size={22} />
             </span>
             <div className="min-w-0 flex-1">
-              <h2 className="text-lg font-semibold text-[#735366]">
+              <h2 className="text-lg font-semibold text-[color:var(--edvora-ink-strong)]">
                 Bulk Upload
               </h2>
               <p className="mt-1 text-sm text-slate-500">
                 Import a CSV sheet, preview validation, and save in one go.
               </p>
-              <p className="mt-4 text-sm font-semibold text-[#A77A95]">
+              <p className="mt-4 text-sm font-semibold text-[color:var(--edvora-primary)]">
                 Launch uploader →
               </p>
             </div>
@@ -200,20 +200,20 @@ function TeacherAttendance() {
 
         <Link
           to="/admin/teacher-attendance/logs"
-          className="group rounded-2xl border border-slate-100 bg-white p-5 sm:p-6 shadow-sm hover:shadow-md hover:border-[#A77A95]/35 transition"
+          className="group rounded-2xl border border-slate-100 bg-white p-5 sm:p-6 shadow-sm hover:shadow-md hover:border-[color:var(--edvora-primary)]/35 transition"
         >
           <div className="flex items-start gap-4">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FAEEE9] text-[#A77A95] group-hover:scale-105 transition">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)] group-hover:scale-105 transition">
               <ScrollText size={22} />
             </span>
             <div className="min-w-0 flex-1">
-              <h2 className="text-lg font-semibold text-[#735366]">
+              <h2 className="text-lg font-semibold text-[color:var(--edvora-ink-strong)]">
                 View Logs
               </h2>
               <p className="mt-1 text-sm text-slate-500">
                 Browse mark history, updates, and bulk-upload audit trails.
               </p>
-              <p className="mt-4 text-sm font-semibold text-[#A77A95]">
+              <p className="mt-4 text-sm font-semibold text-[color:var(--edvora-primary)]">
                 Open logs →
               </p>
             </div>
@@ -224,14 +224,14 @@ function TeacherAttendance() {
       <section className="rounded-2xl border border-slate-100 bg-white p-5 sm:p-6 shadow-sm">
         <div className="flex items-center justify-between gap-3 mb-4">
           <div>
-            <h3 className="text-lg font-semibold text-[#735366]">
+            <h3 className="text-lg font-semibold text-[color:var(--edvora-ink-strong)]">
               Day Snapshot
             </h3>
             <p className="text-sm text-slate-500">
               Breakdown for {date.split("-").reverse().join("-")}
             </p>
           </div>
-          <span className="hidden sm:inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#FAEEE9] text-[#A77A95]">
+          <span className="hidden sm:inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)]">
             <UserRoundCheck size={18} />
           </span>
         </div>
@@ -251,7 +251,7 @@ function TeacherAttendance() {
         </div>
 
         {!summary?.isMarked && !loading ? (
-          <div className="mt-5 flex items-center gap-3 rounded-xl bg-[#FAEEE9] px-4 py-3 text-sm text-[#735366]">
+          <div className="mt-5 flex items-center gap-3 rounded-xl bg-[color:var(--edvora-primary-soft)] px-4 py-3 text-sm text-[color:var(--edvora-ink-strong)]">
             <Users size={16} className="shrink-0" />
             No attendance saved for this date yet. Mark manually or upload a
             CSV to get started.
@@ -260,7 +260,7 @@ function TeacherAttendance() {
       </section>
 
       {loading ? (
-        <div className="fixed bottom-4 right-4 z-40 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-[#735366] shadow-lg border border-slate-100">
+        <div className="fixed bottom-4 right-4 z-40 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-[color:var(--edvora-ink-strong)] shadow-lg border border-slate-100">
           Updating…
         </div>
       ) : null}

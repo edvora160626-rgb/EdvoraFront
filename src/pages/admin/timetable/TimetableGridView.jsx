@@ -1,4 +1,9 @@
-import { DAYS, classLabel, teacherName } from "../../../utils/timetableApi";
+import {
+  DAYS,
+  classLabel,
+  slotAppliesToDay,
+  teacherName,
+} from "../../../utils/timetableApi";
 
 function entryKey(day, slotId) {
   return `${day}:${String(slotId)}`;
@@ -6,7 +11,7 @@ function entryKey(day, slotId) {
 
 /**
  * Read-only or clickable weekly grid.
- * entries: array with day, timeSlotId (id or populated), subjectId, teacherId, roomId, classId?
+ * Slots may apply only to specific days (slot.days); empty days = all days.
  */
 export default function TimetableGridView({
   workingDays = ["MON", "TUE", "WED", "THU", "FRI"],
@@ -25,26 +30,30 @@ export default function TimetableGridView({
 
   const dayLabels = DAYS.filter((d) => workingDays.includes(d.value));
 
-  if (!slots.length) {
+  const visibleSlots = slots.filter((slot) =>
+    dayLabels.some((d) => slotAppliesToDay(slot, d.value))
+  );
+
+  if (!visibleSlots.length) {
     return (
-      <div className="rounded-xl border border-slate-100 bg-white p-8 text-center text-sm text-slate-500 shadow-sm">
+      <div className="glass-strong rounded-2xl p-8 text-center text-sm text-[color:var(--edvora-muted)]">
         No period template configured. Add time slots in Settings.
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-100 bg-white shadow-sm">
+    <div className="overflow-x-auto rounded-2xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass)] shadow-[var(--edvora-glass-shadow)] backdrop-blur-[18px]">
       <table className="min-w-full border-collapse text-left text-sm">
         <thead>
-          <tr className="bg-[#FAEEE9]/70">
-            <th className="sticky left-0 z-10 min-w-[110px] border-b border-slate-100 bg-[#FAEEE9] px-3 py-3 font-semibold text-[#667085]">
+          <tr className="bg-[color:var(--edvora-glass-soft)]">
+            <th className="sticky left-0 z-10 min-w-[110px] border-b border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass-strong)] px-3 py-3 font-semibold text-[color:var(--edvora-muted)]">
               Period
             </th>
             {dayLabels.map((d) => (
               <th
                 key={d.value}
-                className="min-w-[140px] border-b border-slate-100 px-3 py-3 font-semibold text-[#667085]"
+                className="min-w-[140px] border-b border-[color:var(--edvora-glass-border-soft)] px-3 py-3 font-semibold text-[color:var(--edvora-muted)]"
               >
                 {d.label.slice(0, 3)}
               </th>
@@ -52,70 +61,89 @@ export default function TimetableGridView({
           </tr>
         </thead>
         <tbody>
-          {slots.map((slot) => {
+          {visibleSlots.map((slot) => {
             const isBreak = slot.type === "BREAK" || slot.type === "LUNCH";
             return (
-              <tr key={slot._id} className={isBreak ? "bg-slate-50/80" : ""}>
-                <td className="sticky left-0 z-10 border-b border-slate-50 bg-white px-3 py-2">
-                  <p className="font-medium text-[#735366]">{slot.name}</p>
-                  <p className="text-[11px] text-slate-400">
+              <tr key={slot._id}>
+                <td className="sticky left-0 z-10 border-b border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass-strong)] px-3 py-2">
+                  <p className="font-medium text-[color:var(--edvora-ink-strong)]">
+                    {slot.name}
+                  </p>
+                  <p className="text-[11px] text-[color:var(--edvora-muted)]">
                     {slot.startTime}–{slot.endTime}
                   </p>
                 </td>
                 {dayLabels.map((d) => {
+                  if (!slotAppliesToDay(slot, d.value)) {
+                    return (
+                      <td
+                        key={d.value}
+                        className="border-b border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass-soft)]/40 px-2 py-2 text-center"
+                      >
+                        <span className="text-[10px] font-medium uppercase tracking-wide text-[color:var(--edvora-muted)]/50">
+                          Off
+                        </span>
+                      </td>
+                    );
+                  }
+
                   if (isBreak) {
                     return (
                       <td
                         key={d.value}
-                        className="border-b border-slate-50 px-2 py-2 text-center text-xs font-medium text-slate-400"
+                        className="border-b border-[color:var(--edvora-glass-border-soft)] px-2 py-2 text-center text-xs font-medium text-[color:var(--edvora-muted)]"
                       >
                         {slot.type}
                       </td>
                     );
                   }
+
                   const entry = map.get(entryKey(d.value, slot._id));
                   const clickable = !readOnly && onCellClick;
                   return (
-                    <td key={d.value} className="border-b border-slate-50 p-1.5">
+                    <td
+                      key={d.value}
+                      className="border-b border-[color:var(--edvora-glass-border-soft)] p-1.5"
+                    >
                       <button
                         type="button"
                         disabled={!clickable}
                         onClick={() =>
                           clickable && onCellClick({ day: d.value, slot, entry })
                         }
-                        className={`min-h-[64px] w-full rounded-lg border px-2 py-1.5 text-left transition ${
+                        className={`min-h-[64px] w-full rounded-xl border px-2 py-1.5 text-left transition ${
                           entry
-                            ? "border-[#E8D5CE] bg-[#FAEEE9]/50"
-                            : "border-dashed border-slate-200 bg-white"
+                            ? "border-[color:var(--edvora-primary)]/25 bg-[color:var(--edvora-primary)]/8"
+                            : "border-dashed border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass-soft)]/50"
                         } ${
                           clickable
-                            ? "hover:border-[#A77A95] cursor-pointer"
+                            ? "hover:border-[color:var(--edvora-primary)] cursor-pointer"
                             : "cursor-default"
                         }`}
                       >
                         {entry ? (
                           <>
-                            <p className="text-[12px] font-semibold text-[#735366] leading-tight">
+                            <p className="text-[12px] font-semibold text-[color:var(--edvora-ink-strong)] leading-tight">
                               {entry.subjectId?.subjectName ||
                                 entry.subjectName ||
                                 "Assigned"}
                             </p>
                             {showClass && entry.classId && (
-                              <p className="text-[10px] text-[#A77A95]">
+                              <p className="text-[10px] text-[color:var(--edvora-primary)]">
                                 {classLabel(entry.classId)}
                               </p>
                             )}
-                            <p className="text-[10px] text-slate-500 truncate">
+                            <p className="text-[10px] text-[color:var(--edvora-muted)] truncate">
                               {teacherName(entry.teacherId)}
                             </p>
                             {entry.roomId && (
-                              <p className="text-[10px] text-slate-400 truncate">
+                              <p className="text-[10px] text-[color:var(--edvora-muted)]/80 truncate">
                                 {entry.roomId.name || entry.roomId.code}
                               </p>
                             )}
                           </>
                         ) : (
-                          <span className="text-[11px] text-slate-300">
+                          <span className="text-[11px] text-[color:var(--edvora-muted)]/50">
                             {clickable ? "Assign" : "—"}
                           </span>
                         )}

@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
+import { Moon, Palette, Sun } from "lucide-react";
 import EdvoraLogo from "./EdvoraLogo";
+import ThemeSettingsDrawer from "./ThemeSettingsDrawer";
+import { useTheme } from "../theme/ThemeContext";
 
 /* ─── Clock hook ──────────────────────────────────────────────────── */
 function useClock() {
@@ -171,19 +174,15 @@ function LeftPanel() {
         style={{ background: "radial-gradient(ellipse at 10% 90%, rgba(167,122,149,0.15) 0%, transparent 50%)" }} />
 
       {/* ── Top bar ── */}
-      <div className="relative z-10 flex items-center justify-between flex-shrink-0"
-        style={{ padding: "22px 28px 0" }}>
-        {/* Brand */}
-        <div className="flex items-center gap-2.5 min-w-0">
+      <div className="relative z-10 flex items-center justify-between gap-4 flex-shrink-0"
+        style={{ padding: "20px 28px 0" }}>
+        {/* Brand — keep designed background; rounded frame for clean shape */}
+        <div className="min-w-0 shrink flex items-center">
           <EdvoraLogo
-            variant="icon"
+            variant="full"
             decorative
-            className="h-9 w-9 flex-shrink-0 drop-shadow-sm"
+            className="w-[168px] max-w-[38vw] h-auto rounded-xl shadow-[0_10px_28px_rgba(0,0,0,0.35)] ring-1 ring-white/10"
           />
-          <div className="min-w-0">
-            <p style={{ color: "white", fontWeight: 700, fontSize: 14, lineHeight: 1, letterSpacing: "-0.2px" }}>Edvora</p>
-            <p style={{ color: "rgba(255,255,255,0.42)", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", marginTop: 3 }}>School Portal</p>
-          </div>
         </div>
         {/* Clock pill */}
         <div style={{
@@ -257,7 +256,7 @@ function MobileClock() {
         <EdvoraLogo
           variant="icon"
           decorative
-          className="h-7 w-7 flex-shrink-0 drop-shadow-sm"
+          className="h-8 w-8 flex-shrink-0 rounded-lg ring-1 ring-white/15"
         />
         <div className="min-w-0">
           <p style={{ color: "white", fontWeight: 700, fontSize: 13, lineHeight: 1 }}>Edvora</p>
@@ -277,36 +276,53 @@ function MobileClock() {
 
 /* ─── Shell — exactly 100dvh, zero page scroll ───────────────────── */
 function AuthShell({ children, className = "" }) {
+  const { isDark, toggleMode, openThemeDrawer } = useTheme();
+
   return (
     <div
-      className={`${className}`}
+      className={`${className} theme-page`}
       style={{
         width: "100%",
         height: "100dvh",
         display: "flex",
         overflow: "hidden",
-        background: "#f3e8f0",
       }}
     >
-      {/* Left panel — hidden on mobile, fills remaining width */}
       <div className="hidden lg:block" style={{ flex: 1, minWidth: 0, height: "100%" }}>
         <LeftPanel />
       </div>
 
-      {/* Right panel — fixed width, internal scroll only */}
       <div
-        className="flex flex-col items-center justify-center"
+        className="flex flex-col items-center justify-center relative glass-strong"
         style={{
           width: "100%",
           maxWidth: 480,
           flexShrink: 0,
           height: "100%",
           overflowY: "auto",
-          background: "#faf5f8",
           padding: "24px 40px",
+          borderLeft: "1px solid var(--edvora-glass-border-soft)",
         }}
       >
-        {/* Responsive: use full width on mobile */}
+        <div className="absolute top-4 right-4 flex items-center gap-1.5 z-10">
+          <button
+            type="button"
+            onClick={toggleMode}
+            className="w-9 h-9 rounded-xl border border-[color:var(--edvora-border)] text-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-soft)] flex items-center justify-center"
+            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {isDark ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+          <button
+            type="button"
+            onClick={openThemeDrawer}
+            className="w-9 h-9 rounded-xl border border-[color:var(--edvora-border)] text-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-soft)] flex items-center justify-center"
+            aria-label="Open appearance settings"
+          >
+            <Palette size={16} />
+          </button>
+        </div>
+
         <div style={{ width: "100%", maxWidth: 400 }}>
           <div className="lg:hidden">
             <MobileClock />
@@ -314,6 +330,8 @@ function AuthShell({ children, className = "" }) {
           {children}
         </div>
       </div>
+
+      <ThemeSettingsDrawer />
     </div>
   );
 }

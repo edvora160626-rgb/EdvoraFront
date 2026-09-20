@@ -24,16 +24,16 @@ function MiniCalendar({ markedDates = [] }) {
   }, [cursor]);
 
   return (
-    <div className="rounded-2xl bg-white border border-slate-100 shadow-sm p-4 sm:p-5">
+    <div className="rounded-2xl p-4 sm:p-5">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-[#735366]">
+        <h3 className="text-sm font-semibold text-[color:var(--edvora-ink-strong)]">
           {format(cursor, "MMMM yyyy")}
         </h3>
         <div className="flex gap-1">
           <button
             type="button"
             onClick={() => setCursor((d) => subMonths(d, 1))}
-            className="h-7 w-7 rounded-lg hover:bg-[#FAEEE9] text-[#A77A95] flex items-center justify-center"
+            className="h-7 w-7 rounded-lg text-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary)]/10 flex items-center justify-center"
             aria-label="Previous month"
           >
             <ChevronLeft size={16} />
@@ -41,7 +41,7 @@ function MiniCalendar({ markedDates = [] }) {
           <button
             type="button"
             onClick={() => setCursor((d) => addMonths(d, 1))}
-            className="h-7 w-7 rounded-lg hover:bg-[#FAEEE9] text-[#A77A95] flex items-center justify-center"
+            className="h-7 w-7 rounded-lg text-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary)]/10 flex items-center justify-center"
             aria-label="Next month"
           >
             <ChevronRight size={16} />
@@ -51,7 +51,10 @@ function MiniCalendar({ markedDates = [] }) {
 
       <div className="grid grid-cols-7 gap-1 mb-1">
         {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
-          <div key={d} className="text-center text-[10px] font-semibold text-slate-400 py-1">
+          <div
+            key={d}
+            className="text-center text-[10px] font-semibold text-[color:var(--edvora-muted)] py-1"
+          >
             {d}
           </div>
         ))}
@@ -68,15 +71,15 @@ function MiniCalendar({ markedDates = [] }) {
               key={day.toISOString()}
               className={`relative h-8 flex items-center justify-center rounded-lg text-xs ${
                 isToday
-                  ? "bg-[#A77A95] text-white font-bold shadow-sm"
+                  ? "bg-[color:var(--edvora-primary)] text-white font-bold shadow-sm"
                   : inMonth
-                    ? "text-[#735366] hover:bg-[#FAEEE9]"
-                    : "text-slate-300"
+                    ? "text-[color:var(--edvora-ink)] hover:bg-[color:var(--edvora-primary)]/10"
+                    : "text-[color:var(--edvora-muted)]/40"
               }`}
             >
               {format(day, "d")}
               {marked && !isToday ? (
-                <span className="absolute bottom-0.5 h-1 w-1 rounded-full bg-[#D4B87A]" />
+                <span className="absolute bottom-0.5 h-1 w-1 rounded-full bg-[color:var(--edvora-accent)]" />
               ) : null}
             </div>
           );

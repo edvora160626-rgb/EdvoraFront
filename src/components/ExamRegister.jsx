@@ -151,7 +151,7 @@ function ExamRegisterModal({ onClose }) {
             type="button"
             onClick={onClose}
             disabled={submitting}
-            className="rounded-xl p-2 text-[#a77a95] hover:bg-[#FAEEE9]"
+            className="rounded-xl p-2 text-[#a77a95] hover:bg-[color:var(--edvora-primary-soft)]"
             aria-label="Close"
           >
             <X size={20} />
@@ -160,7 +160,7 @@ function ExamRegisterModal({ onClose }) {
 
         <form onSubmit={handleSubmit} className="px-5 py-5 space-y-3.5">
           <div>
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-[#735366]/70 mb-1.5">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-[color:var(--edvora-ink-strong)]/70 mb-1.5">
               Account type *
             </label>
             <div
@@ -181,7 +181,7 @@ function ExamRegisterModal({ onClose }) {
                     className={`rounded-[10px] min-h-[clamp(2.25rem,5vw,2.75rem)] px-1.5 text-[clamp(10px,2.2vw,12px)] font-bold transition disabled:opacity-50 ${
                       active
                         ? "bg-white text-[#5c3050] shadow-sm"
-                        : "text-[#a77a95]/80 hover:text-[#735366]"
+                        : "text-[#a77a95]/80 hover:text-[color:var(--edvora-ink-strong)]"
                     }`}
                   >
                     {opt.label}
@@ -189,14 +189,14 @@ function ExamRegisterModal({ onClose }) {
                 );
               })}
             </div>
-            <p className="mt-1.5 text-[11px] text-[#735366]/60">
+            <p className="mt-1.5 text-[11px] text-[color:var(--edvora-ink-strong)]/60">
               {selectedType.hint}
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-[#735366]/70 mb-1.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-[color:var(--edvora-ink-strong)]/70 mb-1.5">
                 First name *
               </label>
               <input
@@ -208,7 +208,7 @@ function ExamRegisterModal({ onClose }) {
               />
             </div>
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-[#735366]/70 mb-1.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-[color:var(--edvora-ink-strong)]/70 mb-1.5">
                 Last name
               </label>
               <input
@@ -222,7 +222,7 @@ function ExamRegisterModal({ onClose }) {
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-[#735366]/70 mb-1.5">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-[color:var(--edvora-ink-strong)]/70 mb-1.5">
               Email *
             </label>
             <input
@@ -237,7 +237,7 @@ function ExamRegisterModal({ onClose }) {
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-[#735366]/70 mb-1.5">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-[color:var(--edvora-ink-strong)]/70 mb-1.5">
               Phone *
             </label>
             <PhoneInput
@@ -250,7 +250,7 @@ function ExamRegisterModal({ onClose }) {
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-[#735366]/70 mb-1.5">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-[color:var(--edvora-ink-strong)]/70 mb-1.5">
               Gender
             </label>
             <CustomSelect
@@ -265,7 +265,7 @@ function ExamRegisterModal({ onClose }) {
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-[#735366]/70 mb-1.5">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-[color:var(--edvora-ink-strong)]/70 mb-1.5">
               Password *
             </label>
             <div className="relative">
@@ -290,7 +290,7 @@ function ExamRegisterModal({ onClose }) {
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-[#735366]/70 mb-1.5">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-[color:var(--edvora-ink-strong)]/70 mb-1.5">
               Confirm password *
             </label>
             <input

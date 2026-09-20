@@ -1,9 +1,19 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, Plus, X, Hash, Mail, DoorClosed } from "lucide-react";
+import {
+  ArrowUpRight,
+  Building2,
+  DoorClosed,
+  Hash,
+  Layers3,
+  Mail,
+  Plus,
+  X,
+} from "lucide-react";
 import CustomSelect from "../../common/CustomSelect";
 import EdvoraLoader from "../../common/EdvoraLoader";
 import PhoneInput from "../../common/PhoneInput";
+import StatusFilterSwitch from "../../common/StatusFilterSwitch";
 import { openSnackbar } from "../../common/snackbar/snackbar";
 import {
   createDepartment,
@@ -13,7 +23,6 @@ import {
 
 const EMPTY_FORM = {
   departmentName: "",
-  departmentCode: "",
   description: "",
   email: "",
   phone: "",
@@ -26,8 +35,9 @@ const EMPTY_FORM = {
 };
 
 const inputClass =
-  "w-full h-[42px] rounded-lg border border-[#D0D5DD] bg-white px-3 text-[14px] text-[#344054] outline-none focus:border-[#A77A95]";
-const labelClass = "block text-[13px] font-semibold text-[#667085] mb-1.5";
+  "w-full h-[44px] rounded-xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass)] backdrop-blur-md px-3.5 text-[14px] text-[color:var(--edvora-ink-strong)] outline-none focus:border-[color:var(--edvora-primary)] focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--edvora-primary)_16%,transparent)]";
+const labelClass =
+  "block text-[12px] font-semibold tracking-wide uppercase text-[color:var(--edvora-muted)] mb-1.5";
 
 function AddDepartmentModal({ onClose, onCreated }) {
   const [formData, setFormData] = useState(EMPTY_FORM);
@@ -38,9 +48,9 @@ function AddDepartmentModal({ onClose, onCreated }) {
   };
 
   const handleSubmit = async () => {
-    if (!formData.departmentName.trim() || !formData.departmentCode.trim()) {
+    if (!formData.departmentName.trim()) {
       return openSnackbar({
-        message: "Department name and code are required",
+        message: "Department name is required",
         variant: "warning",
       });
     }
@@ -50,7 +60,6 @@ function AddDepartmentModal({ onClose, onCreated }) {
 
       const payload = {
         departmentName: formData.departmentName.trim(),
-        departmentCode: formData.departmentCode.trim().toUpperCase(),
         description: formData.description.trim(),
         email: formData.email.trim().toLowerCase(),
         phone: formData.phone.trim(),
@@ -83,15 +92,14 @@ function AddDepartmentModal({ onClose, onCreated }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-3 sm:p-4">
-      <div className="w-full max-w-[720px] max-h-[90dvh] bg-white rounded-[14px] shadow-2xl overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="h-14 sm:h-16 px-4 sm:px-6 flex items-center justify-between border-b border-gray-200 shrink-0">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[color:var(--edvora-overlay)] backdrop-blur-md p-3 sm:p-4">
+      <div className="w-full max-w-[720px] max-h-[90dvh] glass-strong rounded-2xl overflow-hidden flex flex-col">
+        <div className="h-14 sm:h-16 px-4 sm:px-6 flex items-center justify-between border-b border-[color:var(--edvora-glass-border-soft)] shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#FAEEE9] text-[#A77A95]">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[color:var(--edvora-primary)]/12 text-[color:var(--edvora-primary)] ring-1 ring-[color:var(--edvora-glass-border-soft)]">
               <Building2 size={18} />
             </span>
-            <h2 className="text-base sm:text-[18px] font-semibold text-[#111827] truncate">
+            <h2 className="text-base sm:text-[18px] font-semibold text-[color:var(--edvora-ink-strong)] truncate">
               Add Department
             </h2>
           </div>
@@ -99,14 +107,13 @@ function AddDepartmentModal({ onClose, onCreated }) {
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-primary hover:bg-primary-hover text-white flex items-center justify-center"
+            className="w-9 h-9 rounded-full bg-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-hover)] text-white flex items-center justify-center shadow-md"
             aria-label="Close"
           >
             <X size={18} />
           </button>
         </div>
 
-        {/* Body */}
         <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 sm:px-6 py-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -121,26 +128,10 @@ function AddDepartmentModal({ onClose, onCreated }) {
                 placeholder="e.g. Mathematics"
                 className={inputClass}
               />
-            </div>
-
-            <div>
-              <label className={labelClass}>
-                Department Code <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <Hash
-                  size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A77A95]"
-                />
-                <input
-                  type="text"
-                  name="departmentCode"
-                  value={formData.departmentCode}
-                  onChange={handleChange}
-                  placeholder="e.g. MATH"
-                  className={`${inputClass} pl-9 uppercase`}
-                />
-              </div>
+              <p className="mt-1.5 text-xs text-[color:var(--edvora-muted)]">
+                A unique department code is generated automatically for this
+                school.
+              </p>
             </div>
 
             <div>
@@ -148,7 +139,7 @@ function AddDepartmentModal({ onClose, onCreated }) {
               <div className="relative">
                 <Mail
                   size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A77A95]"
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[color:var(--edvora-primary)]"
                 />
                 <input
                   type="email"
@@ -180,7 +171,7 @@ function AddDepartmentModal({ onClose, onCreated }) {
               <div className="relative">
                 <DoorClosed
                   size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A77A95]"
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[color:var(--edvora-primary)]"
                 />
                 <input
                   type="text"
@@ -245,9 +236,9 @@ function AddDepartmentModal({ onClose, onCreated }) {
                   name="color"
                   value={formData.color}
                   onChange={handleChange}
-                  className="h-[42px] w-14 rounded-lg border border-[#D0D5DD] bg-white p-1 cursor-pointer"
+                  className="h-[44px] w-14 rounded-xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass)] p-1 cursor-pointer"
                 />
-                <span className="text-[13px] text-[#667085]">
+                <span className="text-[13px] font-medium text-[color:var(--edvora-muted)] tabular-nums">
                   {formData.color}
                 </span>
               </div>
@@ -261,18 +252,17 @@ function AddDepartmentModal({ onClose, onCreated }) {
                 value={formData.description}
                 onChange={handleChange}
                 placeholder="Short description of the department"
-                className="w-full rounded-lg border border-[#D0D5DD] bg-white p-3 text-[14px] text-[#344054] outline-none resize-none focus:border-[#A77A95]"
+                className="w-full rounded-xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass)] backdrop-blur-md p-3.5 text-[14px] text-[color:var(--edvora-ink-strong)] outline-none resize-none focus:border-[color:var(--edvora-primary)] focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--edvora-primary)_16%,transparent)]"
               />
             </div>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="px-4 sm:px-6 py-4 border-t border-gray-200 flex justify-end gap-3 shrink-0">
+        <div className="px-4 sm:px-6 py-4 border-t border-[color:var(--edvora-glass-border-soft)] flex justify-end gap-3 shrink-0 bg-[color:var(--edvora-glass-soft)]">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 h-[42px] rounded-lg border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50"
+            className="px-4 h-[42px] rounded-xl border border-[color:var(--edvora-glass-border-soft)] text-[color:var(--edvora-ink)] text-sm font-medium hover:bg-[color:var(--edvora-glass)]"
           >
             Cancel
           </button>
@@ -280,7 +270,7 @@ function AddDepartmentModal({ onClose, onCreated }) {
             type="button"
             onClick={handleSubmit}
             disabled={submitting}
-            className="px-6 h-[42px] rounded-lg bg-[#A77A95] hover:bg-[#8F6580] text-white text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+            className="px-6 h-[42px] rounded-xl theme-btn-primary text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {submitting ? "Saving..." : "Create Department"}
           </button>
@@ -292,43 +282,98 @@ function AddDepartmentModal({ onClose, onCreated }) {
 }
 
 function DepartmentCard({ department, onClick }) {
+  const isInactive = department.status === "INACTIVE";
+  const accent = department.color || "#A77A95";
+  const staffCount =
+    department.teacherids?.length ??
+    department.teachers?.length ??
+    department.staffCount ??
+    null;
+
   return (
     <button
       type="button"
       onClick={onClick}
-      className="w-full text-left bg-white rounded-xl shadow p-4 border border-slate-100 hover:border-[#A77A95]/40 hover:shadow-md transition cursor-pointer"
+      className="group relative w-full overflow-hidden rounded-2xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass)] p-5 text-left shadow-[var(--edvora-glass-shadow)] backdrop-blur-[18px] saturate-[165%] transition duration-300 hover:-translate-y-0.5 hover:border-[color:var(--edvora-primary)]/35 hover:shadow-[var(--edvora-glass-shadow-lg)]"
     >
-      <div className="flex items-start gap-3">
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-28 opacity-90"
+        style={{
+          background: isInactive
+            ? "linear-gradient(135deg, color-mix(in srgb, #ef4444 14%, transparent), transparent 72%)"
+            : `linear-gradient(135deg, color-mix(in srgb, ${accent} 22%, transparent), color-mix(in srgb, var(--edvora-primary) 10%, transparent) 50%, transparent 78%)`,
+        }}
+      />
+
+      <div className="relative flex items-start justify-between gap-3">
         <span
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-white"
-          style={{ backgroundColor: department.color || "#4F46E5" }}
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white shadow-md ring-1 ring-white/25"
+          style={{ backgroundColor: accent }}
         >
-          <Building2 size={18} />
+          <Building2 size={22} />
         </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <p className="font-semibold text-slate-800 truncate">
-              {department.departmentName}
-            </p>
-            <span
-              className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${
-                department.status === "INACTIVE"
-                  ? "bg-red-50 text-red-600"
-                  : "bg-green-50 text-green-700"
-              }`}
-            >
-              {department.status === "INACTIVE" ? "Inactive" : "Active"}
-            </span>
-          </div>
-          <p className="text-xs text-slate-500 mt-0.5">
-            {department.departmentCode}
-          </p>
-          {department.description ? (
-            <p className="text-sm text-slate-600 mt-2 line-clamp-2">
-              {department.description}
-            </p>
-          ) : null}
+
+        <span
+          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ring-1 ${
+            isInactive ? "theme-status-inactive" : "theme-status-active"
+          }`}
+        >
+          <span
+            className={`h-1.5 w-1.5 rounded-full ${
+              isInactive
+                ? "bg-[color:var(--edvora-danger)]"
+                : "bg-[color:var(--edvora-success)]"
+            }`}
+          />
+          {isInactive ? "Inactive" : "Active"}
+        </span>
+      </div>
+
+      <div className="relative mt-4 min-w-0">
+        <div className="flex items-center gap-2">
+          <h3 className="truncate text-[1.2rem] font-bold tracking-tight text-[color:var(--edvora-ink-strong)]">
+            {department.departmentName}
+          </h3>
+          <ArrowUpRight
+            size={16}
+            className="shrink-0 text-[color:var(--edvora-muted)] opacity-0 -translate-x-1 transition group-hover:opacity-100 group-hover:translate-x-0"
+          />
         </div>
+
+        <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[color:var(--edvora-glass-soft)] px-2.5 py-1 text-[11px] font-semibold tracking-wide text-[color:var(--edvora-ink)] ring-1 ring-[color:var(--edvora-glass-border-soft)]">
+          <Hash size={11} className="text-[color:var(--edvora-primary)]" />
+          {department.departmentCode}
+        </div>
+
+        {department.description ? (
+          <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-[color:var(--edvora-muted)]">
+            {department.description}
+          </p>
+        ) : (
+          <p className="mt-3 text-sm text-[color:var(--edvora-muted)]/70 italic">
+            No description yet
+          </p>
+        )}
+      </div>
+
+      <div className="relative mt-5 flex flex-wrap items-center gap-2">
+        {department.roomNumber ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[color:var(--edvora-glass-soft)] px-2.5 py-1 text-[11px] font-medium text-[color:var(--edvora-ink)] ring-1 ring-[color:var(--edvora-glass-border-soft)]">
+            <DoorClosed size={12} className="text-[color:var(--edvora-primary)]" />
+            {department.roomNumber}
+          </span>
+        ) : null}
+        {department.email ? (
+          <span className="inline-flex max-w-full items-center gap-1.5 truncate rounded-full bg-[color:var(--edvora-glass-soft)] px-2.5 py-1 text-[11px] font-medium text-[color:var(--edvora-ink)] ring-1 ring-[color:var(--edvora-glass-border-soft)]">
+            <Mail size={12} className="shrink-0 text-[color:var(--edvora-primary)]" />
+            <span className="truncate">{department.email}</span>
+          </span>
+        ) : null}
+        {staffCount != null ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[color:var(--edvora-glass-soft)] px-2.5 py-1 text-[11px] font-medium text-[color:var(--edvora-ink)] ring-1 ring-[color:var(--edvora-glass-border-soft)]">
+            {staffCount} {staffCount === 1 ? "staff" : "staff"}
+          </span>
+        ) : null}
       </div>
     </button>
   );
@@ -395,92 +440,83 @@ function Departments() {
   const statusLabel = activeStatus === "ACTIVE" ? "active" : "inactive";
 
   return (
-    <div>
-      <div className="mb-6 sm:mb-8 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#735366]">
-            Departments
-          </h1>
-          <p className="text-slate-500 mt-2 text-sm sm:text-base">
-            Create and manage the departments in your school.
-          </p>
-          <div className="mt-3 space-y-2.5">
-            <p className="text-sm font-semibold text-[#735366]">
-              Total departments: {loading ? "…" : totalDepartments}
+    <div className="space-y-6 sm:space-y-7">
+      <section className="relative overflow-hidden rounded-3xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass)] p-5 sm:p-7 shadow-[var(--edvora-glass-shadow)] backdrop-blur-[20px] saturate-[165%]">
+        <div
+          className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full blur-2xl"
+          style={{
+            background:
+              "radial-gradient(circle, color-mix(in srgb, var(--edvora-primary) 28%, transparent), transparent 70%)",
+          }}
+        />
+        <div
+          className="pointer-events-none absolute -bottom-24 left-10 h-48 w-48 rounded-full blur-2xl"
+          style={{
+            background:
+              "radial-gradient(circle, color-mix(in srgb, var(--edvora-accent) 24%, transparent), transparent 70%)",
+          }}
+        />
+
+        <div className="relative flex flex-wrap items-start justify-between gap-5">
+          <div className="min-w-0 max-w-2xl">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[color:var(--edvora-glass-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[color:var(--edvora-primary)] ring-1 ring-[color:var(--edvora-glass-border-soft)]">
+              <Layers3 size={13} />
+              Organization
+            </div>
+            <h1 className="mt-3 text-3xl sm:text-4xl font-bold tracking-tight text-[color:var(--edvora-ink-strong)]">
+              Departments
+            </h1>
+            <p className="mt-2 text-sm sm:text-base text-[color:var(--edvora-muted)] leading-relaxed">
+              Create and manage the departments in your school.
             </p>
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={() => handleStatusClick("ACTIVE")}
-                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-semibold transition ${
-                  activeStatus === "ACTIVE"
-                    ? "bg-green-600 text-white"
-                    : "bg-white text-green-700 border border-green-200 hover:border-green-400"
-                }`}
-              >
-                Active
-                <span
-                  className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                    activeStatus === "ACTIVE"
-                      ? "bg-white/20 text-white"
-                      : "bg-green-50 text-green-700"
-                  }`}
-                >
-                  {counts.ACTIVE}
+
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <div className="inline-flex items-center gap-2 rounded-2xl bg-[color:var(--edvora-glass-strong)] px-3.5 py-2 ring-1 ring-[color:var(--edvora-glass-border-soft)]">
+                <span className="text-xs font-medium text-[color:var(--edvora-muted)]">
+                  Total
                 </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleStatusClick("INACTIVE")}
-                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-semibold transition ${
-                  activeStatus === "INACTIVE"
-                    ? "bg-red-600 text-white"
-                    : "bg-white text-red-600 border border-red-200 hover:border-red-400"
-                }`}
-              >
-                Inactive
-                <span
-                  className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                    activeStatus === "INACTIVE"
-                      ? "bg-white/20 text-white"
-                      : "bg-red-50 text-red-600"
-                  }`}
-                >
-                  {counts.INACTIVE}
+                <span className="text-lg font-bold text-[color:var(--edvora-ink-strong)] tabular-nums">
+                  {loading ? "…" : totalDepartments}
                 </span>
-              </button>
+              </div>
+
+              <StatusFilterSwitch
+                value={activeStatus}
+                onChange={handleStatusClick}
+                counts={counts}
+              />
             </div>
           </div>
-        </div>
 
-        <button
-          type="button"
-          onClick={() => setShowModal(true)}
-          className="inline-flex items-center gap-2 px-4 h-[42px] rounded-lg bg-[#A77A95] hover:bg-[#8F6580] text-white text-sm font-semibold shadow-sm"
-        >
-          <Plus size={18} />
-          Add Department
-        </button>
-      </div>
+          <button
+            type="button"
+            onClick={() => setShowModal(true)}
+            className="inline-flex items-center gap-2 px-5 h-[46px] rounded-2xl theme-btn-primary text-sm font-semibold"
+          >
+            <Plus size={18} />
+            Add Department
+          </button>
+        </div>
+      </section>
 
       {loading ? (
         <EdvoraLoader message="Loading departments…" />
       ) : departments.length === 0 ? (
-        <div className="bg-white rounded-xl shadow p-10 text-center border border-slate-100">
-          <span className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#FAEEE9] text-[#A77A95]">
-            <Building2 size={22} />
+        <div className="glass-strong rounded-3xl p-12 text-center">
+          <span className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[color:var(--edvora-primary)]/12 text-[color:var(--edvora-primary)] ring-1 ring-[color:var(--edvora-glass-border-soft)]">
+            <Building2 size={24} />
           </span>
-          <p className="text-slate-700 font-medium">
+          <p className="text-[color:var(--edvora-ink-strong)] font-semibold text-lg">
             No {statusLabel} departments
           </p>
-          <p className="text-slate-500 text-sm mt-1">
+          <p className="text-[color:var(--edvora-muted)] text-sm mt-2 max-w-sm mx-auto">
             {activeStatus === "ACTIVE"
               ? 'Click "Add Department" to create your first one.'
               : "No inactive departments found."}
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 min-[1024px]:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 min-[1100px]:grid-cols-3 gap-4 sm:gap-5">
           {departments.map((department) => (
             <DepartmentCard
               key={department._id || department.departmentCode}

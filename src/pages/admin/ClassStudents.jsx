@@ -3,6 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   BookOpen,
+  ExternalLink,
+  Hash,
   Mail,
   Phone,
   UserPlus,
@@ -18,23 +20,29 @@ import {
   getActiveStaffBySchool,
   getStudentsByClass,
 } from "../../utils/classesApi";
+import { getSubjectsByClass } from "../../utils/subjectsApi";
 
-const labelClass = "block text-[13px] font-semibold text-[#667085] mb-1.5";
+const labelClass =
+  "block text-[12px] font-semibold tracking-wide uppercase text-[color:var(--edvora-muted)] mb-1.5";
+const glassCard =
+  "rounded-2xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass)] shadow-[var(--edvora-glass-shadow)] backdrop-blur-[18px] saturate-[165%]";
 
 function StatusBadge({ status }) {
-  const styles = {
-    ACTIVE: "bg-green-50 text-green-700",
-    INACTIVE: "bg-red-50 text-red-600",
-    REQUESTED: "bg-[#FAEEE9] text-[#735366]",
-  };
-
+  const inactive = status === "INACTIVE";
   return (
     <span
-      className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${
-        styles[status] || "bg-slate-100 text-slate-600"
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ring-1 ${
+        inactive
+          ? "bg-red-500/10 text-red-600 ring-red-500/15"
+          : "bg-emerald-500/10 text-emerald-700 ring-emerald-500/15"
       }`}
     >
-      {status || "—"}
+      <span
+        className={`h-1.5 w-1.5 rounded-full ${
+          inactive ? "bg-red-500" : "bg-emerald-500"
+        }`}
+      />
+      {inactive ? "Inactive" : "Active"}
     </span>
   );
 }
@@ -51,36 +59,38 @@ function StudentCard({ student }) {
     .join(" ");
 
   return (
-    <div className="bg-white rounded-xl shadow p-4 border border-slate-100">
+    <div className={`${glassCard} p-4`}>
       <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#FAEEE9] text-[#A77A95]">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color:var(--edvora-primary)]/12 text-[color:var(--edvora-primary)] ring-1 ring-[color:var(--edvora-glass-border-soft)]">
           <UserRound size={18} />
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="font-semibold text-slate-800 truncate">{fullName}</p>
+            <p className="font-semibold text-[color:var(--edvora-ink-strong)] truncate">
+              {fullName}
+            </p>
             <StatusBadge status={student.status} />
           </div>
           {student.admissionNumber ? (
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-[color:var(--edvora-muted)] mt-0.5">
               Admission: {student.admissionNumber}
             </p>
           ) : null}
           <div className="mt-3 space-y-1.5">
             {student.rollNumber ? (
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-[color:var(--edvora-ink)]">
                 Roll No: {student.rollNumber}
               </p>
             ) : null}
             {student.email ? (
-              <p className="flex items-center gap-2 text-sm text-slate-600 truncate">
-                <Mail size={14} className="shrink-0 text-[#A77A95]" />
+              <p className="flex items-center gap-2 text-sm text-[color:var(--edvora-ink)] truncate">
+                <Mail size={14} className="shrink-0 text-[color:var(--edvora-primary)]" />
                 {student.email}
               </p>
             ) : null}
             {student.phone ? (
-              <p className="flex items-center gap-2 text-sm text-slate-600">
-                <Phone size={14} className="shrink-0 text-[#A77A95]" />
+              <p className="flex items-center gap-2 text-sm text-[color:var(--edvora-ink)]">
+                <Phone size={14} className="shrink-0 text-[color:var(--edvora-primary)]" />
                 {formatPhoneDisplay(student.phone, student.phoneCode)}
               </p>
             ) : null}
@@ -93,29 +103,26 @@ function StudentCard({ student }) {
 
 function StudentTable({ students }) {
   return (
-    <div className="w-full min-w-0 max-w-full rounded-xl border border-slate-100 bg-white shadow">
+    <div className={`${glassCard} w-full min-w-0 max-w-full overflow-hidden`}>
       <div className="table-scroll w-full max-w-full">
         <table className="w-full min-w-[960px] border-collapse">
-          <thead className="bg-slate-100">
+          <thead className="bg-[color:var(--edvora-glass-soft)]">
             <tr>
-              <th className="p-3 sm:p-4 text-left text-sm font-semibold text-slate-700 whitespace-nowrap">
-                Name
-              </th>
-              <th className="p-3 sm:p-4 text-left text-sm font-semibold text-slate-700 whitespace-nowrap">
-                Admission No
-              </th>
-              <th className="p-3 sm:p-4 text-left text-sm font-semibold text-slate-700 whitespace-nowrap">
-                Roll No
-              </th>
-              <th className="p-3 sm:p-4 text-left text-sm font-semibold text-slate-700 whitespace-nowrap">
-                Email
-              </th>
-              <th className="p-3 sm:p-4 text-left text-sm font-semibold text-slate-700 whitespace-nowrap">
-                Phone
-              </th>
-              <th className="p-3 sm:p-4 text-left text-sm font-semibold text-slate-700 whitespace-nowrap">
-                Status
-              </th>
+              {[
+                "Name",
+                "Admission No",
+                "Roll No",
+                "Email",
+                "Phone",
+                "Status",
+              ].map((h) => (
+                <th
+                  key={h}
+                  className="p-3 sm:p-4 text-left text-sm font-semibold text-[color:var(--edvora-muted)] whitespace-nowrap"
+                >
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -129,20 +136,23 @@ function StudentTable({ students }) {
               );
 
               return (
-                <tr key={student._id} className="border-t border-slate-100">
-                  <td className="p-3 sm:p-4 text-sm text-slate-800 font-medium whitespace-nowrap">
+                <tr
+                  key={student._id}
+                  className="border-t border-[color:var(--edvora-glass-border-soft)]"
+                >
+                  <td className="p-3 sm:p-4 text-sm text-[color:var(--edvora-ink-strong)] font-medium whitespace-nowrap">
                     {fullName || "—"}
                   </td>
-                  <td className="p-3 sm:p-4 text-sm text-slate-600 whitespace-nowrap">
+                  <td className="p-3 sm:p-4 text-sm text-[color:var(--edvora-ink)] whitespace-nowrap">
                     {student.admissionNumber || "—"}
                   </td>
-                  <td className="p-3 sm:p-4 text-sm text-slate-600 whitespace-nowrap">
+                  <td className="p-3 sm:p-4 text-sm text-[color:var(--edvora-ink)] whitespace-nowrap">
                     {student.rollNumber || "—"}
                   </td>
-                  <td className="p-3 sm:p-4 text-sm text-slate-600 whitespace-nowrap">
+                  <td className="p-3 sm:p-4 text-sm text-[color:var(--edvora-ink)] whitespace-nowrap">
                     {student.email || "—"}
                   </td>
-                  <td className="p-3 sm:p-4 text-sm text-slate-600 whitespace-nowrap">
+                  <td className="p-3 sm:p-4 text-sm text-[color:var(--edvora-ink)] whitespace-nowrap">
                     {phone}
                   </td>
                   <td className="p-3 sm:p-4 text-sm whitespace-nowrap">
@@ -256,40 +266,40 @@ function AssignStaffModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4">
-      <div className="w-full max-w-[520px] bg-white rounded-t-[14px] sm:rounded-[14px] shadow-2xl overflow-hidden flex flex-col">
-        <div className="h-14 sm:h-16 px-4 sm:px-6 flex items-center justify-between border-b border-gray-200 shrink-0">
+    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-[color:var(--edvora-overlay)] backdrop-blur-md p-0 sm:p-4">
+      <div className="w-full max-w-[520px] glass-strong rounded-t-2xl sm:rounded-2xl overflow-visible flex flex-col">
+        <div className="h-14 sm:h-16 px-4 sm:px-6 flex items-center justify-between border-b border-[color:var(--edvora-glass-border-soft)] shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#FAEEE9] text-[#A77A95]">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[color:var(--edvora-primary)]/12 text-[color:var(--edvora-primary)]">
               <UserPlus size={18} />
             </span>
-            <h2 className="text-base sm:text-[18px] font-semibold text-[#111827] truncate">
+            <h2 className="text-base sm:text-[18px] font-semibold text-[color:var(--edvora-ink-strong)] truncate">
               {isUpdate ? "Update Assigned Staff" : "Assign Staff"}
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-primary hover:bg-primary-hover text-white flex items-center justify-center"
+            className="w-9 h-9 rounded-full bg-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-hover)] text-white flex items-center justify-center"
             aria-label="Close"
           >
             <X size={18} />
           </button>
         </div>
 
-        <div className="px-4 sm:px-6 py-5 space-y-4">
+        <div className="px-4 sm:px-6 py-5 space-y-4 overflow-visible">
           {currentTeacherLabel ? (
-            <div className="rounded-lg border border-[#E8D5DF] bg-[#FAEEE9] px-3.5 py-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-[#A77A95]">
+            <div className="rounded-xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass-soft)] px-3.5 py-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[color:var(--edvora-primary)]">
                 Currently assigned
               </p>
-              <p className="mt-1 text-sm font-semibold text-[#735366]">
+              <p className="mt-1 text-sm font-semibold text-[color:var(--edvora-ink-strong)]">
                 {currentTeacherLabel}
               </p>
             </div>
           ) : null}
 
-          <div>
+          <div className="relative z-10">
             <label className={labelClass}>
               {isUpdate ? "New staff" : "Staff"}{" "}
               <span className="text-red-500">*</span>
@@ -314,11 +324,11 @@ function AssignStaffModal({
           </div>
         </div>
 
-        <div className="px-4 sm:px-6 py-4 border-t border-gray-200 flex justify-end gap-3 shrink-0">
+        <div className="px-4 sm:px-6 py-4 border-t border-[color:var(--edvora-glass-border-soft)] flex justify-end gap-3 shrink-0 bg-[color:var(--edvora-glass-soft)]">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 h-[42px] rounded-lg border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50"
+            className="px-5 h-[42px] rounded-xl border border-[color:var(--edvora-glass-border-soft)] text-[color:var(--edvora-ink)] text-sm font-medium hover:bg-[color:var(--edvora-glass)]"
           >
             Cancel
           </button>
@@ -326,7 +336,7 @@ function AssignStaffModal({
             type="button"
             onClick={handleSubmit}
             disabled={submitting || loadingStaff}
-            className="px-6 h-[42px] rounded-lg bg-[#A77A95] hover:bg-[#8F6580] text-white text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+            className="px-6 h-[42px] rounded-xl theme-btn-primary text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {submitting
               ? isUpdate
@@ -348,9 +358,100 @@ function AssignStaffModal({
   );
 }
 
+
+function ClassSubjectsPanel({ classId }) {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [subjects, setSubjects] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        setLoading(true);
+        const result = await getSubjectsByClass(classId, "ACTIVE");
+        if (!cancelled) setSubjects(result.data || []);
+      } catch (error) {
+        if (!cancelled) {
+          openSnackbar({
+            message:
+              error?.response?.data?.message || "Failed to load subjects",
+            variant: "error",
+          });
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [classId]);
+
+  return (
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-[color:var(--edvora-muted)]">
+          Subjects assigned to this class from the Subjects module.
+        </p>
+        <button
+          type="button"
+          onClick={() => navigate("/admin/subjects")}
+          className="inline-flex items-center gap-2 px-4 h-[44px] rounded-2xl theme-btn-primary text-sm font-semibold"
+        >
+          <ExternalLink size={16} />
+          Manage Subjects
+        </button>
+      </div>
+
+      {loading ? (
+        <EdvoraLoader message="Loading subjects…" />
+      ) : subjects.length === 0 ? (
+        <div className={`${glassCard} p-12 text-center`}>
+          <span className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[color:var(--edvora-primary)]/12 text-[color:var(--edvora-primary)]">
+            <BookOpen size={24} />
+          </span>
+          <p className="font-semibold text-[color:var(--edvora-ink-strong)] text-lg">
+            No subjects assigned
+          </p>
+          <p className="text-sm text-[color:var(--edvora-muted)] mt-2 max-w-md mx-auto">
+            Create subjects in the Subjects module and add this class to them.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 min-[1100px]:grid-cols-3 gap-4">
+          {subjects.map((subject) => (
+            <article key={subject._id} className={`${glassCard} p-5`}>
+              <div className="flex items-start justify-between gap-3">
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[color:var(--edvora-primary)]/12 text-[color:var(--edvora-primary)]">
+                  <BookOpen size={20} />
+                </span>
+                <StatusBadge status={subject.status} />
+              </div>
+              <h3 className="mt-4 text-lg font-bold text-[color:var(--edvora-ink-strong)] truncate">
+                {subject.subjectName}
+              </h3>
+              <p className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-[color:var(--edvora-muted)]">
+                <Hash size={12} />
+                {subject.subjectCode}
+              </p>
+              {subject.description ? (
+                <p className="mt-3 text-sm text-[color:var(--edvora-muted)] line-clamp-2">
+                  {subject.description}
+                </p>
+              ) : null}
+            </article>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ClassStudents() {
   const { classId } = useParams();
   const navigate = useNavigate();
+  const [tab, setTab] = useState("students");
   const [loading, setLoading] = useState(true);
   const [classInfo, setClassInfo] = useState(null);
   const [students, setStudents] = useState([]);
@@ -396,80 +497,123 @@ function ClassStudents() {
   const hasAssignedStaff = Boolean(classInfo?.classTeacherId);
 
   return (
-    <div className="w-full min-w-0 max-w-full">
-      <div className="mb-6 sm:mb-8">
-        <div className="flex flex-wrap items-start justify-between gap-4">
+    <div className="w-full min-w-0 max-w-full space-y-5 sm:space-y-6">
+      <section className={`relative overflow-hidden ${glassCard} p-5 sm:p-6`}>
+        <div
+          className="pointer-events-none absolute -right-16 -top-20 h-52 w-52 rounded-full blur-2xl"
+          style={{
+            background:
+              "radial-gradient(circle, color-mix(in srgb, var(--edvora-primary) 28%, transparent), transparent 70%)",
+          }}
+        />
+        <div className="relative flex flex-wrap items-start justify-between gap-4">
           <div className="flex flex-wrap items-start gap-4 min-w-0">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#A77A95] text-white">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[color:var(--edvora-primary)] text-white shadow-md">
               <BookOpen size={22} />
             </span>
             <div className="min-w-0">
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#735366]">
-                {classInfo?.className || "Class Students"}
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[color:var(--edvora-ink-strong)]">
+                {classInfo?.className || "Class"}
               </h1>
-              <p className="text-slate-500 mt-1 text-sm sm:text-base">
-                {classInfo?.section ? `Section ${classInfo.section} · ` : ""}
-                Students enrolled in this class
+              <p className="text-[color:var(--edvora-muted)] mt-1 text-sm sm:text-base">
+                {classInfo?.section ? `Section ${classInfo.section}` : "Class detail"}
+                {" · "}
+                Students and subjects for this class
               </p>
-              <p className="text-sm font-semibold text-[#735366] mt-2">
-                Total students: {loading ? "…" : totalStudents}
-              </p>
-              {!loading ? (
-                <p className="text-sm text-slate-500 mt-1">
-                  Assigned staff:{" "}
-                  <span className="font-medium text-[#735366]">
-                    {assignedTeacherLabel || "Not assigned"}
+              <div className="mt-3 flex flex-wrap gap-3 text-sm">
+                <span className="font-semibold text-[color:var(--edvora-ink-strong)]">
+                  Students: {loading ? "…" : totalStudents}
+                </span>
+                <span className="text-[color:var(--edvora-muted)]">
+                  Staff:{" "}
+                  <span className="font-medium text-[color:var(--edvora-ink)]">
+                    {loading
+                      ? "…"
+                      : assignedTeacherLabel || "Not assigned"}
                   </span>
-                </p>
-              ) : null}
+                </span>
+              </div>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setShowAssignModal(true)}
-              disabled={loading || !classInfo}
-              className="inline-flex items-center gap-2 px-4 h-[42px] rounded-lg bg-[#A77A95] hover:bg-[#8F6580] text-white text-sm font-semibold shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              <UserPlus size={16} />
-              {hasAssignedStaff ? "Update Staff" : "Assign Staff"}
-            </button>
+            {tab === "students" && (
+              <button
+                type="button"
+                onClick={() => setShowAssignModal(true)}
+                disabled={loading || !classInfo}
+                className="inline-flex items-center gap-2 px-4 h-[44px] rounded-2xl theme-btn-primary text-sm font-semibold disabled:opacity-60"
+              >
+                <UserPlus size={16} />
+                {hasAssignedStaff ? "Update Staff" : "Assign Staff"}
+              </button>
+            )}
             <button
               type="button"
               onClick={() => navigate("/admin/classes")}
-              className="inline-flex items-center gap-2 px-4 h-[42px] rounded-lg bg-[#A77A95] hover:bg-[#8F6580] text-white text-sm font-semibold shadow-sm"
+              className="inline-flex items-center gap-2 px-4 h-[44px] rounded-2xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass-soft)] text-sm font-semibold text-[color:var(--edvora-ink)]"
             >
               <ArrowLeft size={16} />
               Back
             </button>
           </div>
         </div>
+      </section>
+
+      <div className="inline-flex rounded-2xl bg-[color:var(--edvora-glass-soft)] p-1 ring-1 ring-[color:var(--edvora-glass-border-soft)]">
+        <button
+          type="button"
+          onClick={() => setTab("students")}
+          className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+            tab === "students"
+              ? "bg-[color:var(--edvora-primary)] text-white shadow-md"
+              : "text-[color:var(--edvora-ink)] hover:bg-[color:var(--edvora-glass)]"
+          }`}
+        >
+          Students
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab("subjects")}
+          className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+            tab === "subjects"
+              ? "bg-[color:var(--edvora-primary)] text-white shadow-md"
+              : "text-[color:var(--edvora-ink)] hover:bg-[color:var(--edvora-glass)]"
+          }`}
+        >
+          Subjects
+        </button>
       </div>
 
-      {loading ? (
-        <EdvoraLoader message="Loading students…" />
-      ) : students.length === 0 ? (
-        <div className="bg-white rounded-xl shadow p-10 text-center border border-slate-100">
-          <span className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#FAEEE9] text-[#A77A95]">
-            <UserRound size={22} />
-          </span>
-          <p className="text-slate-700 font-medium">No students found</p>
-          <p className="text-slate-500 text-sm mt-1">
-            There are no students enrolled in this class yet.
-          </p>
-        </div>
+      {tab === "students" ? (
+        loading ? (
+          <EdvoraLoader message="Loading students…" />
+        ) : students.length === 0 ? (
+          <div className={`${glassCard} p-10 text-center`}>
+            <span className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[color:var(--edvora-primary)]/12 text-[color:var(--edvora-primary)]">
+              <UserRound size={22} />
+            </span>
+            <p className="text-[color:var(--edvora-ink-strong)] font-medium">
+              No students found
+            </p>
+            <p className="text-[color:var(--edvora-muted)] text-sm mt-1">
+              There are no students enrolled in this class yet.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:hidden">
+              {students.map((student) => (
+                <StudentCard key={student._id} student={student} />
+              ))}
+            </div>
+            <div className="hidden lg:block w-full min-w-0 max-w-full">
+              <StudentTable students={students} />
+            </div>
+          </>
+        )
       ) : (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:hidden">
-            {students.map((student) => (
-              <StudentCard key={student._id} student={student} />
-            ))}
-          </div>
-          <div className="hidden lg:block w-full min-w-0 max-w-full">
-            <StudentTable students={students} />
-          </div>
-        </>
+        <ClassSubjectsPanel classId={classId} />
       )}
 
       {showAssignModal && (

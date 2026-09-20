@@ -153,19 +153,19 @@ function StudentAttendance() {
       <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Link
           to="/admin/student-attendance/logs"
-          className="group rounded-2xl border border-slate-100 bg-white p-5 sm:p-6 shadow-sm hover:shadow-md hover:border-[#A77A95]/35 transition"
+          className="group rounded-2xl border border-slate-100 bg-white p-5 sm:p-6 shadow-sm hover:shadow-md hover:border-[color:var(--edvora-primary)]/35 transition"
         >
           <div className="flex items-start gap-4">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FAEEE9] text-[#A77A95] group-hover:scale-105 transition">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)] group-hover:scale-105 transition">
               <ScrollText size={22} />
             </span>
             <div className="min-w-0 flex-1">
-              <h2 className="text-lg font-semibold text-[#735366]">View Logs</h2>
+              <h2 className="text-lg font-semibold text-[color:var(--edvora-ink-strong)]">View Logs</h2>
               <p className="mt-1 text-sm text-slate-500">
                 Browse mark history and bulk-upload audit trails for your
                 classes.
               </p>
-              <p className="mt-4 text-sm font-semibold text-[#A77A95]">
+              <p className="mt-4 text-sm font-semibold text-[color:var(--edvora-primary)]">
                 Open logs →
               </p>
             </div>
@@ -174,11 +174,11 @@ function StudentAttendance() {
 
         <div className="rounded-2xl border border-slate-100 bg-white p-5 sm:p-6 shadow-sm">
           <div className="flex items-start gap-4">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FAEEE9] text-[#A77A95]">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)]">
               <BookOpen size={22} />
             </span>
             <div>
-              <h2 className="text-lg font-semibold text-[#735366]">
+              <h2 className="text-lg font-semibold text-[color:var(--edvora-ink-strong)]">
                 How it works
               </h2>
               <p className="mt-1 text-sm text-slate-500">
@@ -193,14 +193,14 @@ function StudentAttendance() {
       <section className="space-y-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h3 className="text-lg font-semibold text-[#735366]">
+            <h3 className="text-lg font-semibold text-[color:var(--edvora-ink-strong)]">
               My Classes
             </h3>
             <p className="text-sm text-slate-500">
               Day sheets for {date.split("-").reverse().join("-")}
             </p>
           </div>
-          <span className="hidden sm:inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#FAEEE9] text-[#A77A95]">
+          <span className="hidden sm:inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)]">
             <GraduationCap size={18} />
           </span>
         </div>
@@ -208,7 +208,7 @@ function StudentAttendance() {
         {!loading && classes.length === 0 ? (
           <div className="rounded-2xl border border-amber-100 bg-amber-50/70 px-5 py-8 text-center">
             <Users className="mx-auto text-amber-600" size={28} />
-            <p className="mt-3 text-base font-semibold text-[#735366]">
+            <p className="mt-3 text-base font-semibold text-[color:var(--edvora-ink-strong)]">
               No classes assigned to you
             </p>
             <p className="mt-1 text-sm text-slate-600 max-w-md mx-auto">
@@ -230,11 +230,11 @@ function StudentAttendance() {
               return (
                 <div
                   key={cls._id}
-                  className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm hover:shadow-md hover:border-[#A77A95]/35 transition"
+                  className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm hover:shadow-md hover:border-[color:var(--edvora-primary)]/35 transition"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <h4 className="text-lg font-semibold text-[#735366] truncate">
+                      <h4 className="text-lg font-semibold text-[color:var(--edvora-ink-strong)] truncate">
                         {cls.className}
                       </h4>
                       <p className="text-sm text-slate-500">
@@ -270,11 +270,11 @@ function StudentAttendance() {
                         {counts.ABSENT || 0}
                       </p>
                     </div>
-                    <div className="rounded-xl bg-[#FAEEE9] px-2.5 py-2 text-center">
-                      <p className="text-[10px] font-semibold text-[#735366]">
+                    <div className="rounded-xl bg-[color:var(--edvora-primary-soft)] px-2.5 py-2 text-center">
+                      <p className="text-[10px] font-semibold text-[color:var(--edvora-ink-strong)]">
                         Rate
                       </p>
-                      <p className="text-sm font-bold text-[#735366]">
+                      <p className="text-sm font-bold text-[color:var(--edvora-ink-strong)]">
                         {presentPct}%
                       </p>
                     </div>
@@ -288,7 +288,7 @@ function StudentAttendance() {
                           `/admin/student-attendance/mark/${cls._id}?date=${date}`
                         )
                       }
-                      className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#A77A95] hover:bg-[#8F6580] px-3 h-10 text-sm font-semibold text-white"
+                      className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-hover)] px-3 h-10 text-sm font-semibold text-white"
                     >
                       <ClipboardCheck size={15} />
                       Mark
@@ -312,7 +312,7 @@ function StudentAttendance() {
         <section className="rounded-2xl border border-slate-100 bg-white p-5 sm:p-6 shadow-sm">
           <div className="flex items-center justify-between gap-3 mb-4">
             <div>
-              <h3 className="text-lg font-semibold text-[#735366]">
+              <h3 className="text-lg font-semibold text-[color:var(--edvora-ink-strong)]">
                 Status Legend
               </h3>
               <p className="text-sm text-slate-500">
@@ -335,7 +335,7 @@ function StudentAttendance() {
       ) : null}
 
       {loading ? (
-        <div className="fixed bottom-4 right-4 z-40 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-[#735366] shadow-lg border border-slate-100">
+        <div className="fixed bottom-4 right-4 z-40 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-[color:var(--edvora-ink-strong)] shadow-lg border border-slate-100">
           Updating…
         </div>
       ) : null}

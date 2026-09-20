@@ -51,7 +51,7 @@ function PortalModeSwitch({ mode, onChange, disabled }) {
             className={`relative rounded-md min-h-[1.85rem] px-2 text-[11px] font-semibold tracking-wide transition-all duration-200 disabled:opacity-50 ${
               active
                 ? "bg-white text-[#5c3050] shadow-sm"
-                : "text-[#a77a95]/75 hover:text-[#735366]"
+                : "text-[#a77a95]/75 hover:text-[color:var(--edvora-ink-strong)]"
             }`}
           >
             {opt.label}
@@ -84,32 +84,38 @@ function Login() {
     }
   }, [status]);
 
+  // Browser Back remounted Login while still signed in → clear session.
+  // Must be mount-only: initial page load is also NavigationType.Pop, and
+  // resetting status after a successful login must not look like "Back".
   useEffect(() => {
     if (!isLoggedIn) return;
+    if (navigationType !== NavigationType.Pop) return;
+    // Stored session (refresh/bookmark) or in-flight login — keep signed in
+    if (status === "succeeded" || status === "loading") return;
+
+    dispatch(logoutUser());
+    dispatch(resetAuthStatus());
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional mount-only
+  }, []);
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    if (status !== "succeeded") return;
+
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+    const homePath = getPortalHomePath(portalMode, user);
 
     // Fresh login submit → enter portal (login stays in history for Back)
-    if (status === "succeeded" && justLoggedInRef.current) {
+    if (justLoggedInRef.current) {
       justLoggedInRef.current = false;
-      const user = JSON.parse(localStorage.getItem("user") || "null");
-      navigate(getPortalHomePath(portalMode, user));
-      dispatch(resetAuthStatus());
-      return;
+      navigate(homePath);
+    } else {
+      // Existing session opened on "/" → go home (covers refresh / bookmark)
+      navigate(homePath, { replace: true });
     }
 
-    // Existing session opened on "/" → go home (covers refresh / bookmark)
-    if (status === "succeeded") {
-      const user = JSON.parse(localStorage.getItem("user") || "null");
-      navigate(getPortalHomePath(portalMode, user), { replace: true });
-      dispatch(resetAuthStatus());
-      return;
-    }
-
-    // Browser Back landed on login while still signed in → clear session
-    if (status !== "loading" && navigationType === NavigationType.Pop) {
-      dispatch(logoutUser());
-      dispatch(resetAuthStatus());
-    }
-  }, [isLoggedIn, status, navigate, dispatch, portalMode, navigationType]);
+    dispatch(resetAuthStatus());
+  }, [isLoggedIn, status, navigate, dispatch, portalMode]);
 
   useEffect(() => {
     if (status === "failed" && error) {
@@ -167,10 +173,10 @@ function Login() {
   return (
     <>
       <AuthShell className={showRegister || loading ? "blur-sm" : ""}>
-        <div className="mb-3 flex flex-col items-start gap-1.5">
+        <div className="mb-4 flex flex-col items-start gap-2">
           <EdvoraLogo
             variant="full"
-            className="h-[2.35rem] w-auto max-w-[118px]"
+            className="w-[min(100%,180px)] h-auto rounded-xl shadow-sm ring-1 ring-[#ead9e3]"
           />
           <span className="text-[9px] font-semibold uppercase tracking-[0.16em] text-[#a77a95]/75">
             {isExam ? "Examination Portal" : "School Management"}
@@ -186,14 +192,14 @@ function Login() {
         <h1 className="text-[1.2rem] font-bold tracking-tight text-[#3d1f33] leading-tight">
           Welcome back
         </h1>
-        <p className="text-[12px] text-[#735366]/60 mt-1 mb-3.5 leading-snug max-w-[28ch]">
+        <p className="text-[12px] text-[color:var(--edvora-ink-strong)]/60 mt-1 mb-3.5 leading-snug max-w-[28ch]">
           {isExam
             ? "Sign in to practice tests, take exams and view results."
             : "Sign in to manage attendance, staff and classes — all in one place."}
         </p>
 
         <div className="mb-2.5">
-          <label className="block text-[10px] font-bold text-[#735366]/65 mb-1 tracking-[0.14em] uppercase">
+          <label className="block text-[10px] font-bold text-[color:var(--edvora-ink-strong)]/65 mb-1 tracking-[0.14em] uppercase">
             Email address
           </label>
           <div style={fieldBox("emailid")}>
@@ -223,7 +229,7 @@ function Login() {
         </div>
 
         <div className="mb-1.5">
-          <label className="block text-[10px] font-bold text-[#735366]/65 mb-1 tracking-[0.14em] uppercase">
+          <label className="block text-[10px] font-bold text-[color:var(--edvora-ink-strong)]/65 mb-1 tracking-[0.14em] uppercase">
             Password
           </label>
           <div style={fieldBox("password")}>

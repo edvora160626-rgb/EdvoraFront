@@ -88,7 +88,7 @@ export default function TeacherTimetable() {
   return (
     <div>
       <div className="mb-4">
-        <h1 className="text-xl font-semibold text-[#735366] sm:text-2xl">
+        <h1 className="text-xl font-semibold text-[color:var(--edvora-ink-strong)] sm:text-2xl">
           Teacher Timetable
         </h1>
         <p className="mt-1 text-sm text-slate-500">
@@ -134,7 +134,7 @@ export default function TeacherTimetable() {
       ) : (
         <>
           {data?.teacher && (
-            <p className="mb-3 text-sm font-medium text-[#735366]">
+            <p className="mb-3 text-sm font-medium text-[color:var(--edvora-ink-strong)]">
               Schedule for {teacherName(data.teacher)}
             </p>
           )}

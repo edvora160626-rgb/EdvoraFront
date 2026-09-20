@@ -35,8 +35,8 @@ export default function TimetableSubnav() {
           className={({ isActive }) =>
             `inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition ${
               isActive
-                ? "border-[#A77A95] bg-[#A77A95] text-white shadow-sm"
-                : "border-[#E8D5CE] bg-white text-[#735366] hover:border-[#A77A95]/50"
+                ? "border-[color:var(--edvora-primary)] bg-[color:var(--edvora-primary)] text-white shadow-sm"
+                : "border-[color:var(--edvora-primary-border)] bg-[color:var(--edvora-card)] text-[color:var(--edvora-ink-strong)] hover:border-[color:var(--edvora-primary)]/50"
             }`
           }
         >
@@ -44,7 +44,7 @@ export default function TimetableSubnav() {
           {label}
         </NavLink>
       ))}
-      <span className="inline-flex items-center gap-2 rounded-lg border border-dashed border-[#E8D5CE] px-3 py-2 text-xs text-slate-400">
+      <span className="inline-flex items-center gap-2 rounded-lg border border-dashed border-[color:var(--edvora-border)] px-3 py-2 text-xs text-[color:var(--edvora-muted)]">
         <CalendarClock size={14} />
         Class grids open from Dashboard
       </span>

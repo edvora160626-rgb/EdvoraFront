@@ -16,7 +16,7 @@ import TimetableSubnav from "./TimetableSubnav";
 import { AcademicYearPicker, useAcademicYear } from "./useAcademicYear";
 
 const inputClass =
-  "w-full h-[42px] rounded-lg border border-[#D0D5DD] bg-white px-3 text-[14px] text-[#344054] outline-none focus:border-[#A77A95]";
+  "w-full h-[42px] rounded-lg border border-[#D0D5DD] bg-white px-3 text-[14px] text-[#344054] outline-none focus:border-[color:var(--edvora-primary)]";
 const labelClass = "block text-[13px] font-semibold text-[#667085] mb-1.5";
 
 export default function TimetableAllocations() {
@@ -166,7 +166,7 @@ export default function TimetableAllocations() {
     <div>
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-[#735366] sm:text-2xl">
+          <h1 className="text-xl font-semibold text-[color:var(--edvora-ink-strong)] sm:text-2xl">
             Subject Allocation
           </h1>
           <p className="mt-1 text-sm text-slate-500">
@@ -177,7 +177,7 @@ export default function TimetableAllocations() {
           type="button"
           disabled={!yearId || !classId}
           onClick={() => setShowModal(true)}
-          className="inline-flex h-[42px] items-center gap-2 rounded-lg bg-[#A77A95] px-4 text-sm font-medium text-white hover:bg-[#8F6580] disabled:opacity-50"
+          className="inline-flex h-[42px] items-center gap-2 rounded-lg bg-[color:var(--edvora-primary)] px-4 text-sm font-medium text-white hover:bg-[color:var(--edvora-primary-hover)] disabled:opacity-50"
         >
           <Plus size={16} /> Add Allocation
         </button>
@@ -222,7 +222,7 @@ export default function TimetableAllocations() {
       ) : (
         <div className="overflow-x-auto rounded-xl border border-slate-100 bg-white shadow-sm">
           <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-slate-100 bg-[#FAEEE9]/60 text-[#667085]">
+            <thead className="border-b border-slate-100 bg-[color:var(--edvora-primary-soft)]/60 text-[#667085]">
               <tr>
                 <th className="px-4 py-3 font-semibold">Subject</th>
                 <th className="px-4 py-3 font-semibold">Teacher</th>
@@ -234,7 +234,7 @@ export default function TimetableAllocations() {
             <tbody>
               {allocations.map((a) => (
                 <tr key={a._id} className="border-b border-slate-50">
-                  <td className="px-4 py-3 text-[#735366]">
+                  <td className="px-4 py-3 text-[color:var(--edvora-ink-strong)]">
                     {a.subjectId?.subjectName || "—"}
                   </td>
                   <td className="px-4 py-3 text-slate-600">
@@ -334,7 +334,7 @@ export default function TimetableAllocations() {
                 type="button"
                 disabled={submitting}
                 onClick={handleCreate}
-                className="h-[42px] rounded-lg bg-[#A77A95] px-4 text-sm font-medium text-white hover:bg-[#8F6580] disabled:opacity-60"
+                className="h-[42px] rounded-lg bg-[color:var(--edvora-primary)] px-4 text-sm font-medium text-white hover:bg-[color:var(--edvora-primary-hover)] disabled:opacity-60"
               >
                 {submitting ? "Saving…" : "Save"}
               </button>

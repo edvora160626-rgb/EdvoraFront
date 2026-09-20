@@ -6,12 +6,14 @@ import {
   useNavigate,
   useNavigationType,
 } from "react-router-dom";
-import { LogOut, Menu, X } from "lucide-react";
+import { LogOut, Menu, Moon, Palette, Sun, X } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import EdvoraLoader from "../../common/EdvoraLoader";
 import EdvoraLogo from "../../common/EdvoraLogo";
 import LogoutModal from "../../common/LogoutModal";
 import ProfileModal from "../../common/ProfileModal";
+import ThemeSettingsDrawer from "../../common/ThemeSettingsDrawer";
+import { useTheme } from "../../theme/ThemeContext";
 import { logoutUser } from "../../redux/slices/authSlice";
 import { ExamSessionProvider } from "./context/ExamSessionContext";
 import ExamSidebarNav from "./ExamSidebarNav";
@@ -33,6 +35,7 @@ function ExamLayoutInner() {
   const navigationType = useNavigationType();
   const dispatch = useDispatch();
   const { isLoggedIn, user } = useSelector((state) => state.auth);
+  const { isDark, toggleMode, openThemeDrawer } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
@@ -122,25 +125,45 @@ function ExamLayoutInner() {
             <EdvoraLogo
               variant="icon"
               decorative
-              className="h-11 w-11 shrink-0 drop-shadow-md"
+              className="h-11 w-11 shrink-0 rounded-xl ring-1 ring-white/15"
             />
             <div className="min-w-0">
               <p className="text-lg font-bold text-white leading-tight truncate">
                 Edvora
               </p>
-              <p className="text-[11px] text-[#F5D69B]/90 truncate">
+              <p className="text-[11px] text-[color:var(--edvora-accent)]/90 truncate">
                 {roleLabel} Portal
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={closeSidebar}
-            className="p-2 rounded-lg hover:bg-white/10 min-[1024px]:hidden shrink-0"
-            aria-label="Close menu"
-          >
-            <X size={20} className="text-white" />
-          </button>
+          <div className="flex items-center gap-1">
+            <div className="hidden min-[1024px]:flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={toggleMode}
+                className="w-9 h-9 rounded-xl border border-white/15 bg-white/10 text-white hover:bg-white/15 flex items-center justify-center"
+                aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              >
+                {isDark ? <Sun size={16} /> : <Moon size={16} />}
+              </button>
+              <button
+                type="button"
+                onClick={openThemeDrawer}
+                className="w-9 h-9 rounded-xl border border-white/15 bg-white/10 text-white hover:bg-white/15 flex items-center justify-center"
+                aria-label="Open appearance settings"
+              >
+                <Palette size={16} />
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={closeSidebar}
+              className="p-2 rounded-lg hover:bg-white/10 min-[1024px]:hidden shrink-0"
+              aria-label="Close menu"
+            >
+              <X size={20} className="text-white" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -172,7 +195,7 @@ function ExamLayoutInner() {
 
   if (!isLoggedIn || !isExamPortalUser(user)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FAEEE9]">
+      <div className="min-h-screen flex items-center justify-center theme-page">
         <EdvoraLoader message="Redirecting…" />
       </div>
     );
@@ -180,7 +203,7 @@ function ExamLayoutInner() {
 
   if (isLiveTest) {
     return (
-      <div className="min-h-dvh bg-[#FAEEE9] overflow-x-hidden">
+      <div className="min-h-dvh theme-page overflow-x-hidden">
         <main className="min-h-dvh overflow-y-auto overscroll-contain rs-page">
           <Suspense
             fallback={
@@ -192,54 +215,73 @@ function ExamLayoutInner() {
             <Outlet />
           </Suspense>
         </main>
+        <ThemeSettingsDrawer />
       </div>
     );
   }
 
   return (
-    <div className="h-dvh overflow-hidden bg-[#FAEEE9] flex flex-col min-[1024px]:flex-row max-w-full">
-      <header className="sticky top-0 z-30 bg-white border-b border-[#C3C3D5] shadow-sm min-[1024px]:hidden">
-        <div className="flex items-center justify-between h-12 sm:h-14 px-3 xs:px-4">
+    <div className="h-dvh overflow-hidden theme-page flex flex-col min-[1024px]:flex-row max-w-full">
+      <header className="sticky top-0 z-30 bg-[color:var(--edvora-card)]/90 backdrop-blur-md border-b border-[color:var(--edvora-border)] shadow-[var(--edvora-shadow-sm)] min-[1024px]:hidden">
+        <div className="flex items-center justify-between h-12 sm:h-14 px-3 xs:px-4 gap-2">
           <div className="flex items-center gap-2 min-w-0">
             <EdvoraLogo
               variant="icon"
               decorative
-              className="h-8 w-8 sm:h-9 sm:w-9 shrink-0"
+              className="h-8 w-8 sm:h-9 sm:w-9 shrink-0 rounded-lg ring-1 ring-[color:var(--edvora-border)]"
             />
-            <span className="rs-body font-bold text-[#735366] truncate">
+            <span className="rs-body font-bold text-[color:var(--edvora-ink)] truncate">
               {roleLabel} Portal
             </span>
           </div>
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(true)}
-            className="rs-icon-btn text-[#A77A95] hover:bg-[#FAEEE9]"
-            aria-label="Open menu"
-          >
-            <Menu className="w-[1.15em] h-[1.15em] text-[clamp(18px,4vw,22px)]" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={toggleMode}
+              className="w-9 h-9 rounded-xl text-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-soft)] flex items-center justify-center"
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {isDark ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+            <button
+              type="button"
+              onClick={openThemeDrawer}
+              className="w-9 h-9 rounded-xl text-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-soft)] flex items-center justify-center"
+              aria-label="Open appearance settings"
+            >
+              <Palette size={18} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              className="rs-icon-btn text-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-soft)]"
+              aria-label="Open menu"
+            >
+              <Menu className="w-[1.15em] h-[1.15em] text-[clamp(18px,4vw,22px)]" />
+            </button>
+          </div>
         </div>
       </header>
 
       {sidebarOpen && (
         <button
           type="button"
-          className="fixed inset-0 z-40 bg-[#735366]/40 backdrop-blur-[2px] min-[1024px]:hidden"
+          className="fixed inset-0 z-40 bg-[color:var(--edvora-overlay)] backdrop-blur-[2px] min-[1024px]:hidden"
           onClick={closeSidebar}
           aria-label="Close menu"
         />
       )}
 
       <aside
-        className={`fixed top-0 left-0 z-50 flex h-full w-[min(292px,88vw)] shrink-0 flex-col overflow-hidden rounded-tr-[28px] rounded-br-[28px] bg-linear-to-b from-[#735366] via-[#8F6580] to-[#A77A95] text-white shadow-2xl transition-transform duration-300 ease-in-out min-[1024px]:relative min-[1024px]:z-auto min-[1024px]:translate-x-0 min-[1024px]:my-3 min-[1024px]:ml-3 min-[1024px]:h-[calc(100dvh-24px)] ${
+        className={`theme-sidebar fixed top-0 left-0 z-50 flex h-full w-[min(292px,88vw)] shrink-0 flex-col overflow-hidden rounded-tr-[28px] rounded-br-[28px] text-white transition-transform duration-300 ease-in-out min-[1024px]:relative min-[1024px]:z-auto min-[1024px]:translate-x-0 min-[1024px]:my-3 min-[1024px]:ml-3 min-[1024px]:h-[calc(100dvh-24px)] ${
           sidebarOpen
             ? "translate-x-0"
             : "-translate-x-full min-[1024px]:translate-x-0"
         }`}
       >
         <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-tr-[28px] rounded-br-[28px]">
-          <div className="absolute -top-16 -right-10 h-40 w-40 rounded-full bg-[#F5D69B]/20" />
-          <div className="absolute bottom-20 -left-10 h-32 w-32 rounded-full bg-[#C3C3D5]/20" />
+          <div className="absolute -top-16 -right-10 h-40 w-40 rounded-full bg-[color:var(--edvora-accent)]/20" />
+          <div className="absolute bottom-20 -left-10 h-32 w-32 rounded-full bg-white/10" />
         </div>
         <div className="relative flex h-full flex-col">{sidebarContent}</div>
       </aside>
@@ -255,6 +297,8 @@ function ExamLayoutInner() {
           <Outlet />
         </Suspense>
       </main>
+
+      <ThemeSettingsDrawer />
 
       <LogoutModal
         open={logoutModalOpen}

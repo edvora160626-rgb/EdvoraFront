@@ -1,163 +1,396 @@
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 import {
+  ArrowUpRight,
   BookOpen,
   Building2,
+  CalendarClock,
   CalendarDays,
   ClipboardCheck,
   ClipboardList,
-  IndianRupee,
-  ShieldCheck,
-  TrendingUp,
-  UserCheck,
+  Library,
+  Sparkles,
   Users,
 } from "lucide-react";
 import { getCurrentUser } from "../../../utils/auth";
 import { ROLE_LABELS, getRoleConfig } from "../../../utils/rolePermissions";
 import EdvoraLoader from "../../../common/EdvoraLoader";
-import DashboardHero from "./shared/DashboardHero";
-import StatCard from "./shared/StatCard";
-import QuickLinks from "./shared/QuickLinks";
 import MiniCalendar from "./shared/MiniCalendar";
-import ScheduleTimeline from "./shared/ScheduleTimeline";
-import SectionCard from "./shared/SectionCard";
-import DonutChart from "./shared/DonutChart";
-import BarChart from "./shared/BarChart";
-import RemindersList from "./shared/RemindersList";
 import usePendingRequests from "./shared/usePendingRequests";
 
 const QUICK_LINKS = [
   { label: "Departments", icon: Building2, to: "/admin/departments" },
   { label: "Classes", icon: BookOpen, to: "/admin/classes" },
-  { label: "Upcoming Events", icon: CalendarDays, to: "/admin/upcoming-events" },
-  { label: "Teacher Attendance", icon: ClipboardCheck, to: "/admin/teacher-attendance" },
+  { label: "Subjects", icon: Library, to: "/admin/subjects" },
+  { label: "Timetable", icon: CalendarClock, to: "/admin/timetable" },
+  { label: "Attendance", icon: ClipboardCheck, to: "/admin/teacher-attendance" },
+  { label: "Events", icon: CalendarDays, to: "/admin/upcoming-events" },
   { label: "Requests", icon: ClipboardList, to: "/admin/requests" },
-  { label: "Staff", icon: UserCheck },
-  { label: "Fees", icon: IndianRupee },
-  { label: "Reports", icon: TrendingUp },
 ];
 
-const STAFF_ATTENDANCE = [
-  { label: "Mon", a: 92, b: 98 },
-  { label: "Tue", a: 88, b: 96 },
-  { label: "Wed", a: 94, b: 99 },
-  { label: "Thu", a: 90, b: 97 },
-  { label: "Fri", a: 86, b: 95 },
-];
+function greeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+const glass =
+  "rounded-3xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass)] shadow-[var(--edvora-glass-shadow)] backdrop-blur-[18px] saturate-[165%]";
 
 function SchoolAdminDashboard() {
   const user = getCurrentUser();
   const config = getRoleConfig();
+  const { sidebarOpen = true } = useOutletContext() || {};
+  const wide = !sidebarOpen;
   const { loading, totalPending, actionablePending, recentRequests, stats } =
     usePendingRequests();
 
-  if (loading) return <EdvoraLoader message="Loading school admin dashboard…" />;
+  const today = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
+  const pulseItems = [
+    {
+      label: "Pending overview",
+      value: totalPending,
+      hint: "Across all roles",
+    },
+    {
+      label: "Teacher approvals",
+      value: actionablePending,
+      hint: "Needs your decision",
+      to: "/admin/requests",
+    },
+    {
+      label: "Quick actions",
+      value: QUICK_LINKS.length,
+      hint: "Modules ready",
+    },
+  ];
+
+  if (loading) {
+    return <EdvoraLoader message="Loading school admin dashboard…" />;
+  }
 
   return (
-    <div className="space-y-6 sm:space-y-7">
-      <DashboardHero
-        portalTitle={config.portalTitle}
-        firstName={user?.firstName}
-        summary="Operations pulse: staff attendance, teacher approvals, classes, and fee collection."
-        ctaLabel="Review Teacher Requests"
-        ctaTo="/admin/requests"
-        accentStats={[
-          { label: "Pending Overview", value: totalPending },
-          { label: "Teacher Approvals", value: actionablePending, highlight: true },
-        ]}
-      />
+    <div
+      className={`space-y-6 sm:space-y-8 transition-[gap] duration-300 ${
+        wide ? "space-y-7 sm:space-y-9" : ""
+      }`}
+      data-layout={wide ? "full" : "sidebar"}
+    >
+      {/* Hero — expands into a two-column composition when sidebar is compressed */}
+      <section className={`relative overflow-hidden ${glass} p-6 sm:p-8 lg:p-10`}>
+        <div
+          className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full blur-3xl"
+          style={{
+            background:
+              "radial-gradient(circle, color-mix(in srgb, var(--edvora-primary) 32%, transparent), transparent 68%)",
+          }}
+        />
+        <div
+          className="pointer-events-none absolute -bottom-28 left-10 h-56 w-56 rounded-full blur-3xl"
+          style={{
+            background:
+              "radial-gradient(circle, color-mix(in srgb, var(--edvora-accent) 28%, transparent), transparent 70%)",
+          }}
+        />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <StatCard title="Active Teachers" value="64" subtitle="2 on leave today" icon={UserCheck} spark={[58, 60, 61, 62, 63, 64, 64]} />
-        <StatCard title="Students Enrolled" value="1,248" subtitle="+18 this month" icon={Users} accent="#8F6580" spark={[1180, 1200, 1210, 1225, 1235, 1240, 1248]} />
-        <StatCard title="Fee Collection" value="86%" subtitle="₹42.6L of ₹49.5L" icon={IndianRupee} accent="#D4B87A" spark={[70, 74, 78, 80, 82, 84, 86]} />
-        <StatCard title="Teacher Requests" value={String(actionablePending)} subtitle="Awaiting your decision" icon={ShieldCheck} accent="#735366" to="/admin/requests" />
-      </div>
+        <div
+          className={`relative grid gap-8 ${
+            wide
+              ? "lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:items-end"
+              : ""
+          }`}
+        >
+          <div className={wide ? "max-w-none" : "max-w-3xl"}>
+            <div className="inline-flex items-center gap-2 rounded-full bg-[color:var(--edvora-glass-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--edvora-primary)] ring-1 ring-[color:var(--edvora-glass-border-soft)]">
+              <Sparkles size={13} />
+              {config.portalTitle}
+            </div>
 
-      <QuickLinks items={QUICK_LINKS} />
+            <h1
+              className={`mt-5 font-bold tracking-tight text-[color:var(--edvora-ink-strong)] ${
+                wide ? "text-5xl sm:text-6xl" : "text-4xl sm:text-5xl"
+              }`}
+            >
+              Edvora
+            </h1>
+            <p className="mt-3 text-lg sm:text-xl text-[color:var(--edvora-ink)]">
+              {greeting()}
+              {user?.firstName ? `, ${user.firstName}` : ""}
+            </p>
+            <p
+              className={`mt-2 text-sm sm:text-base text-[color:var(--edvora-muted)] leading-relaxed ${
+                wide ? "max-w-2xl" : "max-w-xl"
+              }`}
+            >
+              Run your school day from one place — classes, subjects, timetable,
+              and approvals.
+            </p>
+            <p className="mt-3 text-xs font-medium text-[color:var(--edvora-muted)]">
+              {today}
+            </p>
 
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-5">
-        <div className="xl:col-span-8 space-y-4 sm:space-y-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-            <SectionCard title="Staff Attendance Today" subtitle="Present vs expected" actionLabel="Open" actionTo="/admin/teacher-attendance">
-              <div className="flex items-center gap-5">
-                <DonutChart value={91} label="Present" color="#8F6580" />
-                <div className="space-y-2 text-sm flex-1">
-                  <div className="flex justify-between"><span className="text-slate-500">Present</span><span className="font-semibold text-[#735366]">58</span></div>
-                  <div className="flex justify-between"><span className="text-slate-500">On leave</span><span className="font-semibold text-amber-600">4</span></div>
-                  <div className="flex justify-between"><span className="text-slate-500">Absent</span><span className="font-semibold text-red-500">2</span></div>
-                </div>
-              </div>
-            </SectionCard>
-
-            <SectionCard title="Weekly Staff Trend" subtitle="Attendance % · Target %">
-              <div className="flex items-center gap-4 mb-3 text-[11px] text-slate-500">
-                <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#A77A95]" /> Actual</span>
-                <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#F5D69B]" /> Target</span>
-              </div>
-              <BarChart data={STAFF_ATTENDANCE} />
-            </SectionCard>
+            <div className="mt-7 flex flex-wrap items-center gap-3">
+              <Link
+                to="/admin/requests"
+                className="inline-flex h-[46px] items-center gap-2 rounded-2xl theme-btn-primary px-5 text-sm font-semibold"
+              >
+                Review requests
+                <ArrowUpRight size={16} />
+              </Link>
+              <Link
+                to="/admin/timetable"
+                className="inline-flex h-[46px] items-center gap-2 rounded-2xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass-soft)] px-5 text-sm font-semibold text-[color:var(--edvora-ink)] hover:border-[color:var(--edvora-primary)]/35"
+              >
+                Open timetable
+              </Link>
+            </div>
           </div>
 
-          <SectionCard title="Pending by Category" subtitle="Teacher approvals first — then parent & student views" actionLabel="Manage" actionTo="/admin/requests">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {stats.map((s) => (
-                <Link
-                  key={s.role}
-                  to="/admin/requests"
-                  className={`rounded-xl border p-4 hover:shadow-md transition ${
-                    s.actionable ? "border-[#C3C3D5] bg-[#FAEEE9]/50" : "border-slate-100 bg-white"
-                  }`}
-                >
-                  <p className="text-xs text-slate-500">{ROLE_LABELS[s.role] || s.role}</p>
-                  <p className="text-2xl font-bold text-[#735366] mt-1">{s.count}</p>
-                  <p className="text-[11px] mt-1 font-medium text-[#A77A95]">
-                    {s.actionable ? "Can approve / reject" : "View only"}
-                  </p>
-                </Link>
-              ))}
+          {wide ? (
+            <div className="grid grid-cols-3 gap-3">
+              {pulseItems.map((item) => {
+                const inner = (
+                  <>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[color:var(--edvora-muted)]">
+                      {item.label}
+                    </p>
+                    <p className="mt-2 text-3xl font-bold tracking-tight text-[color:var(--edvora-ink-strong)] tabular-nums">
+                      {item.value}
+                    </p>
+                    <p className="mt-1 text-[11px] text-[color:var(--edvora-muted)]">
+                      {item.hint}
+                    </p>
+                  </>
+                );
+                const className =
+                  "rounded-2xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass-soft)] p-4 transition hover:border-[color:var(--edvora-primary)]/35";
+                return item.to ? (
+                  <Link key={item.label} to={item.to} className={className}>
+                    {inner}
+                  </Link>
+                ) : (
+                  <div key={item.label} className={className}>
+                    {inner}
+                  </div>
+                );
+              })}
             </div>
-          </SectionCard>
+          ) : null}
+        </div>
+      </section>
 
-          <SectionCard title="Recent Requests" actionLabel="View all" actionTo="/admin/requests">
-            {recentRequests.length ? (
-              <ul className="space-y-2.5">
-                {recentRequests.map((r) => (
-                  <li key={r._id} className="flex items-center gap-3 rounded-xl bg-slate-50/80 border border-slate-100 p-3">
-                    <div className="h-9 w-9 rounded-full bg-[#FAEEE9] text-[#A77A95] flex items-center justify-center text-xs font-bold">
-                      {r.firstName?.[0]}{r.lastName?.[0] || ""}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-[#735366] truncate">{r.firstName} {r.lastName}</p>
-                      <p className="text-xs text-slate-500">{ROLE_LABELS[r.role] || r.role}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+      {/* Pulse strip — only when sidebar is open (otherwise in hero) */}
+      {!wide ? (
+        <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+          {pulseItems.map((item) => {
+            const inner = (
+              <>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--edvora-muted)]">
+                  {item.label}
+                </p>
+                <p className="mt-2 text-3xl font-bold tracking-tight text-[color:var(--edvora-ink-strong)] tabular-nums">
+                  {item.value}
+                </p>
+                <p className="mt-1 text-xs text-[color:var(--edvora-muted)]">
+                  {item.hint}
+                </p>
+              </>
+            );
+            const className = `${glass} p-5 transition hover:-translate-y-0.5 hover:border-[color:var(--edvora-primary)]/30`;
+            return item.to ? (
+              <Link key={item.label} to={item.to} className={className}>
+                {inner}
+              </Link>
             ) : (
-              <p className="text-sm text-slate-500 text-center py-6">Inbox clear — no pending requests.</p>
-            )}
-          </SectionCard>
+              <div key={item.label} className={className}>
+                {inner}
+              </div>
+            );
+          })}
+        </section>
+      ) : null}
+
+      {/* Navigate */}
+      <section>
+        <div className="mb-4 flex items-end justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-bold text-[color:var(--edvora-ink-strong)]">
+              Navigate
+            </h2>
+            <p className="text-sm text-[color:var(--edvora-muted)]">
+              Jump into the modules you use most.
+            </p>
+          </div>
+        </div>
+        <div
+          className={`grid gap-3 ${
+            wide
+              ? "grid-cols-2 sm:grid-cols-4 xl:grid-cols-7"
+              : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-7"
+          }`}
+        >
+          {QUICK_LINKS.map(({ label, icon: Icon, to }) => (
+            <Link
+              key={label}
+              to={to}
+              className={`group ${glass} flex flex-col items-start gap-4 p-4 transition hover:-translate-y-0.5 hover:border-[color:var(--edvora-primary)]/35 ${
+                wide ? "sm:p-5" : ""
+              }`}
+            >
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[color:var(--edvora-primary)]/12 text-[color:var(--edvora-primary)] ring-1 ring-[color:var(--edvora-glass-border-soft)] transition group-hover:bg-[color:var(--edvora-primary)] group-hover:text-white">
+                <Icon size={18} />
+              </span>
+              <span className="text-sm font-semibold text-[color:var(--edvora-ink-strong)]">
+                {label}
+              </span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Ops + calendar — fuller split when compressed */}
+      <section
+        className={`grid grid-cols-1 gap-4 sm:gap-5 ${
+          wide ? "xl:grid-cols-12" : "xl:grid-cols-12"
+        }`}
+      >
+        <div className={`${wide ? "xl:col-span-8" : "xl:col-span-7"} ${glass} p-5 sm:p-6`}>
+          <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
+            <div>
+              <h2 className="text-lg font-bold text-[color:var(--edvora-ink-strong)]">
+                Approvals
+              </h2>
+              <p className="text-sm text-[color:var(--edvora-muted)]">
+                Pending by role — teacher actions first.
+              </p>
+            </div>
+            <Link
+              to="/admin/requests"
+              className="inline-flex items-center gap-1 text-sm font-semibold text-[color:var(--edvora-primary)] hover:underline"
+            >
+              Manage <ArrowUpRight size={14} />
+            </Link>
+          </div>
+
+          <div
+            className={`grid gap-3 mb-6 ${
+              wide ? "grid-cols-1 sm:grid-cols-3 lg:grid-cols-3" : "grid-cols-1 sm:grid-cols-3"
+            }`}
+          >
+            {stats.map((s) => (
+              <Link
+                key={s.role}
+                to="/admin/requests"
+                className={`rounded-2xl border p-4 transition hover:border-[color:var(--edvora-primary)]/35 ${
+                  s.actionable
+                    ? "border-[color:var(--edvora-primary)]/25 bg-[color:var(--edvora-primary)]/8"
+                    : "border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass-soft)]"
+                }`}
+              >
+                <p className="text-xs text-[color:var(--edvora-muted)]">
+                  {ROLE_LABELS[s.role] || s.role}
+                </p>
+                <p className="mt-1 text-2xl font-bold text-[color:var(--edvora-ink-strong)]">
+                  {s.count}
+                </p>
+                <p className="mt-1 text-[11px] font-medium text-[color:var(--edvora-primary)]">
+                  {s.actionable ? "Can approve" : "View only"}
+                </p>
+              </Link>
+            ))}
+          </div>
+
+          <h3 className="text-sm font-semibold text-[color:var(--edvora-ink-strong)] mb-3">
+            Recent requests
+          </h3>
+          {recentRequests.length ? (
+            <ul
+              className={`gap-2 ${
+                wide
+                  ? "grid grid-cols-1 md:grid-cols-2"
+                  : "space-y-2"
+              }`}
+            >
+              {recentRequests.map((r) => (
+                <li
+                  key={r._id}
+                  className="flex items-center gap-3 rounded-2xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass-soft)] px-3 py-2.5"
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[color:var(--edvora-primary)]/12 text-xs font-bold text-[color:var(--edvora-primary)]">
+                    {r.firstName?.[0]}
+                    {r.lastName?.[0] || ""}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-[color:var(--edvora-ink-strong)] truncate">
+                      {r.firstName} {r.lastName}
+                    </p>
+                    <p className="text-xs text-[color:var(--edvora-muted)]">
+                      {ROLE_LABELS[r.role] || r.role}
+                    </p>
+                  </div>
+                  <Users size={14} className="text-[color:var(--edvora-muted)]" />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="rounded-2xl border border-dashed border-[color:var(--edvora-glass-border-soft)] px-4 py-8 text-center text-sm text-[color:var(--edvora-muted)]">
+              Inbox clear — no pending requests.
+            </p>
+          )}
         </div>
 
-        <aside className="xl:col-span-4 space-y-4 sm:space-y-5">
-          <MiniCalendar />
-          <ScheduleTimeline
-            title="Ops Calendar"
-            items={[
-              { title: "Staff briefing", meta: "Conference room", time: "09:00", now: true },
-              { title: "Department review", meta: "Science wing", time: "11:30" },
-              { title: "Fee follow-up call", meta: "Accounts desk", time: "15:00" },
-            ]}
-          />
-          <RemindersList
-            items={[
-              { title: "Mark teacher attendance", detail: "Open attendance before 10 AM", when: "Today" },
-              { title: "New class sections", detail: "Confirm 8C & 9D capacity", when: "This week" },
-              { title: "Fee defaulters", detail: "14 families overdue > 30 days", when: "Priority" },
-            ]}
-          />
+        <aside className={`${wide ? "xl:col-span-4" : "xl:col-span-5"} space-y-4 sm:space-y-5`}>
+          <div className={`${glass} p-2 overflow-hidden`}>
+            <MiniCalendar />
+          </div>
+          <div className={`${glass} p-5`}>
+            <h2 className="text-lg font-bold text-[color:var(--edvora-ink-strong)]">
+              Today
+            </h2>
+            <p className="text-sm text-[color:var(--edvora-muted)] mb-4">
+              Suggested focus for school ops.
+            </p>
+            <ul className="space-y-3">
+              {[
+                {
+                  title: "Teacher attendance",
+                  detail: "Confirm staff presence before 10 AM",
+                  to: "/admin/teacher-attendance",
+                },
+                {
+                  title: "Timetable drafts",
+                  detail: "Publish class grids for the week",
+                  to: "/admin/timetable",
+                },
+                {
+                  title: "Subject coverage",
+                  detail: "Assign subjects to new sections",
+                  to: "/admin/subjects",
+                },
+              ].map((item) => (
+                <li key={item.title}>
+                  <Link
+                    to={item.to}
+                    className="block rounded-2xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass-soft)] px-3.5 py-3 transition hover:border-[color:var(--edvora-primary)]/35"
+                  >
+                    <p className="text-sm font-semibold text-[color:var(--edvora-ink-strong)]">
+                      {item.title}
+                    </p>
+                    <p className="mt-0.5 text-xs text-[color:var(--edvora-muted)]">
+                      {item.detail}
+                    </p>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </aside>
-      </div>
+      </section>
     </div>
   );
 }

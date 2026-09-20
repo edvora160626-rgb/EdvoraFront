@@ -12,21 +12,42 @@ import {
 } from "lucide-react";
 import CustomSelect from "../../common/CustomSelect";
 import EdvoraLoader from "../../common/EdvoraLoader";
+import PhoneInput from "../../common/PhoneInput";
 import { openSnackbar } from "../../common/snackbar/snackbar";
 import { formatPhoneDisplay } from "../../utils/phone";
 import {
   assignStaffToDepartment,
+  createStaffMember,
   getDepartmentsByStatus,
   getTeachersByDepartment,
 } from "../../utils/departmentApi";
 
 const labelClass = "block text-[13px] font-semibold text-[#667085] mb-1.5";
+const inputClass =
+  "w-full h-[42px] rounded-lg border border-[#D0D5DD] bg-white px-3 text-[14px] text-[#344054] outline-none focus:border-[color:var(--edvora-primary)]";
+
+const GENDER_OPTIONS = [
+  { value: "Male", label: "Male" },
+  { value: "Female", label: "Female" },
+  { value: "Other", label: "Other" },
+];
+
+const EMPTY_NEW_STAFF = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
+  phonecode: "91",
+  gender: "Male",
+  qualification: "",
+  subjects: "",
+};
 
 function StatusBadge({ status }) {
   const styles = {
     ACTIVE: "bg-green-50 text-green-700",
     INACTIVE: "bg-red-50 text-red-600",
-    REQUESTED: "bg-[#FAEEE9] text-[#735366]",
+    REQUESTED: "bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-ink-strong)]",
   };
 
   return (
@@ -47,7 +68,7 @@ function StaffCard({ staff }) {
   return (
     <div className="bg-white rounded-xl shadow p-4 border border-slate-100">
       <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#FAEEE9] text-[#A77A95]">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)]">
           <UserRound size={18} />
         </span>
         <div className="min-w-0 flex-1">
@@ -61,13 +82,13 @@ function StaffCard({ staff }) {
           <div className="mt-3 space-y-1.5">
             {staff.email ? (
               <p className="flex items-center gap-2 text-sm text-slate-600 truncate">
-                <Mail size={14} className="shrink-0 text-[#A77A95]" />
+                <Mail size={14} className="shrink-0 text-[color:var(--edvora-primary)]" />
                 {staff.email}
               </p>
             ) : null}
             {staff.phone ? (
               <p className="flex items-center gap-2 text-sm text-slate-600">
-                <Phone size={14} className="shrink-0 text-[#A77A95]" />
+                <Phone size={14} className="shrink-0 text-[color:var(--edvora-primary)]" />
                 {formatPhoneDisplay(staff.phone, staff.phoneCode)}
               </p>
             ) : null}
@@ -176,18 +197,51 @@ function staffOptionLabel(member) {
   return id ? `${name} (${id})` : name;
 }
 
+function ModeTabs({ mode, onChange, disabled }) {
+  const tabs = [
+    { id: "existing", label: "Add Existing Staff" },
+    { id: "new", label: "Add New Staff" },
+  ];
+
+  return (
+    <div className="flex rounded-lg border border-[color:var(--edvora-border)] bg-[color:var(--edvora-primary-soft)]/40 p-1 gap-1">
+      {tabs.map((tab) => {
+        const active = mode === tab.id;
+        return (
+          <button
+            key={tab.id}
+            type="button"
+            disabled={disabled}
+            onClick={() => onChange(tab.id)}
+            className={`flex-1 h-9 rounded-md text-sm font-semibold transition-colors disabled:opacity-60 ${
+              active
+                ? "bg-[color:var(--edvora-primary)] text-white shadow-sm"
+                : "text-[color:var(--edvora-ink-strong)] hover:bg-white/70"
+            }`}
+          >
+            {tab.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function AddStaffModal({
   currentDepartmentId,
+  currentDepartmentName,
   currentStaffIds,
   onClose,
   onAssigned,
 }) {
+  const [mode, setMode] = useState("existing");
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const [loadingDepartments, setLoadingDepartments] = useState(true);
   const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [staffOptions, setStaffOptions] = useState([]);
   const [loadingStaff, setLoadingStaff] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState(null);
+  const [newStaffForm, setNewStaffForm] = useState(EMPTY_NEW_STAFF);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -273,7 +327,12 @@ function AddStaffModal({
     };
   }, [selectedDepartment, currentStaffIds]);
 
-  const handleSubmit = async () => {
+  const handleNewStaffChange = (e) => {
+    const { name, value } = e.target;
+    setNewStaffForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleAssignExisting = async () => {
     if (!selectedDepartment?.value) {
       return openSnackbar({
         message: "Please select a department",
@@ -316,16 +375,84 @@ function AddStaffModal({
     }
   };
 
+  const handleCreateNew = async () => {
+    const firstName = newStaffForm.firstName.trim();
+    const lastName = newStaffForm.lastName.trim();
+    const email = newStaffForm.email.trim().toLowerCase();
+    const phone = newStaffForm.phone.trim();
+    const qualification = newStaffForm.qualification.trim();
+
+    if (!firstName || !lastName || !email || !phone || !newStaffForm.gender) {
+      return openSnackbar({
+        message: "First name, last name, email, phone and gender are required",
+        variant: "warning",
+      });
+    }
+
+    if (!qualification) {
+      return openSnackbar({
+        message: "Qualification is required",
+        variant: "warning",
+      });
+    }
+
+    if (!currentDepartmentId) {
+      return openSnackbar({
+        message: "Department is missing",
+        variant: "error",
+      });
+    }
+
+    const subjects = newStaffForm.subjects
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    try {
+      setSubmitting(true);
+      await createStaffMember({
+        firstName,
+        lastName,
+        email,
+        phone,
+        phonecode: newStaffForm.phonecode,
+        gender: newStaffForm.gender,
+        department: [currentDepartmentId],
+        qualification,
+        subjects,
+      });
+      openSnackbar({
+        message: "Staff created and set to Active",
+        variant: "success",
+      });
+      onAssigned?.();
+      onClose();
+    } catch (error) {
+      openSnackbar({
+        message:
+          error?.response?.data?.message || "Failed to create staff member",
+        variant: "error",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSubmit = () => {
+    if (mode === "existing") return handleAssignExisting();
+    return handleCreateNew();
+  };
+
   return (
     <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4">
-      <div className="w-full max-w-[520px] bg-white rounded-t-[14px] sm:rounded-[14px] shadow-2xl overflow-hidden flex flex-col">
+      <div className="w-full max-w-[560px] max-h-[90dvh] bg-white rounded-t-[14px] sm:rounded-[14px] shadow-2xl overflow-hidden flex flex-col">
         <div className="h-14 sm:h-16 px-4 sm:px-6 flex items-center justify-between border-b border-gray-200 shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#FAEEE9] text-[#A77A95]">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)]">
               <UserPlus size={18} />
             </span>
             <h2 className="text-base sm:text-[18px] font-semibold text-[#111827] truncate">
-              Add Existing Staff
+              {mode === "existing" ? "Add Existing Staff" : "Add New Staff"}
             </h2>
           </div>
           <button
@@ -338,60 +465,195 @@ function AddStaffModal({
           </button>
         </div>
 
-        <div className="px-4 sm:px-6 py-5 space-y-4">
-          <div>
-            <label className={labelClass}>
-              Department <span className="text-red-500">*</span>
-            </label>
-            <CustomSelect
-              options={departmentOptions}
-              placeholder={
-                loadingDepartments
-                  ? "Loading departments…"
-                  : "Select department"
-              }
-              isSearchable
-              isLoading={loadingDepartments}
-              isDisabled={loadingDepartments || submitting}
-              value={selectedDepartment}
-              onChange={(option) => setSelectedDepartment(option)}
-            />
-          </div>
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 sm:px-6 py-5 space-y-4">
+          <ModeTabs mode={mode} onChange={setMode} disabled={submitting} />
 
-          <div>
-            <label className={labelClass}>
-              Staff <span className="text-red-500">*</span>
-            </label>
-            <CustomSelect
-              options={staffOptions}
-              placeholder={
-                !selectedDepartment
-                  ? "Select a department first"
-                  : loadingStaff
-                    ? "Loading staff…"
-                    : staffOptions.length === 0
-                      ? "No staff in this department"
-                      : "Select staff member"
-              }
-              isSearchable
-              isLoading={loadingStaff}
-              isDisabled={
-                !selectedDepartment || loadingStaff || submitting
-              }
-              value={selectedStaff}
-              onChange={(option) => setSelectedStaff(option)}
-              formatOptionLabel={(option) => (
-                <span className="flex items-center justify-between gap-2">
-                  <span className="truncate">{option.label}</span>
-                  {option.alreadyAssigned ? (
-                    <span className="text-[11px] text-red-500 shrink-0">
-                      Already added
+          {mode === "existing" ? (
+            <>
+              <div>
+                <label className={labelClass}>
+                  Department <span className="text-red-500">*</span>
+                </label>
+                <CustomSelect
+                  options={departmentOptions}
+                  placeholder={
+                    loadingDepartments
+                      ? "Loading departments…"
+                      : "Select department"
+                  }
+                  isSearchable
+                  isLoading={loadingDepartments}
+                  isDisabled={loadingDepartments || submitting}
+                  value={selectedDepartment}
+                  onChange={(option) => setSelectedDepartment(option)}
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>
+                  Staff <span className="text-red-500">*</span>
+                </label>
+                <CustomSelect
+                  options={staffOptions}
+                  placeholder={
+                    !selectedDepartment
+                      ? "Select a department first"
+                      : loadingStaff
+                        ? "Loading staff…"
+                        : staffOptions.length === 0
+                          ? "No staff in this department"
+                          : "Select staff member"
+                  }
+                  isSearchable
+                  isLoading={loadingStaff}
+                  isDisabled={
+                    !selectedDepartment || loadingStaff || submitting
+                  }
+                  value={selectedStaff}
+                  onChange={(option) => setSelectedStaff(option)}
+                  formatOptionLabel={(option) => (
+                    <span className="flex items-center justify-between gap-2">
+                      <span className="truncate">{option.label}</span>
+                      {option.alreadyAssigned ? (
+                        <span className="text-[11px] text-red-500 shrink-0">
+                          Already added
+                        </span>
+                      ) : null}
                     </span>
-                  ) : null}
-                </span>
-              )}
-            />
-          </div>
+                  )}
+                />
+              </div>
+            </>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="sm:col-span-2 rounded-lg border border-[color:var(--edvora-border)] bg-[color:var(--edvora-primary-soft)] px-3.5 py-3">
+                <p className="text-sm font-semibold text-[color:var(--edvora-ink-strong)]">
+                  New staff will be Active by default
+                </p>
+                <p className="text-xs text-slate-500 mt-1">
+                  Assigned to{" "}
+                  {currentDepartmentName
+                    ? `"${currentDepartmentName}"`
+                    : "this department"}
+                  . Staff ID is generated automatically.
+                </p>
+              </div>
+
+              <div>
+                <label className={labelClass}>
+                  First Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="firstName"
+                  value={newStaffForm.firstName}
+                  onChange={handleNewStaffChange}
+                  placeholder="Enter first name"
+                  disabled={submitting}
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>
+                  Last Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="lastName"
+                  value={newStaffForm.lastName}
+                  onChange={handleNewStaffChange}
+                  placeholder="Enter last name"
+                  disabled={submitting}
+                  className={inputClass}
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className={labelClass}>
+                  Email <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={newStaffForm.email}
+                  onChange={handleNewStaffChange}
+                  placeholder="staff@school.com"
+                  disabled={submitting}
+                  className={inputClass}
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className={labelClass}>
+                  Phone <span className="text-red-500">*</span>
+                </label>
+                <PhoneInput
+                  phone={newStaffForm.phone}
+                  phoneCode={newStaffForm.phonecode}
+                  onPhoneChange={(phone) =>
+                    setNewStaffForm((prev) => ({ ...prev, phone }))
+                  }
+                  onPhoneCodeChange={(phonecode) =>
+                    setNewStaffForm((prev) => ({ ...prev, phonecode }))
+                  }
+                  placeholder="Mobile number"
+                  height={42}
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>
+                  Gender <span className="text-red-500">*</span>
+                </label>
+                <CustomSelect
+                  options={GENDER_OPTIONS}
+                  placeholder="Select gender"
+                  isSearchable={false}
+                  isDisabled={submitting}
+                  value={
+                    GENDER_OPTIONS.find(
+                      (option) => option.value === newStaffForm.gender
+                    ) || null
+                  }
+                  onChange={(option) =>
+                    setNewStaffForm((prev) => ({
+                      ...prev,
+                      gender: option?.value || "Male",
+                    }))
+                  }
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>
+                  Qualification <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="qualification"
+                  value={newStaffForm.qualification}
+                  onChange={handleNewStaffChange}
+                  placeholder="e.g. M.Sc Mathematics"
+                  disabled={submitting}
+                  className={inputClass}
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className={labelClass}>Subjects</label>
+                <input
+                  type="text"
+                  name="subjects"
+                  value={newStaffForm.subjects}
+                  onChange={handleNewStaffChange}
+                  placeholder="Comma-separated, e.g. Maths, Physics"
+                  disabled={submitting}
+                  className={inputClass}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="px-4 sm:px-6 py-4 border-t border-gray-200 flex justify-end gap-3 shrink-0">
@@ -406,13 +668,26 @@ function AddStaffModal({
             type="button"
             onClick={handleSubmit}
             disabled={submitting}
-            className="px-6 h-[42px] rounded-lg bg-[#A77A95] hover:bg-[#8F6580] text-white text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+            className="px-6 h-[42px] rounded-lg bg-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-hover)] text-white text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {submitting ? "Adding…" : "Add Staff"}
+            {submitting
+              ? mode === "existing"
+                ? "Adding…"
+                : "Creating…"
+              : mode === "existing"
+                ? "Add Staff"
+                : "Create Staff"}
           </button>
         </div>
       </div>
-      {submitting && <EdvoraLoader overlay message="Assigning staff…" />}
+      {submitting && (
+        <EdvoraLoader
+          overlay
+          message={
+            mode === "existing" ? "Assigning staff…" : "Creating staff…"
+          }
+        />
+      )}
     </div>
   );
 }
@@ -480,7 +755,7 @@ function DepartmentStaff() {
       openSnackbar({
         message:
           error?.response?.data?.message ||
-          "Staff assigned, but failed to refresh the list",
+          "Staff saved, but failed to refresh the list",
         variant: "warning",
       });
     }
@@ -498,7 +773,7 @@ function DepartmentStaff() {
               <Building2 size={22} />
             </span>
             <div className="min-w-0">
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#735366]">
+              <h1 className="text-2xl sm:text-3xl font-bold text-[color:var(--edvora-ink-strong)]">
                 {department?.departmentName || "Department Staff"}
               </h1>
               <p className="text-slate-500 mt-1 text-sm sm:text-base">
@@ -507,7 +782,7 @@ function DepartmentStaff() {
                   : ""}
                 Staff members in this department
               </p>
-              <p className="text-sm font-semibold text-[#735366] mt-2">
+              <p className="text-sm font-semibold text-[color:var(--edvora-ink-strong)] mt-2">
                 Total staff: {loading ? "…" : totalStaff}
               </p>
             </div>
@@ -518,7 +793,7 @@ function DepartmentStaff() {
               type="button"
               onClick={() => setShowAddModal(true)}
               disabled={loading || !department}
-              className="inline-flex items-center gap-2 px-4 h-[42px] rounded-lg bg-[#A77A95] hover:bg-[#8F6580] text-white text-sm font-semibold shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-4 h-[42px] rounded-lg bg-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-hover)] text-white text-sm font-semibold shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <Plus size={18} />
               Add Staff
@@ -526,7 +801,7 @@ function DepartmentStaff() {
             <button
               type="button"
               onClick={() => navigate("/admin/departments")}
-              className="inline-flex items-center gap-2 px-4 h-[42px] rounded-lg bg-[#A77A95] hover:bg-[#8F6580] text-white text-sm font-semibold shadow-sm"
+              className="inline-flex items-center gap-2 px-4 h-[42px] rounded-lg bg-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-hover)] text-white text-sm font-semibold shadow-sm"
             >
               <ArrowLeft size={16} />
               Back
@@ -539,7 +814,7 @@ function DepartmentStaff() {
         <EdvoraLoader message="Loading staff…" />
       ) : staff.length === 0 ? (
         <div className="bg-white rounded-xl shadow p-10 text-center border border-slate-100">
-          <span className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#FAEEE9] text-[#A77A95]">
+          <span className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)]">
             <UserRound size={22} />
           </span>
           <p className="text-slate-700 font-medium">No staff found</p>
@@ -563,6 +838,7 @@ function DepartmentStaff() {
       {showAddModal && (
         <AddStaffModal
           currentDepartmentId={departmentId}
+          currentDepartmentName={department?.departmentName}
           currentStaffIds={currentStaffIds}
           onClose={() => setShowAddModal(false)}
           onAssigned={handleAssigned}

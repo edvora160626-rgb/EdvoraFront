@@ -22,7 +22,7 @@ import { getDepartmentsByStatus } from "../../utils/departmentApi";
 
 function StatusBadge({ status }) {
   const styles = {
-    REQUESTED: "bg-[#FAEEE9] text-[#735366]",
+    REQUESTED: "bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-ink-strong)]",
     ACTIVE: "bg-green-50 text-green-700",
     INACTIVE: "bg-red-50 text-red-700",
   };
@@ -223,7 +223,7 @@ function RequestDetailModal({ user, onClose, onUpdated }) {
       <div className="w-full max-w-[560px] max-h-[90dvh] bg-white rounded-[14px] shadow-2xl overflow-hidden flex flex-col">
         <div className="h-14 sm:h-16 px-4 sm:px-6 flex items-center justify-between border-b border-gray-200 shrink-0">
           <div className="min-w-0">
-            <h2 className="text-base sm:text-lg font-semibold text-[#735366] truncate">
+            <h2 className="text-base sm:text-lg font-semibold text-[color:var(--edvora-ink-strong)] truncate">
               {user.firstName} {user.lastName}
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -243,7 +243,7 @@ function RequestDetailModal({ user, onClose, onUpdated }) {
         <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between gap-3 mb-4">
             <StatusBadge status={user.status} />
-            <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#FAEEE9] text-[#A77A95]">
+            <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)]">
               {roleLabel}
             </span>
           </div>
@@ -354,7 +354,7 @@ function UserCard({ user, onView }) {
       <button
         type="button"
         onClick={() => onView(user)}
-        className="inline-flex items-center gap-2 bg-[#A77A95] hover:bg-[#8F6580] text-white px-3 sm:px-4 py-2 rounded-lg text-sm font-medium"
+        className="inline-flex items-center gap-2 bg-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-hover)] text-white px-3 sm:px-4 py-2 rounded-lg text-sm font-medium"
       >
         <Eye size={16} />
         View
@@ -396,7 +396,7 @@ function RequestTable({ users, onView }) {
                   <button
                     type="button"
                     onClick={() => onView(user)}
-                    className="inline-flex items-center gap-1.5 bg-[#A77A95] hover:bg-[#8F6580] text-white px-3 py-2 rounded-lg text-sm font-medium"
+                    className="inline-flex items-center gap-1.5 bg-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-hover)] text-white px-3 py-2 rounded-lg text-sm font-medium"
                   >
                     <Eye size={15} />
                     View
@@ -540,15 +540,15 @@ function UserRequests() {
               onClick={() => setActiveTab(role)}
               className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-t-lg text-sm font-medium transition border-b-2 -mb-px ${
                 isActive
-                  ? "border-[#A77A95] text-[#A77A95] bg-[#FAEEE9]"
-                  : "border-transparent text-slate-600 hover:text-[#A77A95] hover:bg-slate-50"
+                  ? "border-[color:var(--edvora-primary)] text-[color:var(--edvora-primary)] bg-[color:var(--edvora-primary-soft)]"
+                  : "border-transparent text-slate-600 hover:text-[color:var(--edvora-primary)] hover:bg-slate-50"
               }`}
             >
               <span>{label}</span>
               <span
                 className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                   isActive
-                    ? "bg-[#A77A95] text-white"
+                    ? "bg-[color:var(--edvora-primary)] text-white"
                     : "bg-slate-100 text-slate-600"
                 }`}
               >
@@ -571,7 +571,7 @@ function UserRequests() {
               onClick={() => setActiveStatus(id)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition inline-flex items-center gap-2 ${
                 isActive
-                  ? "bg-[#A77A95] text-white"
+                  ? "bg-[color:var(--edvora-primary)] text-white"
                   : "bg-white text-slate-600 border border-slate-200 hover:border-[#C3C3D5]"
               }`}
             >
@@ -603,7 +603,7 @@ function UserRequests() {
               {getRoleTotal(activeTab)} total in {activeTitle.toLowerCase()}
             </span>
             {activeActionable && activeStatus === "REQUESTED" && (
-              <span className="text-xs font-medium px-2 py-1 rounded-full bg-[#FAEEE9] text-[#8F6580]">
+              <span className="text-xs font-medium px-2 py-1 rounded-full bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-muted)]">
                 Can approve/reject
               </span>
             )}

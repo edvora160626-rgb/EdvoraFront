@@ -164,3 +164,58 @@ export async function assignStaffToClass(classId, teacherId) {
   clearClassesCache();
   return data?.data;
 }
+
+export async function updateClass({ classId, className, section }) {
+  const schoolId = getSchoolId();
+  const updatedBy = getCurrentUser()?._id;
+
+  if (!classId) {
+    throw new Error("Class ID is required.");
+  }
+
+  const { data } = await axios.post(`${API_BASE}/class/updateClass`, {
+    classId,
+    schoolId,
+    className: className.trim(),
+    section: section.trim().toUpperCase(),
+    updatedBy,
+  });
+
+  clearClassesCache();
+  return data?.data;
+}
+
+export async function updateClassStatus(classId, status) {
+  const schoolId = getSchoolId();
+  const updatedBy = getCurrentUser()?._id;
+
+  if (!classId || !status) {
+    throw new Error("Class and status are required.");
+  }
+
+  const { data } = await axios.post(`${API_BASE}/class/updateClassStatus`, {
+    classId,
+    schoolId,
+    status,
+    updatedBy,
+  });
+
+  clearClassesCache();
+  return data?.data;
+}
+
+export async function deleteClass(classId) {
+  const schoolId = getSchoolId();
+
+  if (!classId) {
+    throw new Error("Class ID is required.");
+  }
+
+  const { data } = await axios.post(`${API_BASE}/class/deleteClass`, {
+    classId,
+    schoolId,
+  });
+
+  clearClassesCache();
+  return data?.data;
+}

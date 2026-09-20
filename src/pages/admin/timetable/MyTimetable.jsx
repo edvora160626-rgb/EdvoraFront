@@ -66,7 +66,7 @@ export default function MyTimetable() {
   return (
     <div>
       <div className="mb-5">
-        <h1 className="text-xl font-semibold text-[#735366] sm:text-2xl">
+        <h1 className="text-xl font-semibold text-[color:var(--edvora-ink-strong)] sm:text-2xl">
           My Timetable
         </h1>
         <p className="mt-1 text-sm text-slate-500">{subtitle}</p>

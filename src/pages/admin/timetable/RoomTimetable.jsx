@@ -57,11 +57,11 @@ export default function RoomTimetable() {
         <div>
           <Link
             to="/admin/timetable/rooms"
-            className="mb-2 inline-flex items-center gap-1 text-sm text-[#A77A95] hover:underline"
+            className="mb-2 inline-flex items-center gap-1 text-sm text-[color:var(--edvora-primary)] hover:underline"
           >
             <ArrowLeft size={14} /> Back to rooms
           </Link>
-          <h1 className="text-xl font-semibold text-[#735366] sm:text-2xl">
+          <h1 className="text-xl font-semibold text-[color:var(--edvora-ink-strong)] sm:text-2xl">
             {data?.room
               ? `${data.room.name} (${data.room.code})`
               : "Room Timetable"}

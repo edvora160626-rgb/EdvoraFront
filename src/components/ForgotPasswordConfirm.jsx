@@ -80,7 +80,7 @@ function ForgotPasswordConfirm() {
         Having trouble with your password?
       </p>
 
-      <h1 className="text-2xl sm:text-[28px] font-bold text-[#735366] mb-4 sm:mb-6">
+      <h1 className="text-2xl sm:text-[28px] font-bold text-[color:var(--edvora-ink-strong)] mb-4 sm:mb-6">
         Reset password
       </h1>
 
@@ -88,7 +88,7 @@ function ForgotPasswordConfirm() {
         {maskedEmail ? (
           <>
             A verification code will be sent to your registered email{" "}
-            <span className="font-semibold text-[#A77A95] break-all">{maskedEmail}</span>.
+            <span className="font-semibold text-[color:var(--edvora-primary)] break-all">{maskedEmail}</span>.
           </>
         ) : (
           "Enter your registered email and we will send you a verification code."
@@ -99,14 +99,14 @@ function ForgotPasswordConfirm() {
         <div className="relative mb-6">
           <Mail
             size={18}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A77A95]"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-[color:var(--edvora-primary)]"
           />
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email Address"
-            className="w-full h-[48px] rounded-xl border border-[#D0D5DD] bg-white pl-12 pr-4 text-[14px] outline-none focus:border-[#A77A95]"
+            className="w-full h-[48px] rounded-xl border border-[#D0D5DD] bg-white pl-12 pr-4 text-[14px] outline-none focus:border-[color:var(--edvora-primary)]"
           />
         </div>
       )}
@@ -115,7 +115,7 @@ function ForgotPasswordConfirm() {
         type="button"
         disabled={sending}
         onClick={handleSend}
-        className="w-full h-[48px] rounded-xl bg-[#A77A95] hover:bg-[#8F6580] text-white font-semibold transition disabled:opacity-60"
+        className="w-full h-[48px] rounded-xl bg-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-hover)] text-white font-semibold transition disabled:opacity-60"
       >
         {sending ? "Sending..." : "Send OTP"}
       </button>
@@ -125,7 +125,7 @@ function ForgotPasswordConfirm() {
         <button
           type="button"
           onClick={() => navigate("/")}
-          className="font-semibold text-[#A77A95] hover:text-[#8F6580]"
+          className="font-semibold text-[color:var(--edvora-primary)] hover:text-[color:var(--edvora-muted)]"
         >
           Back to login
         </button>

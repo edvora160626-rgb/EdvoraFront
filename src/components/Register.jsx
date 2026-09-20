@@ -313,7 +313,7 @@ function RegisterModal({ onClose }) {
     }
   };
   const inputClass =
-    "w-full h-[38px] rounded-md border border-[#D0D5DD] bg-white px-3 text-[14px] text-[#344054] outline-none focus:border-[#A77A95]";
+    "w-full h-[38px] rounded-md border border-[#D0D5DD] bg-white px-3 text-[14px] text-[#344054] outline-none focus:border-[color:var(--edvora-primary)]";
 
   const labelClass =
     "block text-[13px] font-semibold text-[#667085] mb-2";
@@ -663,8 +663,8 @@ function RegisterModal({ onClose }) {
           {userType === "teacher" && (
             <div className="grid grid-cols-1 min-[640px]:grid-cols-2 min-[1024px]:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
 
-              <div className="min-[640px]:col-span-2 min-[1024px]:col-span-3 rounded-lg border border-[#E8D5DF] bg-[#FAEEE9] px-3.5 py-3">
-                <p className="text-sm font-semibold text-[#735366]">
+              <div className="min-[640px]:col-span-2 min-[1024px]:col-span-3 rounded-lg border border-[color:var(--edvora-border)] bg-[color:var(--edvora-primary-soft)] px-3.5 py-3">
+                <p className="text-sm font-semibold text-[color:var(--edvora-ink-strong)]">
                   Staff ID is generated automatically
                 </p>
                 <p className="text-xs text-slate-500 mt-1">
@@ -729,8 +729,8 @@ function RegisterModal({ onClose }) {
           )}
 
           {userType === "admin" && (
-            <div className="mt-6 sm:mt-8 rounded-lg border border-[#E8D5DF] bg-[#FAEEE9] px-3.5 py-3">
-              <p className="text-sm font-semibold text-[#735366]">
+            <div className="mt-6 sm:mt-8 rounded-lg border border-[color:var(--edvora-border)] bg-[color:var(--edvora-primary-soft)] px-3.5 py-3">
+              <p className="text-sm font-semibold text-[color:var(--edvora-ink-strong)]">
                 Employee ID is generated automatically
               </p>
               <p className="text-xs text-slate-500 mt-1">
@@ -881,7 +881,7 @@ function RegisterModal({ onClose }) {
               type="button"
               onClick={handleSubmit}
               disabled={submitting}
-              className="px-6 h-[38px] rounded-md bg-[#A77A95] hover:bg-[#8F6580] text-white text-[13px] font-medium disabled:opacity-60"
+              className="px-6 h-[38px] rounded-md bg-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-hover)] text-white text-[13px] font-medium disabled:opacity-60"
             >
               Create Account
             </button>

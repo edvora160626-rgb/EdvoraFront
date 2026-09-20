@@ -69,23 +69,23 @@ function ParentDashboard() {
             A
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-medium text-[#A77A95]">Linked child</p>
-            <p className="text-lg font-bold text-[#735366]">Aanya Sharma · Class 8A</p>
+            <p className="text-xs font-medium text-[color:var(--edvora-primary)]">Linked child</p>
+            <p className="text-lg font-bold text-[color:var(--edvora-ink-strong)]">Aanya Sharma · Class 8A</p>
             <p className="text-xs text-slate-500">Roll 24 · Homeroom: Ms. Ria</p>
           </div>
         </div>
         <div className="grid grid-cols-3 gap-2 sm:gap-3 w-full sm:w-auto">
-          <div className="rounded-xl bg-[#FAEEE9] px-3 py-2 text-center">
+          <div className="rounded-xl bg-[color:var(--edvora-primary-soft)] px-3 py-2 text-center">
             <p className="text-[10px] text-slate-500">Rank</p>
-            <p className="text-sm font-bold text-[#735366]">#6</p>
+            <p className="text-sm font-bold text-[color:var(--edvora-ink-strong)]">#6</p>
           </div>
-          <div className="rounded-xl bg-[#FAEEE9] px-3 py-2 text-center">
+          <div className="rounded-xl bg-[color:var(--edvora-primary-soft)] px-3 py-2 text-center">
             <p className="text-[10px] text-slate-500">GPA</p>
-            <p className="text-sm font-bold text-[#735366]">3.7</p>
+            <p className="text-sm font-bold text-[color:var(--edvora-ink-strong)]">3.7</p>
           </div>
-          <div className="rounded-xl bg-[#FAEEE9] px-3 py-2 text-center">
+          <div className="rounded-xl bg-[color:var(--edvora-primary-soft)] px-3 py-2 text-center">
             <p className="text-[10px] text-slate-500">Conduct</p>
-            <p className="text-sm font-bold text-[#735366]">A</p>
+            <p className="text-sm font-bold text-[color:var(--edvora-ink-strong)]">A</p>
           </div>
         </div>
       </div>
@@ -104,7 +104,7 @@ function ParentDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
             <SectionCard title="Subject Progress" subtitle="Term average vs class top">
               <div className="flex items-center gap-4 mb-3 text-[11px] text-slate-500">
-                <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#A77A95]" /> Aanya</span>
+                <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[color:var(--edvora-primary)]" /> Aanya</span>
                 <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#F5D69B]" /> Class top</span>
               </div>
               <BarChart data={SUBJECTS} />
@@ -114,7 +114,7 @@ function ParentDashboard() {
               <div className="flex items-center gap-5">
                 <DonutChart value={88} label="On time" />
                 <div className="space-y-2 text-sm flex-1">
-                  <div className="flex justify-between"><span className="text-slate-500">Submitted</span><span className="font-semibold text-[#735366]">22</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Submitted</span><span className="font-semibold text-[color:var(--edvora-ink-strong)]">22</span></div>
                   <div className="flex justify-between"><span className="text-slate-500">Pending</span><span className="font-semibold text-amber-600">2</span></div>
                   <div className="flex justify-between"><span className="text-slate-500">Late</span><span className="font-semibold text-red-500">1</span></div>
                 </div>
@@ -128,14 +128,14 @@ function ParentDashboard() {
             <div className="space-y-3">
               <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/80 p-3">
                 <div>
-                  <p className="text-sm font-semibold text-[#735366]">Term 2 Tuition</p>
+                  <p className="text-sm font-semibold text-[color:var(--edvora-ink-strong)]">Term 2 Tuition</p>
                   <p className="text-xs text-slate-500">Due Aug 5, 2026</p>
                 </div>
                 <span className="text-sm font-bold text-amber-600">₹8,200 due</span>
               </div>
               <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/80 p-3">
                 <div>
-                  <p className="text-sm font-semibold text-[#735366]">Transport</p>
+                  <p className="text-sm font-semibold text-[color:var(--edvora-ink-strong)]">Transport</p>
                   <p className="text-xs text-slate-500">Paid Jul 1</p>
                 </div>
                 <span className="text-sm font-bold text-emerald-600">Paid</span>

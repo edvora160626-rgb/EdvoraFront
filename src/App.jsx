@@ -20,6 +20,7 @@ const Departments = lazy(() => import("./pages/admin/Departments"));
 const DepartmentStaff = lazy(() => import("./pages/admin/DepartmentStaff"));
 const Classes = lazy(() => import("./pages/admin/Classes"));
 const ClassStudents = lazy(() => import("./pages/admin/ClassStudents"));
+const Subjects = lazy(() => import("./pages/admin/Subjects"));
 const TeacherAttendance = lazy(() => import("./pages/admin/TeacherAttendance"));
 const TeacherAttendanceMark = lazy(
   () => import("./pages/admin/TeacherAttendanceMark")
@@ -138,6 +139,7 @@ function App() {
             />
             <Route path="classes" element={<Classes />} />
             <Route path="classes/:classId" element={<ClassStudents />} />
+            <Route path="subjects" element={<Subjects />} />
             <Route path="teacher-attendance" element={<TeacherAttendance />} />
             <Route
               path="teacher-attendance/mark"

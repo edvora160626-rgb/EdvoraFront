@@ -16,7 +16,7 @@ import { AcademicYearPicker, useAcademicYear } from "./useAcademicYear";
 
 function StatCard({ label, value, icon: Icon, tone = "default" }) {
   const tones = {
-    default: "bg-[#FAEEE9] text-[#A77A95]",
+    default: "bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)]",
     green: "bg-emerald-50 text-emerald-700",
     amber: "bg-amber-50 text-amber-700",
   };
@@ -30,7 +30,7 @@ function StatCard({ label, value, icon: Icon, tone = "default" }) {
           <Icon size={18} />
         </span>
       </div>
-      <p className="mt-2 text-2xl font-semibold text-[#735366]">{value}</p>
+      <p className="mt-2 text-2xl font-semibold text-[color:var(--edvora-ink-strong)]">{value}</p>
     </div>
   );
 }
@@ -83,7 +83,7 @@ export default function TimetableDashboard() {
     <div>
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-[#735366] sm:text-2xl">
+          <h1 className="text-xl font-semibold text-[color:var(--edvora-ink-strong)] sm:text-2xl">
             Timetable
           </h1>
           <p className="mt-1 text-sm text-slate-500">
@@ -101,13 +101,13 @@ export default function TimetableDashboard() {
 
       {!yearId ? (
         <div className="rounded-xl border border-slate-100 bg-white p-8 text-center shadow-sm">
-          <CalendarClock className="mx-auto text-[#A77A95]" size={36} />
-          <p className="mt-3 text-[#735366] font-medium">
+          <CalendarClock className="mx-auto text-[color:var(--edvora-primary)]" size={36} />
+          <p className="mt-3 text-[color:var(--edvora-ink-strong)] font-medium">
             Set up an academic year to begin
           </p>
           <Link
             to="/admin/timetable/settings"
-            className="mt-4 inline-flex h-[42px] items-center rounded-lg bg-[#A77A95] px-4 text-sm font-medium text-white hover:bg-[#8F6580]"
+            className="mt-4 inline-flex h-[42px] items-center rounded-lg bg-[color:var(--edvora-primary)] px-4 text-sm font-medium text-white hover:bg-[color:var(--edvora-primary-hover)]"
           >
             Go to Settings
           </Link>
@@ -142,19 +142,19 @@ export default function TimetableDashboard() {
           <div className="mb-5 flex flex-wrap gap-2">
             <Link
               to="/admin/timetable/settings"
-              className="inline-flex h-[42px] items-center gap-2 rounded-lg border border-[#E8D5CE] bg-white px-4 text-sm font-medium text-[#735366] hover:border-[#A77A95]/50"
+              className="inline-flex h-[42px] items-center gap-2 rounded-lg border border-[color:var(--edvora-border)] bg-white px-4 text-sm font-medium text-[color:var(--edvora-ink-strong)] hover:border-[color:var(--edvora-primary)]/50"
             >
               <Settings2 size={16} /> Settings
             </Link>
             <Link
               to="/admin/timetable/rooms"
-              className="inline-flex h-[42px] items-center gap-2 rounded-lg border border-[#E8D5CE] bg-white px-4 text-sm font-medium text-[#735366] hover:border-[#A77A95]/50"
+              className="inline-flex h-[42px] items-center gap-2 rounded-lg border border-[color:var(--edvora-border)] bg-white px-4 text-sm font-medium text-[color:var(--edvora-ink-strong)] hover:border-[color:var(--edvora-primary)]/50"
             >
               <DoorOpen size={16} /> Rooms
             </Link>
             <Link
               to="/admin/timetable/allocations"
-              className="inline-flex h-[42px] items-center gap-2 rounded-lg border border-[#E8D5CE] bg-white px-4 text-sm font-medium text-[#735366] hover:border-[#A77A95]/50"
+              className="inline-flex h-[42px] items-center gap-2 rounded-lg border border-[color:var(--edvora-border)] bg-white px-4 text-sm font-medium text-[color:var(--edvora-ink-strong)] hover:border-[color:var(--edvora-primary)]/50"
             >
               <Users size={16} /> Allocations
             </Link>
@@ -162,7 +162,7 @@ export default function TimetableDashboard() {
 
           <div className="grid gap-5 lg:grid-cols-3">
             <div className="lg:col-span-2 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
-              <h2 className="mb-3 text-base font-semibold text-[#735366]">
+              <h2 className="mb-3 text-base font-semibold text-[color:var(--edvora-ink-strong)]">
                 Class Timetables
               </h2>
               {!data?.classes?.length ? (
@@ -178,14 +178,14 @@ export default function TimetableDashboard() {
                       onClick={() =>
                         navigate(`/admin/timetable/class/${cls._id}`)
                       }
-                      className="flex items-center justify-between rounded-xl border border-slate-100 bg-white p-3 text-left transition hover:border-[#A77A95]/40"
+                      className="flex items-center justify-between rounded-xl border border-slate-100 bg-white p-3 text-left transition hover:border-[color:var(--edvora-primary)]/40"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#FAEEE9] text-[#A77A95]">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)]">
                           <BookOpen size={18} />
                         </span>
                         <div>
-                          <p className="font-medium text-[#735366]">
+                          <p className="font-medium text-[color:var(--edvora-ink-strong)]">
                             {cls.className} {cls.section}
                           </p>
                           <p className="text-xs text-slate-500">
@@ -215,7 +215,7 @@ export default function TimetableDashboard() {
             </div>
 
             <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
-              <h2 className="mb-3 text-base font-semibold text-[#735366]">
+              <h2 className="mb-3 text-base font-semibold text-[color:var(--edvora-ink-strong)]">
                 Recent Drafts
               </h2>
               {!data?.drafts?.length ? (
@@ -231,9 +231,9 @@ export default function TimetableDashboard() {
                             `/admin/timetable/class/${d.classId?._id || d.classId}`
                           )
                         }
-                        className="w-full rounded-lg border border-slate-100 px-3 py-2 text-left text-sm hover:border-[#A77A95]/40"
+                        className="w-full rounded-lg border border-slate-100 px-3 py-2 text-left text-sm hover:border-[color:var(--edvora-primary)]/40"
                       >
-                        <span className="font-medium text-[#735366]">
+                        <span className="font-medium text-[color:var(--edvora-ink-strong)]">
                           {d.classId
                             ? `${d.classId.className} ${d.classId.section}`
                             : "Class"}

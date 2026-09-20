@@ -6,35 +6,36 @@
   --breakpoint-xs: 480px;
   --breakpoint-3xl: 2560px;
 
-  --color-primary: #a77a95;
-  --color-primary-hover: #8f6580;
-  --color-primary-deep: #735366;
-  --color-primary-soft: #faeee9;
-  --color-primary-muted: #faeee9;
-  --color-primary-border: #c3c3d5;
+  --color-primary: var(--edvora-primary);
+  --color-primary-hover: var(--edvora-primary-hover);
+  --color-primary-deep: var(--edvora-primary-deep);
+  --color-primary-soft: var(--edvora-primary-soft);
+  --color-primary-muted: var(--edvora-primary-muted);
+  --color-primary-border: var(--edvora-primary-border);
 
-  --color-secondary: #c3c3d5;
-  --color-secondary-hover: #a77a95;
-  --color-secondary-soft: #e8e8f0;
+  --color-secondary: var(--edvora-secondary);
+  --color-secondary-hover: var(--edvora-primary);
+  --color-secondary-soft: var(--edvora-secondary-soft);
 
-  --color-accent: #f5d69b;
-  --color-accent-hover: #d4b87a;
-  --color-accent-soft: #faeee9;
-  --color-accent-bright: #f5d69b;
+  --color-accent: var(--edvora-accent);
+  --color-accent-hover: var(--edvora-accent-hover);
+  --color-accent-soft: var(--edvora-accent-soft);
+  --color-accent-bright: var(--edvora-accent-bright);
 
-  --color-surface: #faeee9;
-  --color-surface-tint: #faeee9;
-  --color-card: #ffffff;
-  --color-card-dark: #c3c3d5;
+  --color-surface: var(--edvora-surface);
+  --color-surface-tint: var(--edvora-surface-tint);
+  --color-card: var(--edvora-card);
+  --color-card-dark: var(--edvora-secondary);
 
-  --color-textPrimary: #735366;
-  --color-textSecondary: #a77a95;
+  --color-textPrimary: var(--edvora-ink);
+  --color-textSecondary: var(--edvora-primary);
 
-  --color-ink: #735366;
-  --color-muted: #8f6580;
+  --color-ink: var(--edvora-ink);
+  --color-muted: var(--edvora-muted);
 }
 
-:root {
+:root,
+html[data-theme="light"] {
   --edvora-primary: #a77a95;
   --edvora-primary-hover: #8f6580;
   --edvora-primary-deep: #735366;
@@ -46,16 +47,559 @@
   --edvora-accent: #f5d69b;
   --edvora-accent-bright: #f5d69b;
   --edvora-accent-soft: #faeee9;
+  --edvora-accent-hover: #d4b87a;
   --edvora-surface: #faeee9;
+  --edvora-surface-tint: #faeee9;
+  --edvora-card: #ffffff;
+  --edvora-elevated: #f6ebe7;
   --edvora-ink: #735366;
+  --edvora-ink-strong: #3d1f33;
+  --edvora-muted: #8f6580;
+  --edvora-border: #e4d4dc;
+  --edvora-overlay: rgba(115, 83, 102, 0.4);
+  --edvora-sidebar-from: #735366;
+  --edvora-sidebar-via: #8f6580;
+  --edvora-sidebar-to: #a77a95;
+  --edvora-shadow: 0 10px 40px rgba(115, 83, 102, 0.12);
+  --edvora-shadow-sm: 0 2px 12px rgba(115, 83, 102, 0.08);
+
+  /* Glassmorphism */
+  --edvora-glass: rgba(255, 255, 255, 0.52);
+  --edvora-glass-strong: rgba(255, 255, 255, 0.72);
+  --edvora-glass-soft: rgba(255, 255, 255, 0.28);
+  --edvora-glass-border: rgba(255, 255, 255, 0.55);
+  --edvora-glass-border-soft: rgba(167, 122, 149, 0.18);
+  --edvora-glass-blur: 18px;
+  --edvora-glass-saturate: 165%;
+  --edvora-glass-shadow: 0 8px 32px rgba(115, 83, 102, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  --edvora-glass-shadow-lg: 0 20px 60px rgba(115, 83, 102, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+
+  /* Semantic status — light */
+  --edvora-success: #059669;
+  --edvora-success-soft: rgba(5, 150, 105, 0.12);
+  --edvora-success-ink: #047857;
+  --edvora-danger: #dc2626;
+  --edvora-danger-soft: rgba(220, 38, 38, 0.12);
+  --edvora-danger-ink: #b91c1c;
+  --edvora-warning: #d97706;
+  --edvora-warning-soft: rgba(217, 119, 6, 0.12);
+  --edvora-warning-ink: #b45309;
+  --edvora-on-solid: #ffffff;
+  --edvora-switch-track: color-mix(in srgb, var(--edvora-primary) 14%, #ffffff);
+  --edvora-switch-track-off: color-mix(in srgb, var(--edvora-muted) 18%, #ffffff);
+}
+
+html[data-theme="dark"] {
+  --edvora-primary: #c49ab4;
+  --edvora-primary-hover: #b087a2;
+  --edvora-primary-deep: #e8d5df;
+  --edvora-primary-soft: #2a1f26;
+  --edvora-primary-muted: #2a1f26;
+  --edvora-primary-border: #4a3a44;
+  --edvora-secondary: #6b5f72;
+  --edvora-secondary-soft: #3a3038;
+  --edvora-accent: #f5d69b;
+  --edvora-accent-bright: #f5d69b;
+  --edvora-accent-soft: #2a1f26;
+  --edvora-accent-hover: #d4b87a;
+  --edvora-surface: #161018;
+  --edvora-surface-tint: #1c141a;
+  --edvora-card: #221a20;
+  --edvora-elevated: #2a2128;
+  --edvora-ink: #f3e8ee;
+  --edvora-ink-strong: #fff8fb;
+  --edvora-muted: #c9b2bf;
+  --edvora-border: #3d3239;
+  --edvora-overlay: rgba(10, 6, 10, 0.55);
+  --edvora-sidebar-from: #5a3f52;
+  --edvora-sidebar-via: #7a5a70;
+  --edvora-sidebar-to: #a77a95;
+  --edvora-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+  --edvora-shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.35);
+
+  --edvora-glass: rgba(34, 26, 32, 0.55);
+  --edvora-glass-strong: rgba(42, 33, 40, 0.72);
+  --edvora-glass-soft: rgba(255, 255, 255, 0.06);
+  --edvora-glass-border: rgba(255, 255, 255, 0.1);
+  --edvora-glass-border-soft: rgba(196, 154, 180, 0.22);
+  --edvora-glass-blur: 20px;
+  --edvora-glass-saturate: 150%;
+  --edvora-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --edvora-glass-shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  /* Semantic status — dark */
+  --edvora-success: #34d399;
+  --edvora-success-soft: rgba(52, 211, 153, 0.16);
+  --edvora-success-ink: #6ee7b7;
+  --edvora-danger: #f87171;
+  --edvora-danger-soft: rgba(248, 113, 113, 0.16);
+  --edvora-danger-ink: #fca5a5;
+  --edvora-warning: #fbbf24;
+  --edvora-warning-soft: rgba(251, 191, 36, 0.16);
+  --edvora-warning-ink: #fcd34d;
+  --edvora-on-solid: #0f0a0d;
+  --edvora-switch-track: color-mix(in srgb, var(--edvora-primary) 28%, #221a20);
+  --edvora-switch-track-off: color-mix(in srgb, var(--edvora-muted) 22%, #221a20);
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--edvora-surface);
+  background:
+    radial-gradient(
+      ellipse 80% 50% at 10% -10%,
+      color-mix(in srgb, var(--edvora-primary) 18%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 70% 45% at 95% 10%,
+      color-mix(in srgb, var(--edvora-accent) 16%, transparent),
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 60% 40% at 50% 110%,
+      color-mix(in srgb, var(--edvora-primary) 12%, transparent),
+      transparent 55%
+    ),
+    var(--edvora-surface);
+  background-attachment: fixed;
   color: var(--edvora-ink);
   text-rendering: optimizeLegibility;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* ── Glassmorphism primitives ───────────────────────────────────── */
+.glass,
+.theme-card,
+.theme-elevated,
+.rs-card {
+  background: var(--edvora-glass) !important;
+  backdrop-filter: blur(var(--edvora-glass-blur))
+    saturate(var(--edvora-glass-saturate));
+  -webkit-backdrop-filter: blur(var(--edvora-glass-blur))
+    saturate(var(--edvora-glass-saturate));
+  border: 1px solid var(--edvora-glass-border-soft) !important;
+  box-shadow: var(--edvora-glass-shadow) !important;
+  color: var(--edvora-ink);
+}
+
+.glass-strong {
+  background: var(--edvora-glass-strong) !important;
+  backdrop-filter: blur(calc(var(--edvora-glass-blur) + 6px))
+    saturate(var(--edvora-glass-saturate));
+  -webkit-backdrop-filter: blur(calc(var(--edvora-glass-blur) + 6px))
+    saturate(var(--edvora-glass-saturate));
+  border: 1px solid var(--edvora-glass-border) !important;
+  box-shadow: var(--edvora-glass-shadow-lg) !important;
+}
+
+.glass-soft {
+  background: var(--edvora-glass-soft) !important;
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border: 1px solid var(--edvora-glass-border-soft) !important;
+}
+
+.theme-page {
+  background:
+    radial-gradient(
+      ellipse 70% 45% at 0% 0%,
+      color-mix(in srgb, var(--edvora-primary) 14%, transparent),
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 55% 40% at 100% 0%,
+      color-mix(in srgb, var(--edvora-accent) 12%, transparent),
+      transparent 45%
+    ),
+    var(--edvora-surface);
+  background-attachment: fixed;
+  color: var(--edvora-ink);
+}
+
+.theme-sidebar {
+  background: linear-gradient(
+    165deg,
+    var(--edvora-sidebar-from) 0%,
+    var(--edvora-sidebar-via) 48%,
+    var(--edvora-sidebar-to) 100%
+  );
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  border: 1px solid color-mix(in srgb, var(--edvora-accent) 28%, rgba(255, 255, 255, 0.18));
+  color: #fff;
+  box-shadow:
+    var(--edvora-glass-shadow-lg),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.theme-btn-primary {
+  background: linear-gradient(
+    135deg,
+    var(--edvora-primary) 0%,
+    var(--edvora-primary-hover) 100%
+  );
+  color: #fff;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--edvora-primary) 32%, transparent);
+}
+
+html[data-theme="dark"] .theme-btn-primary {
+  color: #fff;
+  background: linear-gradient(
+    135deg,
+    var(--edvora-primary) 0%,
+    color-mix(in srgb, var(--edvora-primary) 55%, #1a1016) 100%
+  );
+}
+
+/* Segmented switches (Active / Inactive, Light / Dark, tabs) */
+.theme-segment {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.25rem;
+  border-radius: 1rem;
+  background: var(--edvora-switch-track);
+  border: 1px solid var(--edvora-glass-border-soft);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+html[data-theme="dark"] .theme-segment {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.theme-segment-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+  color: var(--edvora-muted);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.theme-segment-btn:hover {
+  color: var(--edvora-ink);
+  background: color-mix(in srgb, var(--edvora-primary) 8%, transparent);
+}
+
+.theme-segment-btn.is-active {
+  background: var(--edvora-primary);
+  color: #fff;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--edvora-primary) 35%, transparent);
+}
+
+.theme-segment-btn.is-active:hover {
+  color: #fff;
+  background: var(--edvora-primary-hover);
+}
+
+.theme-segment-btn.is-success {
+  color: var(--edvora-success-ink);
+}
+
+.theme-segment-btn.is-success:hover {
+  background: var(--edvora-success-soft);
+  color: var(--edvora-success-ink);
+}
+
+.theme-segment-btn.is-success.is-active {
+  background: var(--edvora-success);
+  color: #fff;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--edvora-success) 35%, transparent);
+}
+
+.theme-segment-btn.is-success.is-active:hover {
+  filter: brightness(1.05);
+  color: #fff;
+}
+
+.theme-segment-btn.is-danger {
+  color: var(--edvora-danger-ink);
+}
+
+.theme-segment-btn.is-danger:hover {
+  background: var(--edvora-danger-soft);
+  color: var(--edvora-danger-ink);
+}
+
+.theme-segment-btn.is-danger.is-active {
+  background: var(--edvora-danger);
+  color: #fff;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--edvora-danger) 35%, transparent);
+}
+
+.theme-segment-btn.is-danger.is-active:hover {
+  filter: brightness(1.05);
+  color: #fff;
+}
+
+.theme-segment-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  border-radius: 9999px;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: color-mix(in srgb, currentColor 14%, transparent);
+}
+
+.theme-segment-btn.is-active .theme-segment-count {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.theme-status-active {
+  background: var(--edvora-success-soft) !important;
+  color: var(--edvora-success-ink) !important;
+  border-color: color-mix(in srgb, var(--edvora-success) 25%, transparent) !important;
+}
+
+.theme-status-inactive {
+  background: var(--edvora-danger-soft) !important;
+  color: var(--edvora-danger-ink) !important;
+  border-color: color-mix(in srgb, var(--edvora-danger) 25%, transparent) !important;
+}
+
+.theme-chip-on {
+  background: var(--edvora-primary) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--edvora-primary) 30%, transparent);
+}
+
+.theme-chip-off {
+  background: var(--edvora-glass-soft) !important;
+  color: var(--edvora-ink) !important;
+  border: 1px solid var(--edvora-glass-border-soft) !important;
+}
+
+.theme-chip-off:hover {
+  border-color: color-mix(in srgb, var(--edvora-primary) 40%, transparent) !important;
+}
+
+/* Global glass remap — cards, panels, modals across the app */
+.rs-page .bg-white,
+main .bg-white,
+.theme-page .bg-white,
+[class*="rounded-xl"].bg-white,
+[class*="rounded-2xl"].bg-white,
+[class*="rounded-[14px]"].bg-white,
+[class*="rounded-t-[14px]"].bg-white,
+.fixed .bg-white.shadow-2xl,
+.fixed [class*="max-w-"].bg-white {
+  background: var(--edvora-glass) !important;
+  backdrop-filter: blur(var(--edvora-glass-blur))
+    saturate(var(--edvora-glass-saturate)) !important;
+  -webkit-backdrop-filter: blur(var(--edvora-glass-blur))
+    saturate(var(--edvora-glass-saturate)) !important;
+  border-color: var(--edvora-glass-border-soft) !important;
+  box-shadow: var(--edvora-glass-shadow) !important;
+}
+
+/* Sticky / floating headers */
+header.sticky,
+.sticky.top-0.z-30 {
+  background: var(--edvora-glass-strong) !important;
+  backdrop-filter: blur(20px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+  border-color: var(--edvora-glass-border-soft) !important;
+}
+
+/* Soft fills that sit on glass pages */
+.rs-page .bg-slate-50,
+.rs-page .bg-slate-100,
+.rs-page .bg-\[\#FCF9FB\],
+.rs-page .bg-\[\#FAEEE9\] {
+  background: var(--edvora-glass-soft) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+/* Modal scrim stays frosted */
+.fixed.inset-0.z-\[9999\],
+.fixed.inset-0.bg-black\/40 {
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+}
+
+/* Brand colour remaps — follow chosen palette in light & dark */
+.text-\[\#735366\],
+.text-\[\#3d1f33\],
+.text-\[\#3D1F33\] {
+  color: var(--edvora-ink-strong) !important;
+}
+
+.text-\[\#8F6580\],
+.text-\[\#8f6580\] {
+  color: var(--edvora-muted) !important;
+}
+
+.text-\[\#A77A95\],
+.text-\[\#a77a95\] {
+  color: var(--edvora-primary) !important;
+}
+
+.bg-\[\#A77A95\],
+.bg-\[\#a77a95\] {
+  background-color: var(--edvora-primary) !important;
+}
+
+.bg-\[\#8F6580\],
+.bg-\[\#8f6580\],
+.hover\:bg-\[\#8F6580\]:hover,
+.hover\:bg-\[\#8f6580\]:hover {
+  background-color: var(--edvora-primary-hover) !important;
+}
+
+.bg-\[\#FAEEE9\],
+.bg-\[\#faeee9\],
+.bg-\[\#F6EBE7\],
+.bg-\[\#f6ebe7\],
+.bg-\[\#faf5f8\],
+.bg-\[\#f3e8f0\] {
+  background-color: var(--edvora-primary-soft) !important;
+}
+
+.bg-\[\#735366\],
+.bg-\[\#735366\] {
+  background-color: var(--edvora-primary-deep) !important;
+}
+
+.border-\[\#A77A95\],
+.border-\[\#a77a95\],
+.hover\:border-\[\#A77A95\]:hover {
+  border-color: var(--edvora-primary) !important;
+}
+
+.border-\[\#E8D5CE\],
+.border-\[\#E8D5DF\],
+.border-\[\#ead9e3\],
+.border-\[\#C3C3D5\],
+.border-\[\#D0D5DD\] {
+  border-color: var(--edvora-border) !important;
+}
+
+.focus\:border-\[\#A77A95\]:focus {
+  border-color: var(--edvora-primary) !important;
+}
+
+.from-\[\#A77A95\] {
+  --tw-gradient-from: var(--edvora-primary) !important;
+  --tw-gradient-to: color-mix(in srgb, var(--edvora-primary) 0%, transparent) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+.to-\[\#735366\],
+.via-\[\#8F6580\] {
+  --tw-gradient-to: var(--edvora-primary-deep) !important;
+}
+
+.to-\[\#A77A95\] {
+  --tw-gradient-to: var(--edvora-primary) !important;
+}
+
+/* Emerald / red utility remaps for status chips left in pages */
+.bg-emerald-600 {
+  background-color: var(--edvora-success) !important;
+}
+.bg-red-600 {
+  background-color: var(--edvora-danger) !important;
+}
+.text-emerald-700,
+.text-emerald-600 {
+  color: var(--edvora-success-ink) !important;
+}
+.text-red-600,
+.text-red-700 {
+  color: var(--edvora-danger-ink) !important;
+}
+.bg-emerald-500\/10,
+.hover\:bg-emerald-500\/10:hover {
+  background-color: var(--edvora-success-soft) !important;
+}
+.bg-red-500\/10,
+.hover\:bg-red-500\/10:hover {
+  background-color: var(--edvora-danger-soft) !important;
+}
+.bg-amber-500\/10,
+.hover\:bg-amber-500\/10:hover {
+  background-color: var(--edvora-warning-soft) !important;
+}
+.text-amber-700 {
+  color: var(--edvora-warning-ink) !important;
+}
+
+/* Dark-mode soft remaps for widely hardcoded utility classes */
+html[data-theme="dark"] .bg-white {
+  background: var(--edvora-glass) !important;
+}
+
+html[data-theme="dark"] .bg-\[\#FAEEE9\],
+html[data-theme="dark"] .bg-\[\#faeee9\],
+html[data-theme="dark"] .bg-\[\#F6EBE7\],
+html[data-theme="dark"] .bg-\[\#faf5f8\],
+html[data-theme="dark"] .bg-\[\#f3e8f0\] {
+  background: var(--edvora-glass-soft) !important;
+}
+
+html[data-theme="dark"] .bg-slate-50,
+html[data-theme="dark"] .bg-slate-100,
+html[data-theme="dark"] .bg-\[\#FCF9FB\],
+html[data-theme="dark"] .bg-\[\#FAEEE9\]\/40 {
+  background: var(--edvora-glass-soft) !important;
+}
+
+html[data-theme="dark"] .text-slate-800,
+html[data-theme="dark"] .text-slate-700,
+html[data-theme="dark"] .text-\[\#111827\],
+html[data-theme="dark"] .text-\[\#344054\] {
+  color: var(--edvora-ink-strong) !important;
+}
+
+html[data-theme="dark"] .text-slate-600,
+html[data-theme="dark"] .text-slate-500,
+html[data-theme="dark"] .text-\[\#667085\] {
+  color: var(--edvora-muted) !important;
+}
+
+html[data-theme="dark"] .text-\[\#735366\],
+html[data-theme="dark"] .text-\[\#3d1f33\] {
+  color: var(--edvora-ink) !important;
+}
+
+html[data-theme="dark"] .border-slate-100,
+html[data-theme="dark"] .border-slate-200,
+html[data-theme="dark"] .border-gray-200,
+html[data-theme="dark"] .border-\[\#D0D5DD\],
+html[data-theme="dark"] .border-\[\#E8D5DF\],
+html[data-theme="dark"] .border-\[\#ead9e3\],
+html[data-theme="dark"] .border-\[\#C3C3D5\] {
+  border-color: var(--edvora-border) !important;
+}
+
+html[data-theme="dark"] .shadow-sm,
+html[data-theme="dark"] .shadow,
+html[data-theme="dark"] .shadow-md,
+html[data-theme="dark"] .shadow-lg,
+html[data-theme="dark"] .shadow-2xl {
+  --tw-shadow-color: rgba(0, 0, 0, 0.35);
 }
 
 /* Thin scrollbar — hidden until scrolling */
@@ -66,7 +610,8 @@ body {
 
 html.is-scrolling,
 html.is-scrolling * {
-  scrollbar-color: rgba(167, 122, 149, 0.55) transparent;
+  scrollbar-color: color-mix(in srgb, var(--edvora-primary) 55%, transparent)
+    transparent;
 }
 
 *::-webkit-scrollbar {
@@ -84,7 +629,7 @@ html.is-scrolling * {
 }
 
 html.is-scrolling *::-webkit-scrollbar-thumb {
-  background-color: rgba(167, 122, 149, 0.55);
+  background-color: color-mix(in srgb, var(--edvora-primary) 55%, transparent);
 }
 
 img,
@@ -93,19 +638,22 @@ svg {
   height: auto;
 }
 
-/* Clock colon blink */
 .clock-colon {
   animation: clockBlink 1s step-start infinite;
 }
 
 @keyframes clockBlink {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.15; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.15;
+  }
 }
 
-/* Login pencil loader */
 .login-loader {
-  --color-1: #a77a95;
+  --color-1: var(--edvora-primary);
   --color-2: rgba(0, 0, 0, 0.02);
   --color-3: #ffffff;
   --size: 0.55px;

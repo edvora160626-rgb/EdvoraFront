@@ -34,7 +34,7 @@ import {
 } from "../../utils/eventsApi";
 
 const inputClass =
-  "w-full h-[42px] rounded-lg border border-[#D0D5DD] bg-white px-3 text-[14px] text-[#344054] outline-none focus:border-[#A77A95]";
+  "w-full h-[42px] rounded-lg border border-[#D0D5DD] bg-white px-3 text-[14px] text-[#344054] outline-none focus:border-[color:var(--edvora-primary)]";
 const labelClass = "block text-[13px] font-semibold text-[#667085] mb-1.5";
 
 const STATUS_STYLES = {
@@ -146,7 +146,7 @@ function ProgramModal({
               <label className={labelClass}>Description</label>
               <textarea
                 rows={3}
-                className="w-full rounded-lg border border-[#D0D5DD] bg-white px-3 py-2.5 text-[14px] outline-none focus:border-[#A77A95]"
+                className="w-full rounded-lg border border-[#D0D5DD] bg-white px-3 py-2.5 text-[14px] outline-none focus:border-[color:var(--edvora-primary)]"
                 value={formData.description}
                 onChange={(e) =>
                   setFormData((p) => ({ ...p, description: e.target.value }))
@@ -272,7 +272,7 @@ function ProgramModal({
             type="button"
             disabled={submitting}
             onClick={handleSubmit}
-            className="h-[42px] px-5 rounded-lg bg-[#A77A95] hover:bg-[#8F6580] text-white text-sm font-semibold disabled:opacity-60"
+            className="h-[42px] px-5 rounded-lg bg-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-hover)] text-white text-sm font-semibold disabled:opacity-60"
           >
             {submitting
               ? "Saving…"
@@ -343,7 +343,7 @@ function EditEventModal({ event, onClose, onSaved }) {
             <label className={labelClass}>Description</label>
             <textarea
               rows={3}
-              className="w-full rounded-lg border border-[#D0D5DD] px-3 py-2.5 text-sm outline-none focus:border-[#A77A95]"
+              className="w-full rounded-lg border border-[#D0D5DD] px-3 py-2.5 text-sm outline-none focus:border-[color:var(--edvora-primary)]"
               value={formData.description}
               onChange={(e) =>
                 setFormData((p) => ({ ...p, description: e.target.value }))
@@ -413,7 +413,7 @@ function EditEventModal({ event, onClose, onSaved }) {
             type="button"
             disabled={submitting}
             onClick={handleSubmit}
-            className="h-[42px] px-5 rounded-lg bg-[#A77A95] text-white text-sm font-semibold disabled:opacity-60"
+            className="h-[42px] px-5 rounded-lg bg-[color:var(--edvora-primary)] text-white text-sm font-semibold disabled:opacity-60"
           >
             {submitting ? "Saving…" : "Save"}
           </button>
@@ -641,7 +641,7 @@ function EventDetail() {
       <button
         type="button"
         onClick={() => navigate("/admin/upcoming-events")}
-        className="inline-flex items-center gap-2 text-sm font-semibold text-[#735366] hover:text-[#A77A95] mb-4"
+        className="inline-flex items-center gap-2 text-sm font-semibold text-[color:var(--edvora-ink-strong)] hover:text-[color:var(--edvora-primary)] mb-4"
       >
         <ArrowLeft size={16} />
         Back to events
@@ -651,7 +651,7 @@ function EventDetail() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#735366]">
+              <h1 className="text-2xl sm:text-3xl font-bold text-[color:var(--edvora-ink-strong)]">
                 {event.eventName}
               </h1>
               <span
@@ -736,7 +736,7 @@ function EventDetail() {
           onClick={() => setActiveTab("programs")}
           className={`px-4 py-2 rounded-lg text-sm font-semibold ${
             activeTab === "programs"
-              ? "bg-[#A77A95] text-white"
+              ? "bg-[color:var(--edvora-primary)] text-white"
               : "bg-white border border-slate-200 text-slate-700"
           }`}
         >
@@ -748,7 +748,7 @@ function EventDetail() {
             onClick={() => setActiveTab("participants")}
             className={`px-4 py-2 rounded-lg text-sm font-semibold ${
               activeTab === "participants"
-                ? "bg-[#A77A95] text-white"
+                ? "bg-[color:var(--edvora-primary)] text-white"
                 : "bg-white border border-slate-200 text-slate-700"
             }`}
           >
@@ -767,7 +767,7 @@ function EventDetail() {
                   setEditingProgram(null);
                   setShowProgramModal(true);
                 }}
-                className="inline-flex items-center gap-2 h-[40px] px-4 rounded-lg bg-[#A77A95] text-white text-sm font-semibold"
+                className="inline-flex items-center gap-2 h-[40px] px-4 rounded-lg bg-[color:var(--edvora-primary)] text-white text-sm font-semibold"
               >
                 <Plus size={16} />
                 Add Program
@@ -807,7 +807,7 @@ function EventDetail() {
                           {program.registrationStatus}
                         </span>
                         {program.isRegistered ? (
-                          <span className="text-[11px] px-2 py-0.5 rounded-full font-medium bg-[#FAEEE9] text-[#A77A95]">
+                          <span className="text-[11px] px-2 py-0.5 rounded-full font-medium bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)]">
                             Registered
                           </span>
                         ) : null}
@@ -862,7 +862,7 @@ function EventDetail() {
                           type="button"
                           disabled={actionLoading}
                           onClick={() => handleRegister(program._id)}
-                          className="h-[36px] px-3 rounded-lg bg-[#A77A95] text-white text-sm font-semibold disabled:opacity-60"
+                          className="h-[36px] px-3 rounded-lg bg-[color:var(--edvora-primary)] text-white text-sm font-semibold disabled:opacity-60"
                         >
                           Register
                         </button>

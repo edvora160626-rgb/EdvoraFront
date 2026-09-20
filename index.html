@@ -35,6 +35,17 @@
     <link rel="canonical" href="http://localhost:5173/" />
 
     <title>Edvora</title>
+    <script>
+      (function () {
+        try {
+          var mode = localStorage.getItem("edvora_theme_mode") || "light";
+          document.documentElement.dataset.theme =
+            mode === "dark" ? "dark" : "light";
+          document.documentElement.style.colorScheme =
+            mode === "dark" ? "dark" : "light";
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -28,12 +28,12 @@ function LogoutModal({
         className="relative w-full max-w-xs sm:max-w-sm rounded-xl bg-white shadow-2xl ring-1 ring-black/5"
       >
         <div className="px-4 sm:px-5 pt-5 pb-1 flex flex-col items-center text-center">
-          <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#FAEEE9] text-[#A77A95]">
+          <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[color:var(--edvora-primary-soft)] text-[color:var(--edvora-primary)]">
             <LogOut size={22} />
           </span>
           <h3
             id="logout-modal-title"
-            className="text-base sm:text-lg font-semibold text-[#735366]"
+            className="text-base sm:text-lg font-semibold text-[color:var(--edvora-ink-strong)]"
           >
             {title}
           </h3>

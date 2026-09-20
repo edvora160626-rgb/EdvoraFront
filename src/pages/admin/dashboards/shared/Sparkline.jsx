@@ -1,6 +1,6 @@
 function Sparkline({
   points = [4, 8, 6, 10, 7, 12, 9],
-  color = "#A77A95",
+  color = "var(--edvora-primary)",
   height = 28,
   width = 80,
 }) {
