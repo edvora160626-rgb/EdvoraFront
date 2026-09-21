@@ -1,13 +1,19 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
+import {
+  clearAuthSession,
+  getCurrentUser,
+  getToken,
+  setAuthSession,
+} from "../../utils/auth";
+import { setPortalMode } from "../../utils/portalMode";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 function readStoredAuth() {
   try {
-    const token = localStorage.getItem("token");
-    const rawUser = localStorage.getItem("user");
-    const user = rawUser ? JSON.parse(rawUser) : null;
+    const token = getToken();
+    const user = getCurrentUser();
 
     if (token && user) {
       return {
@@ -48,10 +54,9 @@ export const loginUser = createAsyncThunk(
       const token = data.token || "";
       const user = data.user || null;
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
+      setAuthSession({ token, user });
       if (data.portalMode) {
-        localStorage.setItem("edvora_portal_mode", data.portalMode);
+        setPortalMode(data.portalMode);
       }
 
       return {
@@ -69,8 +74,7 @@ export const loginUser = createAsyncThunk(
 );
 
 export const logoutUser = createAsyncThunk("auth/logout", async () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
+  clearAuthSession();
   return true;
 });
 
@@ -90,7 +94,7 @@ const authSlice = createSlice({
       const user = action.payload || null;
       state.user = user;
       if (user) {
-        localStorage.setItem("user", JSON.stringify(user));
+        setAuthSession({ token: getToken(), user });
       }
     },
   },
