@@ -15,7 +15,14 @@ const STORAGE_KEY = "edvora_portal_mode";
 
 export function getPortalMode() {
   try {
-    const value = localStorage.getItem(STORAGE_KEY);
+    let value = sessionStorage.getItem(STORAGE_KEY);
+    if (!value) {
+      value = localStorage.getItem(STORAGE_KEY);
+      if (value) {
+        sessionStorage.setItem(STORAGE_KEY, value);
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
     if (value === PORTAL_MODES.EXAMINATION) return PORTAL_MODES.EXAMINATION;
   } catch {
     // ignore
@@ -29,7 +36,9 @@ export function setPortalMode(mode) {
       ? PORTAL_MODES.EXAMINATION
       : PORTAL_MODES.SCHOOL;
   try {
-    localStorage.setItem(STORAGE_KEY, next);
+    sessionStorage.setItem(STORAGE_KEY, next);
+    // Avoid a shared localStorage portal mode clobbering another tab.
+    localStorage.removeItem(STORAGE_KEY);
   } catch {
     // ignore
   }

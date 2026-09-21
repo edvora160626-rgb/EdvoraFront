@@ -1,6 +1,40 @@
-export function getCurrentUser() {
+/**
+ * Auth identity is tab-scoped (sessionStorage)
+ * Tabs share localStorage, so a single localStorage token forced one account
+ * across the whole browser; sessionStorage keeps each tab independent.
+ */
+
+function clearLegacyLocalAuth() {
   try {
-    const raw = localStorage.getItem("user");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+  } catch {
+    // ignore
+  }
+}
+
+/** Move a pre-existing shared localStorage session into this tab once. */
+function migrateLegacyAuthIfNeeded() {
+  try {
+    if (sessionStorage.getItem("token") && sessionStorage.getItem("user")) {
+      return;
+    }
+    const token = localStorage.getItem("token");
+    const rawUser = localStorage.getItem("user");
+    if (!token || !rawUser) return;
+
+    sessionStorage.setItem("token", token);
+    sessionStorage.setItem("user", rawUser);
+    clearLegacyLocalAuth();
+  } catch {
+    // ignore
+  }
+}
+
+export function getCurrentUser() {
+  migrateLegacyAuthIfNeeded();
+  try {
+    const raw = sessionStorage.getItem("user");
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
@@ -8,7 +42,25 @@ export function getCurrentUser() {
 }
 
 export function getToken() {
-  return localStorage.getItem("token") || "";
+  migrateLegacyAuthIfNeeded();
+  return sessionStorage.getItem("token") || "";
+}
+
+export function setAuthSession({ token, user } = {}) {
+  if (token) sessionStorage.setItem("token", token);
+  else sessionStorage.removeItem("token");
+
+  if (user) sessionStorage.setItem("user", JSON.stringify(user));
+  else sessionStorage.removeItem("user");
+
+  // Drop any previous shared-browser login so it cannot overwrite this tab.
+  clearLegacyLocalAuth();
+}
+
+export function clearAuthSession() {
+  sessionStorage.removeItem("token");
+  sessionStorage.removeItem("user");
+  clearLegacyLocalAuth();
 }
 
 export function normalizeRole(role = "") {

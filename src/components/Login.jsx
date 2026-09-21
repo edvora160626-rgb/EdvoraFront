@@ -16,6 +16,7 @@ import {
   logoutUser,
   resetAuthStatus,
 } from "../redux/slices/authSlice";
+import { getCurrentUser } from "../utils/auth";
 import {
   getPortalHomePath,
   getPortalMode,
@@ -102,8 +103,7 @@ function Login() {
     if (!isLoggedIn) return;
     if (status !== "succeeded") return;
 
-    const user = JSON.parse(localStorage.getItem("user") || "null");
-    const homePath = getPortalHomePath(portalMode, user);
+    const homePath = getPortalHomePath(portalMode, getCurrentUser());
 
     // Fresh login submit → enter portal (login stays in history for Back)
     if (justLoggedInRef.current) {
