@@ -176,12 +176,12 @@ function LeftPanel() {
       {/* ── Top bar ── */}
       <div className="relative z-10 flex items-center justify-between gap-4 flex-shrink-0"
         style={{ padding: "20px 28px 0" }}>
-        {/* Brand — keep designed background; rounded frame for clean shape */}
+        {/* Brand mark only — no card frame */}
         <div className="min-w-0 shrink flex items-center">
           <EdvoraLogo
             variant="full"
             decorative
-            className="w-[168px] max-w-[38vw] h-auto rounded-xl shadow-[0_10px_28px_rgba(0,0,0,0.35)] ring-1 ring-white/10"
+            className="w-[118px] max-w-[28vw] h-auto drop-shadow-[0_6px_16px_rgba(0,0,0,0.28)]"
           />
         </div>
         {/* Clock pill */}
@@ -256,7 +256,7 @@ function MobileClock() {
         <EdvoraLogo
           variant="icon"
           decorative
-          className="h-8 w-8 flex-shrink-0 rounded-lg ring-1 ring-white/15"
+          className="h-8 w-8 flex-shrink-0"
         />
         <div className="min-w-0">
           <p style={{ color: "white", fontWeight: 700, fontSize: 13, lineHeight: 1 }}>Edvora</p>

@@ -173,10 +173,10 @@ function Login() {
   return (
     <>
       <AuthShell className={showRegister || loading ? "blur-sm" : ""}>
-        <div className="mb-4 flex flex-col items-start gap-2">
+        <div className="mb-4 flex flex-col items-center text-center gap-2">
           <EdvoraLogo
             variant="full"
-            className="w-[min(100%,180px)] h-auto rounded-xl shadow-sm ring-1 ring-[#ead9e3]"
+            className="w-[min(100%,188px)] h-auto"
           />
           <span className="text-[9px] font-semibold uppercase tracking-[0.16em] text-[#a77a95]/75">
             {isExam ? "Examination Portal" : "School Management"}
@@ -189,10 +189,10 @@ function Login() {
           disabled={loading}
         />
 
-        <h1 className="text-[1.2rem] font-bold tracking-tight text-[#3d1f33] leading-tight">
+        <h1 className="text-center text-[1.2rem] font-bold tracking-tight text-[#3d1f33] leading-tight">
           Welcome back
         </h1>
-        <p className="text-[12px] text-[color:var(--edvora-ink-strong)]/60 mt-1 mb-3.5 leading-snug max-w-[28ch]">
+        <p className="text-center text-[12px] text-[color:var(--edvora-ink-strong)]/60 mt-1 mb-3.5 leading-snug">
           {isExam
             ? "Sign in to practice tests, take exams and view results."
             : "Sign in to manage attendance, staff and classes — all in one place."}

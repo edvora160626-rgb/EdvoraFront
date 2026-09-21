@@ -312,7 +312,7 @@ function AdminLayout() {
               <EdvoraLogo
                 variant="icon"
                 decorative
-                className="h-10 w-10 shrink-0 rounded-xl ring-1 ring-[color:var(--edvora-glass-border-soft)]"
+                className="h-10 w-10 shrink-0"
               />
               <div className="min-w-0 hidden sm:block">
                 <p className="text-sm font-bold tracking-tight text-[color:var(--edvora-ink-strong)] truncate">
@@ -385,7 +385,7 @@ function AdminLayout() {
               <EdvoraLogo
                 variant="icon"
                 decorative
-                className="h-11 w-11 shrink-0 rounded-2xl ring-1 ring-white/20"
+                className="h-11 w-11 shrink-0"
               />
               <div className="min-w-0">
                 <p className="text-lg font-bold text-white leading-tight truncate">

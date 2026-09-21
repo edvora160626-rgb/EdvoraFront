@@ -3,10 +3,8 @@ import iconLogo from "../assets/edvora-logo-icon.png";
 
 /**
  * Edvora brand mark (book + graduate + wordmark).
- * - full: complete logo artwork with designed background
- * - icon: square crop of the mark (sidebars, favicon)
- *
- * Background is part of the artwork — do not force transparency.
+ * - full: complete logo on a transparent background
+ * - icon: mark crop (sidebars, compact headers)
  */
 function EdvoraLogo({
   variant = "full",
@@ -24,8 +22,7 @@ function EdvoraLogo({
       aria-hidden={decorative ? true : undefined}
       draggable={false}
       className={[
-        "block select-none object-contain object-center",
-        isIcon ? "aspect-square" : "aspect-[1024/682]",
+        "block select-none object-contain object-center bg-transparent",
         className,
       ]
         .filter(Boolean)

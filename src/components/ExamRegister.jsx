@@ -24,11 +24,6 @@ const ACCOUNT_TYPE_OPTIONS = [
     label: "Admin",
     hint: "Question bank, tests, users, reports",
   },
-  {
-    value: "PROCTOR",
-    label: "Proctor",
-    hint: "Live sessions & exam acceptance",
-  },
 ];
 
 function ExamRegisterModal({ onClose }) {
@@ -318,8 +313,7 @@ function ExamRegisterModal({ onClose }) {
           </button>
 
           <p className="text-center text-[11px] text-[#a77a95]/55 pb-2">
-            Admin, Candidate and Proctor get different screens after login
-            (Nextestify-style).
+            Admin and Candidate get different screens after login.
           </p>
         </form>
       </div>

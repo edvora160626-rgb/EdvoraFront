@@ -17,7 +17,7 @@ import { useTheme } from "../../theme/ThemeContext";
 import { logoutUser } from "../../redux/slices/authSlice";
 import { ExamSessionProvider } from "./context/ExamSessionContext";
 import ExamSidebarNav from "./ExamSidebarNav";
-import { ADMIN_NAV, CANDIDATE_NAV, PROCTOR_NAV } from "./examNav";
+import { ADMIN_NAV, CANDIDATE_NAV } from "./examNav";
 import {
   EXAM_ROLES,
   getExamRole,
@@ -42,12 +42,10 @@ function ExamLayoutInner() {
   const isLiveTest = location.pathname === "/exam/test-page";
   const role = getExamRole(user);
   const roleLabel = getExamRoleLabel(role);
-  const isNestedNav =
-    role === EXAM_ROLES.ADMIN || role === EXAM_ROLES.PROCTOR;
+  const isNestedNav = role === EXAM_ROLES.ADMIN;
 
   const navItems = useMemo(() => {
     if (role === EXAM_ROLES.ADMIN) return ADMIN_NAV;
-    if (role === EXAM_ROLES.PROCTOR) return PROCTOR_NAV;
     return CANDIDATE_NAV;
   }, [role]);
 
@@ -70,15 +68,9 @@ function ExamLayoutInner() {
 
     const home = getPortalHomePath(PORTAL_MODES.EXAMINATION, user);
     const path = location.pathname;
-    const isSharedExamFlow =
-      path.startsWith("/exam/test") || path === "/exam/result";
     const isWrongRolePath =
       (role === EXAM_ROLES.ADMIN && !path.startsWith("/exam/admin")) ||
-      (role === EXAM_ROLES.PROCTOR &&
-        !path.startsWith("/exam/proctor") &&
-        !isSharedExamFlow) ||
-      (role === EXAM_ROLES.CANDIDATE &&
-        (path.startsWith("/exam/admin") || path.startsWith("/exam/proctor")));
+      (role === EXAM_ROLES.CANDIDATE && path.startsWith("/exam/admin"));
 
     if (!isWrongRolePath) return;
 
@@ -125,7 +117,7 @@ function ExamLayoutInner() {
             <EdvoraLogo
               variant="icon"
               decorative
-              className="h-11 w-11 shrink-0 rounded-xl ring-1 ring-white/15"
+              className="h-11 w-11 shrink-0"
             />
             <div className="min-w-0">
               <p className="text-lg font-bold text-white leading-tight truncate">
@@ -228,7 +220,7 @@ function ExamLayoutInner() {
             <EdvoraLogo
               variant="icon"
               decorative
-              className="h-8 w-8 sm:h-9 sm:w-9 shrink-0 rounded-lg ring-1 ring-[color:var(--edvora-border)]"
+              className="h-8 w-8 sm:h-9 sm:w-9 shrink-0"
             />
             <span className="rs-body font-bold text-[color:var(--edvora-ink)] truncate">
               {roleLabel} Portal

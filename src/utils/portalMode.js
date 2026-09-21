@@ -6,7 +6,6 @@ export const PORTAL_MODES = Object.freeze({
 export const EXAM_ROLES = Object.freeze({
   ADMIN: "EXAM_ADMIN",
   CANDIDATE: "EXAM_CANDIDATE",
-  PROCTOR: "EXAM_PROCTOR",
 });
 
 /** @deprecated use EXAM_ROLES.CANDIDATE */
@@ -54,7 +53,6 @@ export function isExamCandidate(userOrRole) {
 
 export function getExamRoleLabel(role) {
   if (role === EXAM_ROLES.ADMIN) return "Admin";
-  if (role === EXAM_ROLES.PROCTOR) return "Proctor";
   if (role === EXAM_ROLES.CANDIDATE) return "Candidate";
   return "Examination";
 }
@@ -63,6 +61,5 @@ export function getPortalHomePath(mode = getPortalMode(), user = null) {
   if (mode !== PORTAL_MODES.EXAMINATION) return "/admin/dashboard";
   const role = getExamRole(user);
   if (role === EXAM_ROLES.ADMIN) return "/exam/admin/dashboard";
-  if (role === EXAM_ROLES.PROCTOR) return "/exam/proctor/dashboard";
   return "/exam/dashboard";
 }

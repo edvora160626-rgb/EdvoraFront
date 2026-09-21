@@ -9,7 +9,6 @@ const FILTERS = [
   { value: "", label: "All" },
   { value: "EXAM_CANDIDATE", label: "Candidate" },
   { value: "EXAM_ADMIN", label: "Admin" },
-  { value: "EXAM_PROCTOR", label: "Proctor" },
 ];
 
 export default function AdminUsers({
@@ -51,7 +50,7 @@ export default function AdminUsers({
       <PageHeader module={module} title={title} description={description} />
 
       {showFilters && !lockedRole ? (
-        <div className="mb-4 grid grid-cols-4 gap-1 rounded-xl border border-[#e8d5e0] bg-[#fdf8fb] p-1">
+        <div className="mb-4 grid grid-cols-3 gap-1 rounded-xl border border-[#e8d5e0] bg-[#fdf8fb] p-1">
           {FILTERS.map((f) => (
             <button
               key={f.value || "all"}

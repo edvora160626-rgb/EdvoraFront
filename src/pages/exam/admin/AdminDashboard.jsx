@@ -114,7 +114,6 @@ export default function AdminDashboard() {
           <Pill>Materials {s.materials ?? 0}</Pill>
           <Pill tone="warn">Open tickets {s.openTickets ?? 0}</Pill>
           <Pill tone="success">Admins {s.admins ?? 0}</Pill>
-          <Pill>Proctors {s.proctors ?? 0}</Pill>
         </div>
       </Surface>
     </div>

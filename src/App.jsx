@@ -82,8 +82,8 @@ const AdminCandidates = lazy(
 );
 const AdminQuestions = lazy(() => import("./pages/exam/admin/AdminQuestions"));
 const AdminTests = lazy(() => import("./pages/exam/admin/AdminTests"));
-const AdminProctorAcceptance = lazy(
-  () => import("./pages/exam/admin/AdminProctorAcceptance")
+const AdminExamWindows = lazy(
+  () => import("./pages/exam/admin/AdminExamWindows")
 );
 const AdminTestEnrollments = lazy(
   () => import("./pages/exam/admin/AdminTestEnrollments")
@@ -99,14 +99,6 @@ const AdminResults = lazy(() => import("./pages/exam/admin/AdminResults"));
 const AdminEventLog = lazy(() => import("./pages/exam/admin/AdminEventLog"));
 const AdminSupportTickets = lazy(
   () => import("./pages/exam/admin/AdminSupportTickets")
-);
-
-const ProctorDashboard = lazy(
-  () => import("./pages/exam/proctor/ProctorDashboard")
-);
-const ProctorLive = lazy(() => import("./pages/exam/proctor/ProctorLive"));
-const ProctorAcceptance = lazy(
-  () => import("./pages/exam/proctor/ProctorAcceptance")
 );
 
 function RouteFallback() {
@@ -209,8 +201,12 @@ function App() {
               element={<AdminTests />}
             />
             <Route
+              path="admin/tests/exam-windows"
+              element={<AdminExamWindows />}
+            />
+            <Route
               path="admin/tests/proctor-acceptance"
-              element={<AdminProctorAcceptance />}
+              element={<Navigate to="/exam/admin/tests/exam-windows" replace />}
             />
             <Route
               path="admin/tests/enrollments"
@@ -263,9 +259,10 @@ function App() {
               element={<Navigate to="/exam/admin/reports/results" replace />}
             />
 
-            <Route path="proctor/dashboard" element={<ProctorDashboard />} />
-            <Route path="proctor/live" element={<ProctorLive />} />
-            <Route path="proctor/acceptance" element={<ProctorAcceptance />} />
+            <Route
+              path="proctor/*"
+              element={<Navigate to="/exam/admin/dashboard" replace />}
+            />
           </Route>
         </Routes>
       </Suspense>

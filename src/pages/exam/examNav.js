@@ -7,13 +7,10 @@ import {
   ChartColumn,
   CircleHelp,
   ClipboardList,
-  Eye,
   HelpCircle,
   LayoutDashboard,
   MessageSquare,
-  Monitor,
   NotebookPen,
-  ShieldCheck,
   Users,
 } from "lucide-react";
 
@@ -47,8 +44,8 @@ export const ADMIN_NAV = [
     children: [
       { to: "/exam/admin/tests/configuration", label: "Test Configuration" },
       {
-        to: "/exam/admin/tests/proctor-acceptance",
-        label: "Proctor Acceptance",
+        to: "/exam/admin/tests/exam-windows",
+        label: "Exam Windows",
       },
       { to: "/exam/admin/tests/enrollments", label: "Test Enrollments" },
     ],
@@ -74,35 +71,6 @@ export const ADMIN_NAV = [
       { to: "/exam/admin/reports/results", label: "Test Results" },
       { to: "/exam/admin/reports/event-log", label: "Event Log" },
       { to: "/exam/admin/reports/support", label: "Support" },
-    ],
-  },
-];
-
-export const PROCTOR_NAV = [
-  {
-    id: "dashboards",
-    label: "Dashboard",
-    icon: LayoutDashboard,
-    to: "/exam/proctor/dashboard",
-    end: true,
-  },
-  {
-    id: "test-setup",
-    label: "Test Setup",
-    icon: ShieldCheck,
-    children: [
-      {
-        to: "/exam/proctor/acceptance",
-        label: "Proctor Acceptance",
-      },
-    ],
-  },
-  {
-    id: "monitoring",
-    label: "Monitoring",
-    icon: Monitor,
-    children: [
-      { to: "/exam/proctor/live", label: "Live Proctoring", icon: Eye },
     ],
   },
 ];

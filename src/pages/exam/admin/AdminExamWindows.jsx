@@ -4,7 +4,7 @@ import { PageHeader, Pill, Surface } from "../components/ExamUI";
 import EdvoraLoader from "../../../common/EdvoraLoader";
 import { openSnackbar } from "../../../common/snackbar/snackbar";
 
-export default function ProctorAcceptance() {
+export default function AdminExamWindows() {
   const [loading, setLoading] = useState(true);
   const [tests, setTests] = useState([]);
 
@@ -28,7 +28,7 @@ export default function ProctorAcceptance() {
   if (loading) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
-        <EdvoraLoader message="Loading acceptance list…" />
+        <EdvoraLoader message="Loading exam windows…" />
       </div>
     );
   }
@@ -37,8 +37,8 @@ export default function ProctorAcceptance() {
     <div className="max-w-5xl mx-auto">
       <PageHeader
         module="Test Setup"
-        title="Proctor Acceptance"
-        description="Review scheduled and on-demand exam windows assigned for monitoring."
+        title="Exam Windows"
+        description="Review scheduled and on-demand exam windows."
       />
       <div className="space-y-3">
         {tests.length === 0 ? (
@@ -52,7 +52,7 @@ export default function ProctorAcceptance() {
                 <h2 className="rs-body font-bold text-[#3d1f33]">{t.title}</h2>
                 <Pill>{t.type}</Pill>
                 <Pill tone={t.windowOpen ? "success" : "warn"}>
-                  {t.windowOpen ? "Accept / monitor" : "Upcoming / closed"}
+                  {t.windowOpen ? "Open" : "Upcoming / closed"}
                 </Pill>
               </div>
               <p className="mt-1 rs-caption text-[#735366]/65">

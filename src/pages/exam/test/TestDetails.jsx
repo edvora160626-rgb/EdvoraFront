@@ -123,7 +123,7 @@ export default function TestDetails() {
           <li>Answer all questions before the timer ends.</li>
           <li>You can navigate between questions freely.</li>
           <li>Submit once — review answers on the result page.</li>
-          <li>Face capture / proctoring is disabled in this build.</li>
+          <li>Face capture is disabled in this build.</li>
           {test.type === "SCHEDULED" && !test.enrolled ? (
             <li className="text-amber-700">
               Enroll from Schedule Test before starting this exam.
