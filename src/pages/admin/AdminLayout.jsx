@@ -310,18 +310,13 @@ function AdminLayout() {
 
             <div className="flex items-center gap-2.5 min-w-0">
               <EdvoraLogo
-                variant="icon"
+                variant="full"
                 decorative
-                className="h-10 w-10 shrink-0"
+                className="h-12 max-h-12 w-auto shrink-0"
               />
-              <div className="min-w-0 hidden sm:block">
-                <p className="text-sm font-bold tracking-tight text-[color:var(--edvora-ink-strong)] truncate">
-                  Edvora
-                </p>
-                <p className="text-[11px] font-medium text-[color:var(--edvora-muted)] truncate">
-                  {portalTitle}
-                </p>
-              </div>
+              <p className="min-w-0 hidden sm:block text-[11px] font-medium text-[color:var(--edvora-muted)] truncate">
+                {portalTitle}
+              </p>
             </div>
           </div>
 
@@ -381,18 +376,10 @@ function AdminLayout() {
               <div className="absolute bottom-24 -left-12 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
             </div>
 
-            <div className="relative flex items-center gap-3 p-5 pb-3">
-              <EdvoraLogo
-                variant="icon"
-                decorative
-                className="h-11 w-11 shrink-0"
-              />
-              <div className="min-w-0">
-                <p className="text-lg font-bold text-white leading-tight truncate">
-                  Edvora
-                </p>
-                <p className="text-[11px] text-white/65 truncate">{portalTitle}</p>
-              </div>
+            <div className="relative px-5 pt-5 pb-2">
+              <p className="text-[11px] font-medium text-white/65 truncate">
+                {portalTitle}
+              </p>
             </div>
 
             <div className="relative flex-1 min-h-0 overflow-y-auto py-2">

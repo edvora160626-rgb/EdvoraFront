@@ -632,10 +632,23 @@ html.is-scrolling *::-webkit-scrollbar-thumb {
   background-color: color-mix(in srgb, var(--edvora-primary) 55%, transparent);
 }
 
-img,
+img:not(.edvora-logo),
 svg {
   max-width: 100%;
   height: auto;
+}
+
+/* Hide browser built-in password reveal (Edge/IE/Chrome) — app has its own toggle */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+input::-webkit-credentials-auto-fill-button,
+input::-webkit-strong-password-auto-fill-button {
+  display: none !important;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .clock-colon {

@@ -176,7 +176,7 @@ function Login() {
         <div className="mb-4 flex flex-col items-center text-center gap-2">
           <EdvoraLogo
             variant="full"
-            className="w-[min(100%,188px)] h-auto"
+            className="w-[min(100%,220px)] h-auto"
           />
           <span className="text-[9px] font-semibold uppercase tracking-[0.16em] text-[#a77a95]/75">
             {isExam ? "Examination Portal" : "School Management"}

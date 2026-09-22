@@ -181,7 +181,7 @@ function LeftPanel() {
           <EdvoraLogo
             variant="full"
             decorative
-            className="w-[118px] max-w-[28vw] h-auto drop-shadow-[0_6px_16px_rgba(0,0,0,0.28)]"
+            className="w-[108px] max-w-[24vw] h-auto drop-shadow-[0_6px_16px_rgba(0,0,0,0.28)]"
           />
         </div>
         {/* Clock pill */}
@@ -254,14 +254,13 @@ function MobileClock() {
       style={{ background: "linear-gradient(135deg,#5c3050,#9b6a8a)", padding: "11px 16px" }}>
       <div className="flex items-center gap-2.5 min-w-0">
         <EdvoraLogo
-          variant="icon"
+          variant="full"
           decorative
-          className="h-8 w-8 flex-shrink-0"
+          className="h-10 max-h-10 w-auto flex-shrink-0"
         />
-        <div className="min-w-0">
-          <p style={{ color: "white", fontWeight: 700, fontSize: 13, lineHeight: 1 }}>Edvora</p>
-          <p style={{ color: "rgba(255,255,255,0.52)", fontSize: 10, marginTop: 2 }}>{day}, {date} {month}</p>
-        </div>
+        <p className="min-w-0 truncate" style={{ color: "rgba(255,255,255,0.52)", fontSize: 10 }}>
+          {day}, {date} {month}
+        </p>
       </div>
       <p style={{ fontFamily: "monospace", fontWeight: 700, color: "white", fontSize: 17, letterSpacing: "0.05em" }}>
         {hh}

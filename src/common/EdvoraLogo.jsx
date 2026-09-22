@@ -2,9 +2,9 @@ import fullLogo from "../assets/edvora-logo.png";
 import iconLogo from "../assets/edvora-logo-icon.png";
 
 /**
- * Edvora brand mark (book + graduate + wordmark).
- * - full: complete logo on a transparent background
- * - icon: mark crop (sidebars, compact headers)
+ * Edvora brand mark.
+ * - full: emblem + Edvora wordmark + tagline
+ * - icon: emblem only (headers / sidebars)
  */
 function EdvoraLogo({
   variant = "full",
@@ -15,20 +15,40 @@ function EdvoraLogo({
   const isIcon = variant === "icon";
   const src = isIcon ? iconLogo : fullLogo;
 
-  return (
+  const img = (
     <img
       src={src}
       alt={decorative ? "" : alt}
       aria-hidden={decorative ? true : undefined}
       draggable={false}
-      className={[
-        "block select-none object-contain object-center bg-transparent",
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ")}
+      className={
+        isIcon
+          ? "edvora-logo block select-none object-contain object-center"
+          : ["edvora-logo block select-none object-contain object-center bg-transparent", className]
+              .filter(Boolean)
+              .join(" ")
+      }
+      style={
+        isIcon
+          ? { height: "100%", width: "auto", maxWidth: "none", maxHeight: "100%" }
+          : undefined
+      }
     />
   );
+
+  if (isIcon) {
+    return (
+      <span
+        className={["inline-flex shrink-0 items-center leading-none", className]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        {img}
+      </span>
+    );
+  }
+
+  return img;
 }
 
 export default EdvoraLogo;

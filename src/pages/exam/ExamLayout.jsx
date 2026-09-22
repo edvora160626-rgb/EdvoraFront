@@ -114,19 +114,9 @@ function ExamLayoutInner() {
       <div className="p-5 pb-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <EdvoraLogo
-              variant="icon"
-              decorative
-              className="h-11 w-11 shrink-0"
-            />
-            <div className="min-w-0">
-              <p className="text-lg font-bold text-white leading-tight truncate">
-                Edvora
-              </p>
-              <p className="text-[11px] text-[color:var(--edvora-accent)]/90 truncate">
-                {roleLabel} Portal
-              </p>
-            </div>
+            <p className="min-w-0 text-[11px] text-[color:var(--edvora-accent)]/90 truncate">
+              {roleLabel} Portal
+            </p>
           </div>
           <div className="flex items-center gap-1">
             <div className="hidden min-[1024px]:flex items-center gap-1.5">
@@ -218,9 +208,9 @@ function ExamLayoutInner() {
         <div className="flex items-center justify-between h-12 sm:h-14 px-3 xs:px-4 gap-2">
           <div className="flex items-center gap-2 min-w-0">
             <EdvoraLogo
-              variant="icon"
+              variant="full"
               decorative
-              className="h-8 w-8 sm:h-9 sm:w-9 shrink-0"
+              className="h-10 max-h-10 w-auto shrink-0"
             />
             <span className="rs-body font-bold text-[color:var(--edvora-ink)] truncate">
               {roleLabel} Portal

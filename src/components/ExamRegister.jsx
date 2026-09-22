@@ -28,6 +28,7 @@ const ACCOUNT_TYPE_OPTIONS = [
 
 function ExamRegisterModal({ onClose }) {
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     userType: "CANDIDATE",
@@ -288,14 +289,28 @@ function ExamRegisterModal({ onClose }) {
             <label className="block text-[11px] font-bold uppercase tracking-wider text-[color:var(--edvora-ink-strong)]/70 mb-1.5">
               Confirm password *
             </label>
-            <input
-              type={showPassword ? "text" : "password"}
-              className={inputClass}
-              value={form.confirmPassword}
-              onChange={(e) => setField("confirmPassword", e.target.value)}
-              disabled={submitting}
-              autoComplete="new-password"
-            />
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                className={`${inputClass} pr-11`}
+                value={form.confirmPassword}
+                onChange={(e) => setField("confirmPassword", e.target.value)}
+                disabled={submitting}
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#a77a95]"
+                onClick={() => setShowConfirmPassword((p) => !p)}
+                aria-label={
+                  showConfirmPassword
+                    ? "Hide confirm password"
+                    : "Show confirm password"
+                }
+              >
+                {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
           </div>
 
           <button

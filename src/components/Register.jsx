@@ -12,6 +12,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL;
 function RegisterModal({ onClose }) {
   const [userType, setUserType] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [schoolOptions, setSchoolOptions] = useState([]);
   const [classOptions, setClassOptions] = useState([]);
@@ -481,21 +482,17 @@ function RegisterModal({ onClose }) {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Enter password"
-                  className={inputClass}
+                  autoComplete="new-password"
+                  className={`${inputClass} pr-10`}
                 />
 
                 <button
                   type="button"
-                  className="absolute right-3 top-2"
-                  onClick={() =>
-                    setShowPassword(!showPassword)
-                  }
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#667085]"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? (
-                    <Eye size={18} />
-                  ) : (
-                    <EyeOff size={18} />
-                  )}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
@@ -505,14 +502,33 @@ function RegisterModal({ onClose }) {
                 Confirm Password
               </label>
 
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="Confirm password"
-                className={inputClass}
-              />
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Confirm password"
+                  autoComplete="new-password"
+                  className={`${inputClass} pr-10`}
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#667085]"
+                  onClick={() => setShowConfirmPassword((p) => !p)}
+                  aria-label={
+                    showConfirmPassword
+                      ? "Hide confirm password"
+                      : "Show confirm password"
+                  }
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff size={18} />
+                  ) : (
+                    <Eye size={18} />
+                  )}
+                </button>
+              </div>
             </div>
 
             <div>
