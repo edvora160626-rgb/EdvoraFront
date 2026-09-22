@@ -113,9 +113,10 @@ export default function TeacherTimetable() {
             placeholder="Select teacher"
           />
         </div>
-        <label className="flex items-center gap-2 pb-2 text-sm text-[#667085]">
+        <label className="flex items-center gap-2 pb-2 text-sm text-[color:var(--edvora-muted)]">
           <input
             type="checkbox"
+            className="h-4 w-4 accent-[color:var(--edvora-primary)]"
             checked={includeDrafts}
             onChange={(e) => setIncludeDrafts(e.target.checked)}
           />

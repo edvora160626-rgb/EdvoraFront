@@ -4,6 +4,7 @@ import {
   Clock3,
   Copy,
   Layers3,
+  Pencil,
   Plus,
   Trash2,
   X,
@@ -27,6 +28,7 @@ import {
   listTimeSlots,
   setCurrentAcademicYear,
   slotAppliesToDay,
+  updateAcademicYear,
   updateTimeSlot,
   upsertTimetableSettings,
 } from "../../../utils/timetableApi";
@@ -40,6 +42,23 @@ const labelClass =
 const TABS = ["Academic Year", "Working Days", "Period Template", "Holidays"];
 const glassCard =
   "rounded-2xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass)] p-5 shadow-[var(--edvora-glass-shadow)] backdrop-blur-[18px] saturate-[165%]";
+
+const EMPTY_YEAR_FORM = {
+  name: "",
+  startDate: "",
+  endDate: "",
+  isCurrent: true,
+};
+
+function toDateInputValue(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
 
 function DayChipToggle({ days, selected, onToggle, size = "md" }) {
   return (
@@ -76,12 +95,8 @@ export default function TimetableSettings() {
   const [tab, setTab] = useState(TABS[0]);
   const [loading, setLoading] = useState(false);
 
-  const [yearForm, setYearForm] = useState({
-    name: "",
-    startDate: "",
-    endDate: "",
-    isCurrent: true,
-  });
+  const [yearForm, setYearForm] = useState({ ...EMPTY_YEAR_FORM });
+  const [editingYearId, setEditingYearId] = useState(null);
   const [savingYear, setSavingYear] = useState(false);
 
   const [settings, setSettings] = useState({
@@ -189,7 +204,23 @@ export default function TimetableSettings() {
     [slots, selectedDay]
   );
 
-  const handleCreateYear = async () => {
+  const resetYearForm = () => {
+    setEditingYearId(null);
+    setYearForm({ ...EMPTY_YEAR_FORM });
+  };
+
+  const handleEditYear = (year) => {
+    setEditingYearId(year._id);
+    setYearForm({
+      name: year.name || "",
+      startDate: toDateInputValue(year.startDate),
+      endDate: toDateInputValue(year.endDate),
+      isCurrent: Boolean(year.isCurrent),
+    });
+    setTab("Academic Year");
+  };
+
+  const handleSaveYear = async () => {
     if (!yearForm.name.trim() || !yearForm.startDate || !yearForm.endDate) {
       return openSnackbar({
         message: "Name and dates are required",
@@ -198,13 +229,27 @@ export default function TimetableSettings() {
     }
     try {
       setSavingYear(true);
-      await createAcademicYear(yearForm);
-      openSnackbar({ message: "Academic year created", variant: "success" });
-      setYearForm({ name: "", startDate: "", endDate: "", isCurrent: true });
+      if (editingYearId) {
+        await updateAcademicYear({
+          academicYearId: editingYearId,
+          name: yearForm.name.trim(),
+          startDate: yearForm.startDate,
+          endDate: yearForm.endDate,
+          isCurrent: yearForm.isCurrent,
+        });
+        openSnackbar({ message: "Academic year updated", variant: "success" });
+        if (yearForm.isCurrent) setYearId(editingYearId);
+      } else {
+        await createAcademicYear(yearForm);
+        openSnackbar({ message: "Academic year created", variant: "success" });
+      }
+      resetYearForm();
       await reload();
     } catch (error) {
       openSnackbar({
-        message: error?.response?.data?.message || "Failed to create year",
+        message:
+          error?.response?.data?.message ||
+          (editingYearId ? "Failed to update year" : "Failed to create year"),
         variant: "error",
       });
     } finally {
@@ -539,9 +584,28 @@ export default function TimetableSettings() {
       ) : tab === "Academic Year" ? (
         <div className="grid gap-5 lg:grid-cols-2">
           <div className={glassCard}>
-            <h2 className="mb-4 text-base font-semibold text-[color:var(--edvora-ink-strong)]">
-              Add Academic Year
-            </h2>
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-base font-semibold text-[color:var(--edvora-ink-strong)]">
+                  {editingYearId ? "Edit Academic Year" : "Add Academic Year"}
+                </h2>
+                {editingYearId ? (
+                  <p className="mt-1 text-xs text-[color:var(--edvora-muted)]">
+                    Update name, dates, or current status.
+                  </p>
+                ) : null}
+              </div>
+              {editingYearId ? (
+                <button
+                  type="button"
+                  onClick={resetYearForm}
+                  className="inline-flex h-8 items-center gap-1 rounded-lg px-2.5 text-xs font-semibold text-[color:var(--edvora-muted)] hover:bg-[color:var(--edvora-glass-soft)] hover:text-[color:var(--edvora-ink)]"
+                >
+                  <X size={14} />
+                  Cancel
+                </button>
+              ) : null}
+            </div>
             <div className="space-y-3">
               <div>
                 <label className={labelClass}>Name</label>
@@ -573,6 +637,7 @@ export default function TimetableSettings() {
               <label className="flex items-center gap-2 text-sm text-[color:var(--edvora-muted)]">
                 <input
                   type="checkbox"
+                  className="h-4 w-4 accent-[color:var(--edvora-primary)]"
                   checked={yearForm.isCurrent}
                   onChange={(e) =>
                     setYearForm((p) => ({
@@ -586,10 +651,14 @@ export default function TimetableSettings() {
               <button
                 type="button"
                 disabled={savingYear}
-                onClick={handleCreateYear}
+                onClick={handleSaveYear}
                 className="h-[44px] rounded-xl theme-btn-primary px-5 text-sm font-semibold disabled:opacity-60"
               >
-                {savingYear ? "Saving…" : "Create Year"}
+                {savingYear
+                  ? "Saving…"
+                  : editingYearId
+                    ? "Save Changes"
+                    : "Create Year"}
               </button>
             </div>
           </div>
@@ -607,10 +676,14 @@ export default function TimetableSettings() {
                 {years.map((y) => (
                   <li
                     key={y._id}
-                    className="flex items-center justify-between rounded-xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass-soft)] px-3 py-2.5"
+                    className={`flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5 ${
+                      editingYearId === y._id
+                        ? "border-[color:var(--edvora-primary)]/40 bg-[color:var(--edvora-primary)]/8"
+                        : "border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass-soft)]"
+                    }`}
                   >
-                    <div>
-                      <p className="font-medium text-[color:var(--edvora-ink-strong)]">
+                    <div className="min-w-0">
+                      <p className="font-medium text-[color:var(--edvora-ink-strong)] truncate">
                         {y.name}
                       </p>
                       <p className="text-xs text-[color:var(--edvora-muted)]">
@@ -618,19 +691,30 @@ export default function TimetableSettings() {
                         {new Date(y.endDate).toLocaleDateString()}
                       </p>
                     </div>
-                    {y.isCurrent ? (
-                      <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-500/15">
-                        Current
-                      </span>
-                    ) : (
+                    <div className="flex shrink-0 items-center gap-2">
+                      {y.isCurrent ? (
+                        <span className="rounded-full bg-[color:var(--edvora-success-soft)] px-2.5 py-0.5 text-[11px] font-semibold text-[color:var(--edvora-success-ink)] ring-1 ring-[color:var(--edvora-success)]/20">
+                          Current
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleSetCurrent(y._id)}
+                          className="text-xs font-semibold text-[color:var(--edvora-primary)] hover:underline"
+                        >
+                          Make current
+                        </button>
+                      )}
                       <button
                         type="button"
-                        onClick={() => handleSetCurrent(y._id)}
-                        className="text-xs font-semibold text-[color:var(--edvora-primary)] hover:underline"
+                        onClick={() => handleEditYear(y)}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[color:var(--edvora-glass-border-soft)] text-[color:var(--edvora-primary)] transition hover:bg-[color:var(--edvora-primary)]/10"
+                        aria-label={`Edit ${y.name}`}
+                        title="Edit"
                       >
-                        Make current
+                        <Pencil size={14} />
                       </button>
-                    )}
+                    </div>
                   </li>
                 ))}
               </ul>
