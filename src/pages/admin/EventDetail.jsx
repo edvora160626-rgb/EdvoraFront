@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -10,7 +10,9 @@ import {
   Users,
   X,
 } from "lucide-react";
+import ConfirmModal from "../../common/ConfirmModal";
 import CustomDatePicker from "../../common/CustomDatePicker";
+import CustomMultiSelect from "../../common/CustomMultiSelect";
 import CustomSelect from "../../common/CustomSelect";
 import CustomTimePicker from "../../common/CustomTimePicker";
 import EdvoraLoader from "../../common/EdvoraLoader";
@@ -34,8 +36,11 @@ import {
 } from "../../utils/eventsApi";
 
 const inputClass =
-  "w-full h-[42px] rounded-lg border border-[#D0D5DD] bg-white px-3 text-[14px] text-[#344054] outline-none focus:border-[color:var(--edvora-primary)]";
-const labelClass = "block text-[13px] font-semibold text-[#667085] mb-1.5";
+  "w-full h-[46px] rounded-xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass)] backdrop-blur-md px-3.5 text-[14px] text-[color:var(--edvora-ink-strong)] outline-none transition focus:border-[color:var(--edvora-primary)] focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--edvora-primary)_16%,transparent)] placeholder:text-[color:var(--edvora-muted)]";
+const labelClass =
+  "block text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--edvora-muted)] mb-1.5";
+const textareaClass =
+  "w-full rounded-xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass)] backdrop-blur-md px-3.5 py-2.5 text-[14px] text-[color:var(--edvora-ink-strong)] outline-none transition focus:border-[color:var(--edvora-primary)] focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--edvora-primary)_16%,transparent)] resize-none";
 
 const STATUS_STYLES = {
   DRAFT: "bg-slate-100 text-slate-700",
@@ -103,35 +108,56 @@ function ProgramModal({
     }
   };
 
-  const selectedClassLabels = useMemo(() => {
-    const selected = new Set(formData.eligibleClasses || []);
-    return classOptions
-      .filter((opt) => selected.has(opt.value))
-      .map((opt) => opt.label)
-      .join(", ");
-  }, [formData.eligibleClasses, classOptions]);
-
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-3 sm:p-4">
-      <div className="w-full max-w-[720px] max-h-[90dvh] bg-white rounded-[14px] shadow-2xl overflow-hidden flex flex-col">
-        <div className="h-14 sm:h-16 px-4 sm:px-6 flex items-center justify-between border-b border-gray-200 shrink-0">
-          <h2 className="text-base sm:text-[18px] font-semibold text-[#111827]">
-            {mode === "edit" ? "Edit Program" : "Add Program"}
-          </h2>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[color:var(--edvora-overlay)] backdrop-blur-md p-3 sm:p-4">
+      <button
+        type="button"
+        className="absolute inset-0 cursor-default"
+        aria-label="Close dialog"
+        onClick={submitting ? undefined : onClose}
+      />
+
+      <div className="relative w-full max-w-[760px] max-h-[90dvh] glass-strong rounded-3xl overflow-hidden flex flex-col shadow-[var(--edvora-glass-shadow-lg)]">
+        <div
+          className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full blur-3xl opacity-70"
+          style={{
+            background:
+              "radial-gradient(circle, color-mix(in srgb, var(--edvora-primary) 35%, transparent), transparent 70%)",
+          }}
+        />
+        <div
+          className="pointer-events-none absolute -bottom-24 -left-10 h-40 w-40 rounded-full blur-3xl opacity-60"
+          style={{
+            background:
+              "radial-gradient(circle, color-mix(in srgb, var(--edvora-accent) 28%, transparent), transparent 70%)",
+          }}
+        />
+
+        <div className="relative h-14 sm:h-16 px-5 sm:px-6 flex items-center justify-between border-b border-[color:var(--edvora-glass-border-soft)] shrink-0">
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[color:var(--edvora-primary)]">
+              Event program
+            </p>
+            <h2 className="text-base sm:text-lg font-bold text-[color:var(--edvora-ink-strong)] truncate">
+              {mode === "edit" ? "Edit Program" : "Add Program"}
+            </h2>
+          </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-primary hover:bg-primary-hover text-white flex items-center justify-center"
+            disabled={submitting}
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-[color:var(--edvora-primary)] text-white shadow-md hover:bg-[color:var(--edvora-primary-hover)] disabled:opacity-60"
+            aria-label="Close"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="relative flex-1 min-h-0 overflow-y-auto px-5 sm:px-6 py-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
             <div className="sm:col-span-2">
               <label className={labelClass}>
-                Program Name <span className="text-red-500">*</span>
+                Program Name <span className="text-[color:var(--edvora-danger)]">*</span>
               </label>
               <input
                 className={inputClass}
@@ -142,20 +168,23 @@ function ProgramModal({
                 placeholder="e.g. Classical Dance"
               />
             </div>
+
             <div className="sm:col-span-2">
               <label className={labelClass}>Description</label>
               <textarea
                 rows={3}
-                className="w-full rounded-lg border border-[#D0D5DD] bg-white px-3 py-2.5 text-[14px] outline-none focus:border-[color:var(--edvora-primary)]"
+                className={textareaClass}
                 value={formData.description}
                 onChange={(e) =>
                   setFormData((p) => ({ ...p, description: e.target.value }))
                 }
+                placeholder="Optional details for participants"
               />
             </div>
+
             <div>
               <label className={labelClass}>
-                Program Date <span className="text-red-500">*</span>
+                Program Date <span className="text-[color:var(--edvora-danger)]">*</span>
               </label>
               <CustomDatePicker
                 value={formData.programDate}
@@ -175,6 +204,7 @@ function ProgramModal({
                 placeholder="Select program time"
               />
             </div>
+
             <div>
               <label className={labelClass}>Venue</label>
               <input
@@ -183,6 +213,7 @@ function ProgramModal({
                 onChange={(e) =>
                   setFormData((p) => ({ ...p, venue: e.target.value }))
                 }
+                placeholder="Hall / outdoor / virtual"
               />
             </div>
             <div>
@@ -201,9 +232,11 @@ function ProgramModal({
                 placeholder="Optional"
               />
             </div>
+
             <div>
               <label className={labelClass}>
-                Registration Deadline <span className="text-red-500">*</span>
+                Registration Deadline{" "}
+                <span className="text-[color:var(--edvora-danger)]">*</span>
               </label>
               <CustomDatePicker
                 value={formData.registrationDeadline}
@@ -229,42 +262,37 @@ function ProgramModal({
                 }
               />
             </div>
+
             <div className="sm:col-span-2">
-              <label className={labelClass}>
-                Eligible Classes (leave empty for all)
-              </label>
-              <CustomSelect
+              <label className={labelClass}>Eligible Classes</label>
+              <CustomMultiSelect
                 options={classOptions}
-                value=""
-                placeholder="Add a class…"
-                onChange={(opt) => {
-                  if (!opt?.value) return;
-                  setFormData((p) => {
-                    const set = new Set(p.eligibleClasses || []);
-                    if (set.has(opt.value)) set.delete(opt.value);
-                    else set.add(opt.value);
-                    return { ...p, eligibleClasses: [...set] };
-                  });
-                }}
+                value={formData.eligibleClasses || []}
+                onChange={(eligibleClasses) =>
+                  setFormData((p) => ({ ...p, eligibleClasses }))
+                }
+                placeholder="Select one or more classes…"
+                emptyHint="Empty = all classes eligible"
+                menuPlacement="top"
+                isSearchable
               />
-              {selectedClassLabels ? (
-                <p className="mt-2 text-xs text-slate-600">
-                  Selected: {selectedClassLabels}
-                </p>
-              ) : (
-                <p className="mt-2 text-xs text-slate-500">
-                  All classes are eligible.
-                </p>
-              )}
+              <p className="mt-2 text-[11px] text-[color:var(--edvora-muted)]">
+                {(formData.eligibleClasses || []).length === 0
+                  ? "No selection — every active class can register."
+                  : `${formData.eligibleClasses.length} class${
+                      formData.eligibleClasses.length === 1 ? "" : "es"
+                    } selected.`}
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="px-4 sm:px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+        <div className="relative px-5 sm:px-6 py-4 border-t border-[color:var(--edvora-glass-border-soft)] flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 bg-[color:var(--edvora-glass-soft)]/80 shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="h-[42px] px-4 rounded-lg border border-slate-200 text-sm font-semibold"
+            disabled={submitting}
+            className="h-[44px] px-4 rounded-xl border border-[color:var(--edvora-glass-border-soft)] text-sm font-semibold text-[color:var(--edvora-ink)] hover:bg-[color:var(--edvora-glass)] disabled:opacity-60"
           >
             Cancel
           </button>
@@ -272,7 +300,7 @@ function ProgramModal({
             type="button"
             disabled={submitting}
             onClick={handleSubmit}
-            className="h-[42px] px-5 rounded-lg bg-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-hover)] text-white text-sm font-semibold disabled:opacity-60"
+            className="h-[44px] px-6 rounded-xl theme-btn-primary text-sm font-semibold disabled:opacity-60"
           >
             {submitting
               ? "Saving…"
@@ -282,6 +310,13 @@ function ProgramModal({
           </button>
         </div>
       </div>
+
+      {submitting ? (
+        <EdvoraLoader
+          overlay
+          message={mode === "edit" ? "Updating program…" : "Adding program…"}
+        />
+      ) : null}
     </div>
   );
 }
@@ -316,14 +351,16 @@ function EditEventModal({ event, onClose, onSaved }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-3 sm:p-4">
-      <div className="w-full max-w-[720px] max-h-[90dvh] bg-white rounded-[14px] shadow-2xl overflow-hidden flex flex-col">
-        <div className="h-14 px-4 sm:px-6 flex items-center justify-between border-b">
-          <h2 className="font-semibold text-[#111827]">Edit Event</h2>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[color:var(--edvora-overlay)] backdrop-blur-md p-3 sm:p-4">
+      <div className="w-full max-w-[720px] max-h-[90dvh] glass-strong rounded-3xl shadow-[var(--edvora-glass-shadow-lg)] overflow-hidden flex flex-col">
+        <div className="h-14 px-4 sm:px-6 flex items-center justify-between border-b border-[color:var(--edvora-glass-border-soft)]">
+          <h2 className="font-semibold text-[color:var(--edvora-ink-strong)]">
+            Edit Event
+          </h2>
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center"
+            className="w-9 h-9 rounded-full bg-[color:var(--edvora-primary)] text-white flex items-center justify-center"
           >
             <X size={18} />
           </button>
@@ -343,7 +380,7 @@ function EditEventModal({ event, onClose, onSaved }) {
             <label className={labelClass}>Description</label>
             <textarea
               rows={3}
-              className="w-full rounded-lg border border-[#D0D5DD] px-3 py-2.5 text-sm outline-none focus:border-[color:var(--edvora-primary)]"
+              className={textareaClass}
               value={formData.description}
               onChange={(e) =>
                 setFormData((p) => ({ ...p, description: e.target.value }))
@@ -401,11 +438,11 @@ function EditEventModal({ event, onClose, onSaved }) {
             />
           </div>
         </div>
-        <div className="px-4 sm:px-6 py-4 border-t flex justify-end gap-3">
+        <div className="px-4 sm:px-6 py-4 border-t border-[color:var(--edvora-glass-border-soft)] flex justify-end gap-3 bg-[color:var(--edvora-glass-soft)]/80">
           <button
             type="button"
             onClick={onClose}
-            className="h-[42px] px-4 rounded-lg border text-sm font-semibold"
+            className="h-[44px] px-4 rounded-xl border border-[color:var(--edvora-glass-border-soft)] text-sm font-semibold text-[color:var(--edvora-ink)]"
           >
             Cancel
           </button>
@@ -413,7 +450,7 @@ function EditEventModal({ event, onClose, onSaved }) {
             type="button"
             disabled={submitting}
             onClick={handleSubmit}
-            className="h-[42px] px-5 rounded-lg bg-[color:var(--edvora-primary)] text-white text-sm font-semibold disabled:opacity-60"
+            className="h-[44px] px-5 rounded-xl theme-btn-primary text-sm font-semibold disabled:opacity-60"
           >
             {submitting ? "Saving…" : "Save"}
           </button>
@@ -445,6 +482,9 @@ function EventDetail() {
   const [editingProgram, setEditingProgram] = useState(null);
   const [showEditEvent, setShowEditEvent] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [deleteEventConfirmOpen, setDeleteEventConfirmOpen] = useState(false);
+  const [cancelEventConfirmOpen, setCancelEventConfirmOpen] = useState(false);
+  const [deleteProgramTarget, setDeleteProgramTarget] = useState(null);
   const [search, setSearch] = useState("");
   const [filterProgramId, setFilterProgramId] = useState("");
   const [activeTab, setActiveTab] = useState("programs");
@@ -538,15 +578,13 @@ function EventDetail() {
     }
   };
 
-  const handleCancelEvent = async () => {
-    if (!window.confirm("Cancel this event? Registrations will be closed.")) {
-      return;
-    }
+  const handleConfirmCancelEvent = async () => {
     try {
       setActionLoading(true);
       const updated = await cancelEvent(eventId);
       setEvent(updated);
       await loadDetail();
+      setCancelEventConfirmOpen(false);
       openSnackbar({ message: "Event cancelled", variant: "success" });
     } catch (error) {
       openSnackbar({
@@ -558,11 +596,11 @@ function EventDetail() {
     }
   };
 
-  const handleDeleteEvent = async () => {
-    if (!window.confirm("Delete this draft event permanently?")) return;
+  const handleConfirmDeleteEvent = async () => {
     try {
       setActionLoading(true);
       await deleteEvent(eventId);
+      setDeleteEventConfirmOpen(false);
       openSnackbar({ message: "Event deleted", variant: "success" });
       navigate("/admin/upcoming-events");
     } catch (error) {
@@ -608,12 +646,13 @@ function EventDetail() {
     }
   };
 
-  const handleDeleteProgram = async (programId) => {
-    if (!window.confirm("Delete this program?")) return;
+  const handleConfirmDeleteProgram = async () => {
+    if (!deleteProgramTarget) return;
     try {
       setActionLoading(true);
-      await deleteProgram(programId);
+      await deleteProgram(deleteProgramTarget);
       await loadDetail();
+      setDeleteProgramTarget(null);
       openSnackbar({ message: "Program deleted", variant: "success" });
     } catch (error) {
       openSnackbar({
@@ -708,7 +747,7 @@ function EventDetail() {
                   <button
                     type="button"
                     disabled={actionLoading}
-                    onClick={handleDeleteEvent}
+                    onClick={() => setDeleteEventConfirmOpen(true)}
                     className="h-[38px] px-3 rounded-lg bg-red-50 text-red-600 text-sm font-semibold"
                   >
                     Delete
@@ -719,7 +758,7 @@ function EventDetail() {
                 <button
                   type="button"
                   disabled={actionLoading}
-                  onClick={handleCancelEvent}
+                  onClick={() => setCancelEventConfirmOpen(true)}
                   className="h-[38px] px-3 rounded-lg bg-red-50 text-red-600 text-sm font-semibold"
                 >
                   Cancel Event
@@ -893,7 +932,7 @@ function EventDetail() {
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleDeleteProgram(program._id)}
+                            onClick={() => setDeleteProgramTarget(program._id)}
                             className="h-[36px] w-[36px] rounded-lg border border-red-100 text-red-600 flex items-center justify-center"
                             aria-label="Delete program"
                           >
@@ -1035,6 +1074,46 @@ function EventDetail() {
           onSaved={(updated) => setEvent(updated)}
         />
       ) : null}
+
+      <ConfirmModal
+        open={deleteEventConfirmOpen}
+        title="Delete draft event?"
+        description={`"${event.eventName}" will be permanently removed. This cannot be undone.`}
+        confirmLabel="Delete"
+        tone="danger"
+        loading={actionLoading}
+        onCancel={() => setDeleteEventConfirmOpen(false)}
+        onConfirm={handleConfirmDeleteEvent}
+      />
+
+      <ConfirmModal
+        open={cancelEventConfirmOpen}
+        title="Cancel this event?"
+        description={`"${event.eventName}" will be marked cancelled and registrations will be closed.`}
+        confirmLabel="Cancel Event"
+        tone="warning"
+        loading={actionLoading}
+        onCancel={() => setCancelEventConfirmOpen(false)}
+        onConfirm={handleConfirmCancelEvent}
+      />
+
+      <ConfirmModal
+        open={Boolean(deleteProgramTarget)}
+        title="Delete program?"
+        description={
+          deleteProgramTarget
+            ? `Remove "${
+                programs.find((p) => p._id === deleteProgramTarget)
+                  ?.programName || "this program"
+              }" from "${event.eventName}"? This cannot be undone.`
+            : ""
+        }
+        confirmLabel="Delete"
+        tone="danger"
+        loading={actionLoading}
+        onCancel={() => setDeleteProgramTarget(null)}
+        onConfirm={handleConfirmDeleteProgram}
+      />
     </div>
   );
 }

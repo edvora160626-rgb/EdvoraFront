@@ -863,7 +863,7 @@ function RegisterModal({ onClose }) {
           <div className="flex items-start sm:items-center justify-center mt-6 sm:mt-8 px-2">
             <input
               type="checkbox"
-              className="w-4 h-4 mt-1 sm:mt-0 shrink-0 accent-[#A77A95] cursor-pointer"
+              className="w-4 h-4 mt-1 sm:mt-0 shrink-0 accent-[color:var(--edvora-primary)] cursor-pointer"
             />
 
             <span className="ml-3 text-[13px] sm:text-[14px] text-[#667085] text-center sm:text-left">

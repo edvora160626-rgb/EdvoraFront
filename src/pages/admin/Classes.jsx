@@ -27,6 +27,18 @@ const EMPTY_FORM = {
   section: "",
 };
 
+/** Letters, numbers, and spaces only (no special characters). */
+const ALPHANUMERIC_SPACE = /[^a-zA-Z0-9\s]/g;
+const VALID_CLASS_FIELD = /^[a-zA-Z0-9]+(?:\s+[a-zA-Z0-9]+)*$/;
+
+function sanitizeAlphanumeric(value, { allowSpace = true } = {}) {
+  const cleaned = String(value || "").replace(
+    allowSpace ? ALPHANUMERIC_SPACE : /[^a-zA-Z0-9]/g,
+    ""
+  );
+  return allowSpace ? cleaned.replace(/\s{2,}/g, " ") : cleaned;
+}
+
 const inputClass =
   "w-full h-[44px] rounded-xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass)] backdrop-blur-md px-3.5 text-[14px] text-[color:var(--edvora-ink-strong)] outline-none focus:border-[color:var(--edvora-primary)] focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--edvora-primary)_16%,transparent)]";
 const labelClass =
@@ -36,8 +48,10 @@ function ClassFormModal({ mode = "add", initial, onClose, onSaved }) {
   const [formData, setFormData] = useState(
     initial
       ? {
-          className: initial.className || "",
-          section: initial.section || "",
+          className: sanitizeAlphanumeric(initial.className || ""),
+          section: sanitizeAlphanumeric(initial.section || "", {
+            allowSpace: false,
+          }),
         }
       : EMPTY_FORM
   );
@@ -45,13 +59,28 @@ function ClassFormModal({ mode = "add", initial, onClose, onSaved }) {
   const isEdit = mode === "edit";
 
   const handleChange = (e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    const next =
+      name === "section"
+        ? sanitizeAlphanumeric(value, { allowSpace: false })
+        : sanitizeAlphanumeric(value, { allowSpace: true });
+    setFormData((prev) => ({ ...prev, [name]: next }));
   };
 
   const handleSubmit = async () => {
-    if (!formData.className.trim() || !formData.section.trim()) {
+    const className = formData.className.trim();
+    const section = formData.section.trim();
+
+    if (!className || !section) {
       return openSnackbar({
         message: "Class name and section are required",
+        variant: "warning",
+      });
+    }
+
+    if (!VALID_CLASS_FIELD.test(className) || !VALID_CLASS_FIELD.test(section)) {
+      return openSnackbar({
+        message: "Only letters and numbers are allowed (no special characters)",
         variant: "warning",
       });
     }
@@ -62,18 +91,18 @@ function ClassFormModal({ mode = "add", initial, onClose, onSaved }) {
       if (isEdit) {
         const updated = await updateClass({
           classId: initial._id,
-          className: formData.className,
-          section: formData.section,
+          className,
+          section,
         });
         openSnackbar({
           message: "Class updated successfully",
           variant: "success",
         });
-        onSaved?.(updated || { ...initial, ...formData });
+        onSaved?.(updated || { ...initial, className, section });
       } else {
         const created = await addClass({
-          className: formData.className,
-          section: formData.section,
+          className,
+          section,
         });
         openSnackbar({
           message: "Class created successfully",
@@ -81,8 +110,8 @@ function ClassFormModal({ mode = "add", initial, onClose, onSaved }) {
         });
         onSaved?.(
           created || {
-            ...formData,
-            section: formData.section.trim().toUpperCase(),
+            className,
+            section: section.toUpperCase(),
             strength: 0,
             status: "ACTIVE",
             _id: crypto.randomUUID(),
@@ -137,8 +166,15 @@ function ClassFormModal({ mode = "add", initial, onClose, onSaved }) {
                 value={formData.className}
                 onChange={handleChange}
                 placeholder="e.g. Grade 1, Class 10, LKG"
+                inputMode="text"
+                autoComplete="off"
+                pattern="[A-Za-z0-9 ]+"
+                title="Only letters and numbers"
                 className={inputClass}
               />
+              <p className="mt-1.5 text-[11px] text-[color:var(--edvora-muted)]">
+                Letters and numbers only — no special characters.
+              </p>
             </div>
 
             <div>
@@ -152,6 +188,10 @@ function ClassFormModal({ mode = "add", initial, onClose, onSaved }) {
                 onChange={handleChange}
                 placeholder="e.g. A, B, C"
                 maxLength={5}
+                inputMode="text"
+                autoComplete="off"
+                pattern="[A-Za-z0-9]+"
+                title="Only letters and numbers"
                 className={inputClass}
               />
             </div>

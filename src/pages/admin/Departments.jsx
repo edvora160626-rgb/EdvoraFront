@@ -30,7 +30,6 @@ const EMPTY_FORM = {
   roomNumber: "",
   branch: "",
   color: "#4F46E5",
-  displayOrder: "",
   status: "ACTIVE",
 };
 
@@ -67,7 +66,6 @@ function AddDepartmentModal({ onClose, onCreated }) {
         roomNumber: formData.roomNumber.trim(),
         branch: formData.branch.trim(),
         color: formData.color,
-        displayOrder: Number(formData.displayOrder) || 0,
         status: formData.status,
       };
 
@@ -197,18 +195,6 @@ function AddDepartmentModal({ onClose, onCreated }) {
             </div>
 
             <div>
-              <label className={labelClass}>Display Order</label>
-              <input
-                type="number"
-                name="displayOrder"
-                value={formData.displayOrder}
-                onChange={handleChange}
-                placeholder="0"
-                className={inputClass}
-              />
-            </div>
-
-            <div>
               <label className={labelClass}>Status</label>
               <CustomSelect
                 options={DEPARTMENT_STATUSES}
@@ -285,10 +271,10 @@ function DepartmentCard({ department, onClick }) {
   const isInactive = department.status === "INACTIVE";
   const accent = department.color || "#A77A95";
   const staffCount =
+    department.staffCount ??
     department.teacherids?.length ??
     department.teachers?.length ??
-    department.staffCount ??
-    null;
+    0;
 
   return (
     <button
@@ -371,7 +357,7 @@ function DepartmentCard({ department, onClick }) {
         ) : null}
         {staffCount != null ? (
           <span className="inline-flex items-center gap-1.5 rounded-full bg-[color:var(--edvora-glass-soft)] px-2.5 py-1 text-[11px] font-medium text-[color:var(--edvora-ink)] ring-1 ring-[color:var(--edvora-glass-border-soft)]">
-            {staffCount} {staffCount === 1 ? "staff" : "staff"}
+            {staffCount} staff
           </span>
         ) : null}
       </div>
