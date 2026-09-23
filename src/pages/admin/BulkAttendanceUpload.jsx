@@ -4,21 +4,22 @@ import {
   AlertCircle,
   ArrowLeft,
   CheckCircle2,
+  ClipboardList,
   CloudUpload,
   Download,
   FileSpreadsheet,
   Sparkles,
   Trash2,
   UploadCloud,
+  Users,
 } from "lucide-react";
-import CustomDatePicker from "../../common/CustomDatePicker";
 import CustomSelect from "../../common/CustomSelect";
 import { openSnackbar } from "../../common/snackbar/snackbar";
 import {
   ATTENDANCE_STATUSES,
   bulkUploadAttendance,
-  formatAttendanceSheetDate,
   getAssignedClassesForAttendance,
+  getMonthAttendance,
   getStudentsForAttendance,
   getTeachersForAttendance,
   normalizeBulkRows,
@@ -26,54 +27,148 @@ import {
   todayISO,
 } from "../../utils/attendanceApi";
 import {
+  clampMonthKey,
+  currentMonthKey,
+  getMonthDays,
+  monthKeyFromDate,
+  monthLabel,
+} from "../../utils/attendanceMonth";
+import {
   downloadStudentAttendanceTemplate,
   downloadTeacherAttendanceTemplate,
   parseExcelAttendanceFile,
 } from "../../utils/attendanceTemplate";
 import { getUserRole } from "../../utils/auth";
 
-const STATUS_HINT = ATTENDANCE_STATUSES.map((s) => s.value).join(" | ");
+const STATUS_OPTIONS = [
+  { value: "", label: "—" },
+  ...ATTENDANCE_STATUSES.map((item) => ({
+    value: item.value,
+    label: item.short,
+    title: item.label,
+  })),
+];
+
+function personName(person) {
+  return [person.firstName, person.lastName].filter(Boolean).join(" ").trim();
+}
+
+function rosterIdentity(person, type) {
+  if (type === "STUDENT") {
+    return person.admissionNumber || person.rollNumber || person.email || "";
+  }
+  return person.employeeId || person.staffId || person.email || "";
+}
+
+function peopleFromRoster(list, type, existingMarks = {}) {
+  return (list || []).map((person) => {
+    const days = {};
+    Object.entries(existingMarks).forEach(([key, status]) => {
+      const [id, iso] = key.split("|");
+      if (String(id) === String(person._id) && status) days[iso] = status;
+    });
+    return {
+      id: person._id,
+      identifier: rosterIdentity(person, type),
+      name: personName(person),
+      extra:
+        type === "STUDENT"
+          ? person.rollNumber || ""
+          : person.department || "",
+      days,
+    };
+  });
+}
+
+function mergeParsedRows(currentPeople, parsedRows, monthDays) {
+  const allowed = new Set(monthDays.filter((day) => !day.isFuture).map((day) => day.iso));
+  const byId = new Map(
+    currentPeople.map((person) => [String(person.identifier).toLowerCase(), { ...person, days: { ...person.days } }])
+  );
+
+  parsedRows.forEach((row) => {
+    const key = String(row.identifier || "").trim().toLowerCase();
+    if (!key) return;
+    if (!byId.has(key)) {
+      byId.set(key, {
+        id: "",
+        identifier: row.identifier,
+        name: row.staffName || "",
+        extra: row.department || "",
+        days: {},
+      });
+    }
+    const person = byId.get(key);
+    if (row.staffName) person.name = row.staffName;
+    if (row.date && allowed.has(row.date) && row.status) {
+      const match = ATTENDANCE_STATUSES.find(
+        (item) =>
+          item.value === String(row.status).toUpperCase().replace(/[\s-]+/g, "_") ||
+          item.short === String(row.status).toUpperCase()
+      );
+      person.days[row.date] = match?.value || String(row.status).toUpperCase();
+    }
+  });
+
+  return Array.from(byId.values());
+}
+
+function gridToUploadRows(people) {
+  const rows = [];
+  people.forEach((person) => {
+    Object.entries(person.days || {}).forEach(([date, status]) => {
+      if (!status) return;
+      rows.push({
+        identifier: person.identifier,
+        date,
+        status,
+      });
+    });
+  });
+  return rows;
+}
 
 function BulkAttendanceUpload({ type: typeProp }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const role = getUserRole();
-  const type =
-    typeProp ||
-    (role === "TEACHER" ? "STUDENT" : "TEACHER");
-
+  const type = typeProp || (role === "TEACHER" ? "STUDENT" : "TEACHER");
   const backPath =
     type === "TEACHER"
       ? "/admin/teacher-attendance"
       : "/admin/student-attendance";
+  const isStaff = type === "TEACHER";
 
-  const [date, setDate] = useState(searchParams.get("date") || todayISO());
+  const [month, setMonth] = useState(() =>
+    clampMonthKey(monthKeyFromDate(searchParams.get("date") || todayISO()))
+  );
   const [classId, setClassId] = useState(searchParams.get("classId") || "");
   const [classes, setClasses] = useState([]);
   const [fileName, setFileName] = useState("");
-  const [rows, setRows] = useState([]);
+  const [people, setPeople] = useState([]);
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [loadingRoster, setLoadingRoster] = useState(false);
   const [downloadingTemplate, setDownloadingTemplate] = useState(false);
   const [result, setResult] = useState(null);
   const inputRef = useRef(null);
 
+  const monthDays = useMemo(() => getMonthDays(month), [month]);
+  const writableDays = monthDays.filter((day) => !day.isFuture);
+  const selectedClass = classes.find((item) => String(item._id) === String(classId));
+
   useEffect(() => {
     if (type !== "STUDENT") return;
     let cancelled = false;
-
     const load = async () => {
       try {
-        const res = await getAssignedClassesForAttendance(date);
+        const anchor = writableDays.at(-1)?.iso || `${month}-01`;
+        const res = await getAssignedClassesForAttendance(anchor);
         if (cancelled) return;
         const list = res.classes || [];
         setClasses(list);
         if (!classId && list[0]?._id) setClassId(list[0]._id);
-        if (
-          classId &&
-          list.length &&
-          !list.some((item) => String(item._id) === String(classId))
-        ) {
+        if (classId && list.length && !list.some((item) => String(item._id) === String(classId))) {
           setClassId(list[0]?._id || "");
         }
       } catch (error) {
@@ -85,28 +180,82 @@ function BulkAttendanceUpload({ type: typeProp }) {
         });
       }
     };
-
     load();
     return () => {
       cancelled = true;
     };
-  }, [type, date]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [type, month]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const classOptions = classes.map((item) => ({
     value: item._id,
     label: `${item.className} · Sec ${item.section}`,
   }));
 
-  const selectedClass = classes.find(
-    (item) => String(item._id) === String(classId)
+  const markedCount = useMemo(
+    () =>
+      people.reduce(
+        (sum, person) =>
+          sum + Object.values(person.days || {}).filter(Boolean).length,
+        0
+      ),
+    [people]
   );
 
-  const previewStats = useMemo(() => {
-    const total = rows.length;
-    const withStatus = rows.filter((r) => r.status).length;
-    const missingId = rows.filter((r) => !r.identifier).length;
-    return { total, withStatus, missingId };
-  }, [rows]);
+  const loadRoster = async ({ silent = false } = {}) => {
+    if (type === "STUDENT" && !classId) {
+      if (!silent) {
+        openSnackbar({
+          message: "Select a class before loading the roster",
+          variant: "warning",
+        });
+      }
+      return [];
+    }
+
+    setLoadingRoster(true);
+    try {
+      const anchor = writableDays.at(-1)?.iso || todayISO();
+      const [roster, monthData] = await Promise.all([
+        type === "STUDENT"
+          ? getStudentsForAttendance(classId, anchor)
+          : getTeachersForAttendance(anchor),
+        getMonthAttendance({ type, month, classId: type === "STUDENT" ? classId : null }).catch(
+          () => ({ marks: {} })
+        ),
+      ]);
+      const list = type === "STUDENT" ? roster.students || [] : roster.teachers || [];
+      if (!list.length) {
+        if (!silent) {
+          openSnackbar({
+            message: isStaff
+              ? "No active staff found"
+              : "No active students found in this class",
+            variant: "warning",
+          });
+        }
+        setPeople([]);
+        return [];
+      }
+      const next = peopleFromRoster(list, type, monthData.marks || {});
+      setPeople(next);
+      setResult(null);
+      if (!silent) {
+        openSnackbar({
+          message: `Loaded ${next.length} ${isStaff ? "staff" : "students"} for ${monthLabel(month)}`,
+          variant: "success",
+        });
+      }
+      return next;
+    } catch (error) {
+      openSnackbar({
+        message: error?.response?.data?.message || "Failed to load roster",
+        variant: "error",
+      });
+      return [];
+    } finally {
+      setLoadingRoster(false);
+    }
+  };
 
   const handleFiles = async (fileList) => {
     const file = fileList?.[0];
@@ -114,7 +263,6 @@ function BulkAttendanceUpload({ type: typeProp }) {
 
     const isExcel = /\.(xlsx|xls)$/i.test(file.name);
     const isCsv = /\.(csv|txt)$/i.test(file.name);
-
     if (!isExcel && !isCsv) {
       return openSnackbar({
         message: "Please upload a .xlsx or .csv file",
@@ -123,27 +271,33 @@ function BulkAttendanceUpload({ type: typeProp }) {
     }
 
     try {
-      let rawRows = [];
+      let parsedFile = { rows: [], monthKey: "" };
       if (isExcel) {
-        const buffer = await file.arrayBuffer();
-        rawRows = parseExcelAttendanceFile(buffer);
+        parsedFile = parseExcelAttendanceFile(await file.arrayBuffer());
       } else {
-        const text = await file.text();
-        rawRows = parseCsv(text);
+        parsedFile = parseCsv(await file.text());
       }
 
-      const parsed = normalizeBulkRows(rawRows, type);
+      const fileMonth = clampMonthKey(parsedFile.monthKey || month);
+      if (fileMonth !== month) setMonth(fileMonth);
+      const days = getMonthDays(fileMonth);
+      const parsed = normalizeBulkRows(parsedFile.rows, type, fileMonth);
       if (!parsed.length) {
         return openSnackbar({
-          message: "File has no data rows",
+          message: "File has no attendance marks to import",
           variant: "warning",
         });
       }
+
+      let base = people;
+      if (!base.length) {
+        base = await loadRoster({ silent: true });
+      }
+      setPeople(mergeParsedRows(base, parsed, days));
       setFileName(file.name);
-      setRows(parsed);
       setResult(null);
       openSnackbar({
-        message: `${parsed.length} rows ready for preview`,
+        message: `${parsed.length} marks loaded — you can still edit them on this screen`,
         variant: "success",
       });
     } catch {
@@ -156,7 +310,7 @@ function BulkAttendanceUpload({ type: typeProp }) {
 
   const clearFile = () => {
     setFileName("");
-    setRows([]);
+    setPeople([]);
     setResult(null);
     if (inputRef.current) inputRef.current.value = "";
   };
@@ -164,53 +318,37 @@ function BulkAttendanceUpload({ type: typeProp }) {
   const handleDownloadTemplate = async () => {
     try {
       setDownloadingTemplate(true);
-
-      if (type === "STUDENT") {
-        if (!classId) {
-          openSnackbar({
-            message: "Select a class before downloading the template",
-            variant: "warning",
-          });
-          return;
-        }
-
-        const data = await getStudentsForAttendance(classId, date);
-        const students = data.students || [];
-
-        if (!students.length) {
-          openSnackbar({
-            message: "No active students found in this class",
-            variant: "warning",
-          });
-          return;
-        }
-
-        downloadStudentAttendanceTemplate(
-          students,
-          date,
-          data.classInfo || selectedClass
-        );
+      const roster = await loadRoster({ silent: true });
+      const source = roster.length ? roster : people;
+      if (!source.length) {
         openSnackbar({
-          message: `Styled Excel template ready with ${students.length} students for ${formatAttendanceSheetDate(date)}`,
-          variant: "success",
-        });
-        return;
-      }
-
-      const data = await getTeachersForAttendance(date);
-      const staff = data.teachers || [];
-
-      if (!staff.length) {
-        openSnackbar({
-          message: "No active staff found to include in the template",
+          message: isStaff
+            ? "No active staff found to include in the template"
+            : "Select a class with students before downloading the template",
           variant: "warning",
         });
         return;
       }
 
-      downloadTeacherAttendanceTemplate(staff, date);
+      if (type === "STUDENT") {
+        const data = await getStudentsForAttendance(
+          classId,
+          writableDays.at(-1)?.iso || todayISO()
+        );
+        await downloadStudentAttendanceTemplate(
+          data.students || [],
+          month,
+          data.classInfo || selectedClass
+        );
+      } else {
+        const data = await getTeachersForAttendance(
+          writableDays.at(-1)?.iso || todayISO()
+        );
+        await downloadTeacherAttendanceTemplate(data.teachers || [], month);
+      }
+
       openSnackbar({
-        message: `Styled Excel template ready with ${staff.length} active staff for ${formatAttendanceSheetDate(date)}`,
+        message: `Excel template ready for ${monthLabel(month)} with dropdowns`,
         variant: "success",
       });
     } catch (error) {
@@ -225,6 +363,16 @@ function BulkAttendanceUpload({ type: typeProp }) {
     }
   };
 
+  const setDayStatus = (identifier, iso, status) => {
+    setPeople((prev) =>
+      prev.map((person) =>
+        person.identifier === identifier
+          ? { ...person, days: { ...person.days, [iso]: status } }
+          : person
+      )
+    );
+  };
+
   const handleUpload = async () => {
     if (type === "STUDENT" && !classId) {
       return openSnackbar({
@@ -232,10 +380,10 @@ function BulkAttendanceUpload({ type: typeProp }) {
         variant: "warning",
       });
     }
-
+    const rows = gridToUploadRows(people);
     if (!rows.length) {
       return openSnackbar({
-        message: "Add an attendance file first",
+        message: "Mark at least one day before uploading",
         variant: "warning",
       });
     }
@@ -244,11 +392,10 @@ function BulkAttendanceUpload({ type: typeProp }) {
       setUploading(true);
       const data = await bulkUploadAttendance({
         type,
-        date,
+        date: writableDays.at(-1)?.iso || todayISO(),
         classId: type === "STUDENT" ? classId : null,
         rows,
       });
-
       setResult(data);
       openSnackbar({
         message: data?.message || "Bulk attendance uploaded",
@@ -256,9 +403,7 @@ function BulkAttendanceUpload({ type: typeProp }) {
       });
     } catch (error) {
       const payload = error?.response?.data;
-      if (payload?.errors) {
-        setResult(payload);
-      }
+      if (payload?.errors) setResult(payload);
       openSnackbar({
         message: payload?.message || "Bulk upload failed",
         variant: "error",
@@ -276,9 +421,7 @@ function BulkAttendanceUpload({ type: typeProp }) {
             Bulk Attendance Upload
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            {type === "TEACHER"
-              ? "Import teacher attendance from a styled Excel sheet"
-              : "Import student attendance for your assigned class from Excel"}
+            Mark the full current month for {isStaff ? "staff" : "students"} — Excel dropdown or on-screen entry.
           </p>
         </div>
         <button
@@ -291,38 +434,75 @@ function BulkAttendanceUpload({ type: typeProp }) {
         </button>
       </div>
 
-      <section className="relative overflow-hidden rounded-[28px] border border-[#E8D9D0] bg-linear-to-br from-[#FAEEE9] via-white to-[#F8F4F7] p-6 sm:p-8 shadow-sm">
-        <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[color:var(--edvora-primary)]/10" />
-        <div className="pointer-events-none absolute bottom-0 left-1/3 h-24 w-24 rounded-full bg-[#F5D69B]/30" />
+      <section className="rounded-[24px] border border-[#E8D9D0] bg-white p-5 sm:p-6 shadow-sm">
+        <div className="flex items-center gap-2 text-[color:var(--edvora-primary)] mb-3">
+          <ClipboardList size={18} />
+          <h2 className="text-sm font-semibold uppercase tracking-wider">
+            Instructions
+          </h2>
+        </div>
+        <ol className="space-y-2 text-sm text-slate-600 list-decimal pl-5">
+          <li>
+            Choose the month. Only the <span className="font-medium text-[color:var(--edvora-ink-strong)]">current or a past month</span> is allowed.
+          </li>
+          <li>
+            {isStaff
+              ? "The template includes every active staff member."
+              : "Select your class — only that roster is included."}
+          </li>
+          <li>
+            Download the Excel sheet. It has <span className="font-medium text-[color:var(--edvora-ink-strong)]">one column for every day</span> in {monthLabel(month)}.
+          </li>
+          <li>
+            Use the Excel dropdown — <span className="font-medium text-[color:var(--edvora-ink-strong)]">P Present, A Absent, L Late, HD Half Day, LV Leave</span>. You can also type those codes.
+          </li>
+          <li>
+            Grey columns are <span className="font-medium text-[color:var(--edvora-ink-strong)]">future dates</span> and cannot be marked.
+          </li>
+          <li>
+            Upload the file, or skip Excel and click <span className="font-medium text-[color:var(--edvora-ink-strong)]">Load roster</span> to mark attendance on this screen.
+          </li>
+        </ol>
+      </section>
 
+      <section className="relative overflow-hidden rounded-[28px] border border-[#E8D9D0] bg-linear-to-br from-[#FAEEE9] via-white to-[#F8F4F7] p-6 sm:p-8 shadow-sm">
         <div className="relative grid grid-cols-1 lg:grid-cols-3 gap-5">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-[color:var(--edvora-primary)] mb-2">
-              Step 1 · Date
+              Step 1 · Month
             </p>
-            <CustomDatePicker
-              value={date}
-              onChange={setDate}
-              openTo="day"
-              maxDate={todayISO()}
+            <input
+              type="month"
+              value={month}
+              max={currentMonthKey()}
+              onChange={(e) => {
+                setMonth(clampMonthKey(e.target.value));
+                setPeople([]);
+                setFileName("");
+                setResult(null);
+              }}
+              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-[color:var(--edvora-ink-strong)] outline-none focus:border-[color:var(--edvora-primary)]"
             />
+            <p className="mt-2 text-xs text-slate-500">
+              {writableDays.length} markable day{writableDays.length === 1 ? "" : "s"} · {monthDays.length - writableDays.length} future day{monthDays.length - writableDays.length === 1 ? "" : "s"} locked
+            </p>
           </div>
 
           {type === "STUDENT" ? (
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-[color:var(--edvora-primary)] mb-2">
-                Step 2 · My Class
+                Step 2 · Class
               </p>
               <CustomSelect
                 options={classOptions}
-                value={
-                  classOptions.find((opt) => opt.value === classId) || null
-                }
-                onChange={(opt) => setClassId(opt?.value || "")}
+                value={classOptions.find((opt) => opt.value === classId) || null}
+                onChange={(opt) => {
+                  setClassId(opt?.value || "");
+                  setPeople([]);
+                  setFileName("");
+                }}
                 placeholder={
-                  classOptions.length
-                    ? "Select assigned class"
-                    : "No assigned classes"
+                  classOptions.length ? "Select assigned class" : "No assigned classes"
                 }
               />
             </div>
@@ -344,11 +524,11 @@ function BulkAttendanceUpload({ type: typeProp }) {
             <div className="flex items-center gap-2 text-[color:var(--edvora-primary)]">
               <Sparkles size={16} />
               <p className="text-xs font-semibold uppercase tracking-wider">
-                Allowed statuses
+                Status codes
               </p>
             </div>
-            <p className="mt-2 text-xs leading-relaxed text-slate-600 break-words">
-              {STATUS_HINT}
+            <p className="mt-2 text-xs leading-relaxed text-slate-600">
+              {ATTENDANCE_STATUSES.map((item) => `${item.short} ${item.label}`).join(" · ")}
             </p>
           </div>
         </div>
@@ -378,35 +558,10 @@ function BulkAttendanceUpload({ type: typeProp }) {
               <CloudUpload size={28} />
             </span>
             <h2 className="mt-4 text-xl font-bold text-[color:var(--edvora-ink-strong)]">
-              Drop your file here
+              Drop monthly Excel here
             </h2>
             <p className="mt-2 text-sm text-slate-500 max-w-md">
-              {type === "TEACHER" ? (
-                <>
-                  Download the styled Excel sheet — title, headers, and grid use
-                  Edvora brand colors. Upload the filled{" "}
-                  <span className="font-medium text-[color:var(--edvora-ink-strong)]">.xlsx</span> (or
-                  .csv) back here.
-                  <br />
-                  Columns:{" "}
-                  <span className="font-medium text-[color:var(--edvora-ink-strong)]">
-                    S.No, employeeId, staff name, department, Status, Remarks
-                  </span>
-                </>
-              ) : (
-                <>
-                  Download the class roster Excel, fill Status &amp; Remarks,
-                  then upload the{" "}
-                  <span className="font-medium text-[color:var(--edvora-ink-strong)]">.xlsx</span> (or
-                  .csv).
-                  <br />
-                  Columns:{" "}
-                  <span className="font-medium text-[color:var(--edvora-ink-strong)]">
-                    S.No, admissionNumber, student name, rollNumber, Status,
-                    Remarks
-                  </span>
-                </>
-              )}
+              Template columns: identity plus every day of {monthLabel(month)}. Future dates stay empty.
             </p>
 
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
@@ -421,13 +576,20 @@ function BulkAttendanceUpload({ type: typeProp }) {
               <button
                 type="button"
                 onClick={handleDownloadTemplate}
-                disabled={
-                  downloadingTemplate || (type === "STUDENT" && !classId)
-                }
+                disabled={downloadingTemplate || (type === "STUDENT" && !classId)}
                 className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 h-11 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
               >
                 <Download size={16} />
                 {downloadingTemplate ? "Preparing…" : "Download Template"}
+              </button>
+              <button
+                type="button"
+                onClick={() => loadRoster()}
+                disabled={loadingRoster || (type === "STUDENT" && !classId)}
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 h-11 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+              >
+                <Users size={16} />
+                {loadingRoster ? "Loading…" : "Load roster"}
               </button>
             </div>
 
@@ -446,9 +608,7 @@ function BulkAttendanceUpload({ type: typeProp }) {
                   <p className="text-sm font-semibold text-[color:var(--edvora-ink-strong)] truncate">
                     {fileName}
                   </p>
-                  <p className="text-xs text-slate-500">
-                    {previewStats.total} rows parsed
-                  </p>
+                  <p className="text-xs text-slate-500">{markedCount} marks on this screen</p>
                 </div>
                 <button
                   type="button"
@@ -469,64 +629,46 @@ function BulkAttendanceUpload({ type: typeProp }) {
           </h3>
           <ul className="space-y-3 text-sm text-slate-600">
             <li className="flex gap-2">
-              <CheckCircle2
-                size={16}
-                className="text-emerald-600 mt-0.5 shrink-0"
-              />
-              {type === "TEACHER"
-                ? "Template lists every active staff with S.No, employeeId, name, and department."
-                : "Template lists students in your assigned class with admission & roll numbers."}
+              <CheckCircle2 size={16} className="text-emerald-600 mt-0.5 shrink-0" />
+              One column per calendar day of the selected month.
             </li>
             <li className="flex gap-2">
-              <CheckCircle2
-                size={16}
-                className="text-emerald-600 mt-0.5 shrink-0"
-              />
-              {type === "TEACHER"
-                ? "Fill Status / Remarks only — matching uses employeeId (or staffId / email)."
-                : "Fill Status / Remarks only — matching uses admissionNumber (or roll / email)."}
+              <CheckCircle2 size={16} className="text-emerald-600 mt-0.5 shrink-0" />
+              Excel dropdowns for P / A / L / HD / LV, or type the same codes.
             </li>
             <li className="flex gap-2">
-              <CheckCircle2
-                size={16}
-                className="text-emerald-600 mt-0.5 shrink-0"
-              />
-              Short codes work too: P, A, L, HD, LV.
+              <CheckCircle2 size={16} className="text-emerald-600 mt-0.5 shrink-0" />
+              {isStaff
+                ? "Matching uses employeeId (or staffId / email)."
+                : "Matching uses admissionNumber (or roll / email)."}
             </li>
             <li className="flex gap-2">
-              <AlertCircle
-                size={16}
-                className="text-amber-600 mt-0.5 shrink-0"
-              />
-              Existing marks for matched people on this date will be updated.
+              <AlertCircle size={16} className="text-amber-600 mt-0.5 shrink-0" />
+              Future dates are blocked. Empty cells are skipped. Existing marks for filled days are updated.
             </li>
           </ul>
 
           <div className="grid grid-cols-3 gap-2 pt-2">
             <div className="rounded-xl bg-[color:var(--edvora-primary-soft)] px-3 py-3 text-center">
-              <p className="text-xs text-[color:var(--edvora-ink-strong)]/80">Rows</p>
+              <p className="text-xs text-[color:var(--edvora-ink-strong)]/80">People</p>
               <p className="text-xl font-bold text-[color:var(--edvora-ink-strong)]">
-                {previewStats.total}
+                {people.length}
               </p>
             </div>
             <div className="rounded-xl bg-emerald-50 px-3 py-3 text-center">
-              <p className="text-xs text-emerald-700/80">With status</p>
-              <p className="text-xl font-bold text-emerald-700">
-                {previewStats.withStatus}
-              </p>
+              <p className="text-xs text-emerald-700/80">Marks</p>
+              <p className="text-xl font-bold text-emerald-700">{markedCount}</p>
             </div>
-            <div className="rounded-xl bg-rose-50 px-3 py-3 text-center">
-              <p className="text-xs text-rose-700/80">Missing ID</p>
-              <p className="text-xl font-bold text-rose-700">
-                {previewStats.missingId}
-              </p>
+            <div className="rounded-xl bg-amber-50 px-3 py-3 text-center">
+              <p className="text-xs text-amber-700/80">Days open</p>
+              <p className="text-xl font-bold text-amber-700">{writableDays.length}</p>
             </div>
           </div>
 
           <button
             type="button"
             onClick={handleUpload}
-            disabled={uploading || !rows.length}
+            disabled={uploading || !markedCount}
             className="w-full h-12 rounded-xl bg-[color:var(--edvora-primary)] hover:bg-[color:var(--edvora-primary-hover)] text-white text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {uploading ? "Uploading…" : "Validate & Upload"}
@@ -534,64 +676,77 @@ function BulkAttendanceUpload({ type: typeProp }) {
         </div>
       </section>
 
-      {rows.length > 0 ? (
+      {people.length > 0 ? (
         <section className="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
-          <div className="px-4 sm:px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
-            <div>
-              <h3 className="text-lg font-semibold text-[color:var(--edvora-ink-strong)]">Preview</h3>
-              <p className="text-sm text-slate-500">
-                Review rows before uploading
-              </p>
-            </div>
+          <div className="px-4 sm:px-5 py-4 border-b border-slate-100">
+            <h3 className="text-lg font-semibold text-[color:var(--edvora-ink-strong)]">
+              Monthly grid
+            </h3>
+            <p className="text-sm text-slate-500">
+              Edit any cell here — dropdown or typed codes both work. Grey days are in the future.
+            </p>
           </div>
           <div className="table-scroll">
-            <table className="w-full min-w-[720px] border-collapse">
+            <table className="w-full min-w-[920px] border-collapse">
               <thead className="bg-slate-100">
                 <tr>
-                  <th className="p-3 text-left text-sm font-semibold text-slate-700">
-                    #
+                  <th className="p-2 text-left text-xs font-semibold text-slate-700 sticky left-0 bg-slate-100 z-10">
+                    {isStaff ? "Staff" : "Student"}
                   </th>
-                  <th className="p-3 text-left text-sm font-semibold text-slate-700">
-                    Identifier
+                  <th className="p-2 text-left text-xs font-semibold text-slate-700">
+                    ID
                   </th>
-                  <th className="p-3 text-left text-sm font-semibold text-slate-700">
-                    Status
-                  </th>
-                  <th className="p-3 text-left text-sm font-semibold text-slate-700">
-                    Remarks
-                  </th>
+                  {monthDays.map((day) => (
+                    <th
+                      key={day.iso}
+                      className={`p-1 text-center text-[10px] font-semibold ${
+                        day.isFuture ? "text-slate-400 bg-slate-50" : "text-slate-700"
+                      }`}
+                    >
+                      <div>{day.day}</div>
+                      <div className="font-medium opacity-70">{day.weekday}</div>
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {rows.slice(0, 50).map((row, idx) => (
-                  <tr
-                    key={`${row.identifier}-${idx}`}
-                    className="border-t border-slate-100"
-                  >
-                    <td className="p-3 text-sm text-slate-500">{idx + 1}</td>
-                    <td className="p-3 text-sm font-medium text-slate-800">
-                      {row.identifier || (
-                        <span className="text-rose-500">Missing</span>
-                      )}
+                {people.map((person) => (
+                  <tr key={person.identifier} className="border-t border-slate-100">
+                    <td className="p-2 text-sm font-medium text-slate-800 sticky left-0 bg-white z-10 min-w-[140px]">
+                      {person.name || "—"}
                     </td>
-                    <td className="p-3 text-sm text-slate-700">
-                      {row.status || (
-                        <span className="text-rose-500">Missing</span>
-                      )}
+                    <td className="p-2 text-xs text-slate-500 whitespace-nowrap">
+                      {person.identifier || <span className="text-rose-500">Missing</span>}
                     </td>
-                    <td className="p-3 text-sm text-slate-500">
-                      {row.remarks || "—"}
-                    </td>
+                    {monthDays.map((day) => (
+                      <td key={`${person.identifier}-${day.iso}`} className="p-1">
+                        {day.isFuture ? (
+                          <div className="h-8 rounded-md bg-slate-100 text-center text-[10px] leading-8 text-slate-400">
+                            —
+                          </div>
+                        ) : (
+                          <select
+                            value={person.days?.[day.iso] || ""}
+                            onChange={(e) =>
+                              setDayStatus(person.identifier, day.iso, e.target.value)
+                            }
+                            title={day.iso}
+                            className="h-8 w-14 rounded-md border border-slate-200 bg-white text-center text-[11px] font-semibold text-slate-700 outline-none focus:border-[color:var(--edvora-primary)]"
+                          >
+                            {STATUS_OPTIONS.map((opt) => (
+                              <option key={opt.value || "blank"} value={opt.value}>
+                                {opt.label}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          {rows.length > 50 ? (
-            <p className="px-5 py-3 text-xs text-slate-500 border-t border-slate-100">
-              Showing first 50 of {rows.length} rows.
-            </p>
-          ) : null}
         </section>
       ) : null}
 
@@ -605,7 +760,7 @@ function BulkAttendanceUpload({ type: typeProp }) {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="rounded-xl bg-emerald-50 px-3 py-3">
-              <p className="text-xs text-emerald-700">Valid</p>
+              <p className="text-xs text-emerald-700">Valid marks</p>
               <p className="text-xl font-bold text-emerald-700">
                 {result?.summary?.valid ?? 0}
               </p>
@@ -617,9 +772,9 @@ function BulkAttendanceUpload({ type: typeProp }) {
               </p>
             </div>
             <div className="rounded-xl bg-[color:var(--edvora-primary-soft)] px-3 py-3">
-              <p className="text-xs text-[color:var(--edvora-ink-strong)]">Present</p>
+              <p className="text-xs text-[color:var(--edvora-ink-strong)]">Days saved</p>
               <p className="text-xl font-bold text-[color:var(--edvora-ink-strong)]">
-                {result?.summary?.PRESENT ?? 0}
+                {result?.summary?.days ?? 0}
               </p>
             </div>
             <div className="rounded-xl bg-amber-50 px-3 py-3">
@@ -638,7 +793,8 @@ function BulkAttendanceUpload({ type: typeProp }) {
               <ul className="space-y-1 max-h-40 overflow-y-auto text-sm text-rose-700">
                 {result.errors.slice(0, 20).map((err, idx) => (
                   <li key={`${err.line}-${idx}`}>
-                    Line {err.line}: {err.message}
+                    Line {err.line}
+                    {err.date ? ` (${err.date})` : ""}: {err.message}
                   </li>
                 ))}
               </ul>
@@ -653,12 +809,6 @@ function BulkAttendanceUpload({ type: typeProp }) {
             Back to attendance
           </button>
         </section>
-      ) : null}
-
-      {uploading ? (
-        <div className="fixed bottom-4 right-4 z-40 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-[color:var(--edvora-ink-strong)] shadow-lg border border-slate-100">
-          Uploading…
-        </div>
       ) : null}
     </div>
   );

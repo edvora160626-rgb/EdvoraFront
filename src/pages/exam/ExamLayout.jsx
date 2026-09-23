@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import {
   NavigationType,
   Outlet,
@@ -10,9 +10,6 @@ import { LogOut, Menu, Moon, Palette, Sun, X } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import EdvoraLoader from "../../common/EdvoraLoader";
 import EdvoraLogo from "../../common/EdvoraLogo";
-import LogoutModal from "../../common/LogoutModal";
-import ProfileModal from "../../common/ProfileModal";
-import ThemeSettingsDrawer from "../../common/ThemeSettingsDrawer";
 import { useTheme } from "../../theme/ThemeContext";
 import { logoutUser } from "../../redux/slices/authSlice";
 import { ExamSessionProvider } from "./context/ExamSessionContext";
@@ -28,6 +25,9 @@ import {
   setPortalMode,
 } from "../../utils/portalMode";
 import { openSnackbar } from "../../common/snackbar/snackbar";
+
+const LogoutModal = lazy(() => import("../../common/LogoutModal"));
+const ProfileModal = lazy(() => import("../../common/ProfileModal"));
 
 function ExamLayoutInner() {
   const navigate = useNavigate();
@@ -197,7 +197,6 @@ function ExamLayoutInner() {
             <Outlet />
           </Suspense>
         </main>
-        <ThemeSettingsDrawer />
       </div>
     );
   }
@@ -280,22 +279,28 @@ function ExamLayoutInner() {
         </Suspense>
       </main>
 
-      <ThemeSettingsDrawer />
+      {logoutModalOpen ? (
+        <Suspense fallback={null}>
+          <LogoutModal
+            open={logoutModalOpen}
+            title="Logout Confirmation"
+            description="Are you sure you want to logout?"
+            confirmText="Logout"
+            cancelText="Cancel"
+            onConfirm={handleLogoutConfirm}
+            onCancel={() => setLogoutModalOpen(false)}
+          />
+        </Suspense>
+      ) : null}
 
-      <LogoutModal
-        open={logoutModalOpen}
-        title="Logout Confirmation"
-        description="Are you sure you want to logout?"
-        confirmText="Logout"
-        cancelText="Cancel"
-        onConfirm={handleLogoutConfirm}
-        onCancel={() => setLogoutModalOpen(false)}
-      />
-
-      <ProfileModal
-        open={profileModalOpen}
-        onClose={() => setProfileModalOpen(false)}
-      />
+      {profileModalOpen ? (
+        <Suspense fallback={null}>
+          <ProfileModal
+            open={profileModalOpen}
+            onClose={() => setProfileModalOpen(false)}
+          />
+        </Suspense>
+      ) : null}
     </div>
   );
 }

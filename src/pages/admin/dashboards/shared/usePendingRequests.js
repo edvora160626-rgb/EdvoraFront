@@ -31,22 +31,13 @@ export default function usePendingRequests() {
           return;
         }
 
-        const counts = await fetchPendingCounts(viewRoles);
+        const [counts, groups] = await Promise.all([
+          fetchPendingCounts(viewRoles),
+          fetchAllViewableRequests(undefined, viewRoles),
+        ]);
         if (cancelled) return;
         setPendingCounts(counts);
         setLoading(false);
-
-        const rolesWithPending = viewRoles.filter(
-          (role) => (counts[role]?.REQUESTED || 0) > 0
-        );
-
-        if (!rolesWithPending.length) {
-          setRecentRequests([]);
-          return;
-        }
-
-        const groups = await fetchAllViewableRequests(undefined, rolesWithPending);
-        if (cancelled) return;
 
         const recent = groups
           .flatMap(({ role, users }) =>

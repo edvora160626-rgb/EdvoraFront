@@ -21,6 +21,7 @@ import {
   getPortalHomePath,
   getPortalMode,
   PORTAL_MODES,
+  prefetchPortalHome,
   setPortalMode,
 } from "../utils/portalMode";
 
@@ -75,9 +76,14 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loginData, setLoginData] = useState({ emailid: "", password: "" });
   const [focusedField, setFocusedField] = useState(null);
+  const [busy, setBusy] = useState(false);
 
-  const loading = status === "loading";
+  const loading = status === "loading" || busy;
   const isExam = portalMode === PORTAL_MODES.EXAMINATION;
+
+  useEffect(() => {
+    prefetchPortalHome(portalMode);
+  }, [portalMode]);
 
   useEffect(() => {
     if (status === "failed") {
@@ -102,18 +108,11 @@ function Login() {
   useEffect(() => {
     if (!isLoggedIn) return;
     if (status !== "succeeded") return;
+    // Fresh submit navigates itself so the overlay stays up until the route changes
+    if (justLoggedInRef.current) return;
 
     const homePath = getPortalHomePath(portalMode, getCurrentUser());
-
-    // Fresh login submit → enter portal (login stays in history for Back)
-    if (justLoggedInRef.current) {
-      justLoggedInRef.current = false;
-      navigate(homePath);
-    } else {
-      // Existing session opened on "/" → go home (covers refresh / bookmark)
-      navigate(homePath, { replace: true });
-    }
-
+    navigate(homePath, { replace: true });
     dispatch(resetAuthStatus());
   }, [isLoggedIn, status, navigate, dispatch, portalMode]);
 
@@ -129,12 +128,13 @@ function Login() {
     const saved = setPortalMode(next);
     setMode(saved);
     setShowRegister(false);
+    prefetchPortalHome(saved);
   };
 
   const handleChange = (e) =>
     setLoginData((p) => ({ ...p, [e.target.name]: e.target.value }));
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!loginData.emailid || !loginData.password)
       return openSnackbar({
         message: "Please enter email and password",
@@ -142,13 +142,25 @@ function Login() {
       });
     setPortalMode(portalMode);
     justLoggedInRef.current = true;
-    dispatch(
-      loginUser({
-        emailid: loginData.emailid,
-        password: loginData.password,
-        portalMode,
-      })
-    );
+    setBusy(true);
+    prefetchPortalHome(portalMode);
+    try {
+      const result = await dispatch(
+        loginUser({
+          emailid: loginData.emailid,
+          password: loginData.password,
+          portalMode,
+        })
+      ).unwrap();
+      prefetchPortalHome(result.portalMode || portalMode, result.user);
+      navigate(
+        getPortalHomePath(result.portalMode || portalMode, result.user)
+      );
+      dispatch(resetAuthStatus());
+    } catch {
+      justLoggedInRef.current = false;
+      setBusy(false);
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -240,7 +252,10 @@ function Login() {
               value={loginData.password}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
-              onFocus={() => setFocusedField("password")}
+              onFocus={() => {
+                setFocusedField("password");
+                prefetchPortalHome(portalMode);
+              }}
               onBlur={() => setFocusedField(null)}
               disabled={loading}
               placeholder="••••••••"

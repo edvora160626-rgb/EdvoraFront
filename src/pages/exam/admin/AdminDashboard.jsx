@@ -10,7 +10,6 @@ import {
 import DashboardHero from "../../admin/dashboards/shared/DashboardHero";
 import { examApi } from "../../../utils/examApi";
 import { PageHeader, Pill, Surface } from "../components/ExamUI";
-import EdvoraLoader from "../../../common/EdvoraLoader";
 import { openSnackbar } from "../../../common/snackbar/snackbar";
 
 export default function AdminDashboard() {
@@ -35,15 +34,8 @@ export default function AdminDashboard() {
     };
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex min-h-[40vh] items-center justify-center">
-        <EdvoraLoader message="Loading admin dashboard…" />
-      </div>
-    );
-  }
-
   const s = stats || {};
+  const statValue = (n) => (loading ? "…" : n ?? 0);
 
   return (
     <div className="max-w-7xl mx-auto space-y-5">
@@ -54,10 +46,10 @@ export default function AdminDashboard() {
         ctaLabel="Question bank"
         ctaTo="/exam/admin/questions"
         accentStats={[
-          { label: "Candidates", value: s.candidates ?? 0 },
-          { label: "Published tests", value: s.tests ?? 0 },
-          { label: "Questions", value: s.questions ?? 0 },
-          { label: "Live now", value: s.liveAttempts ?? 0, highlight: true },
+          { label: "Candidates", value: statValue(s.candidates) },
+          { label: "Published tests", value: statValue(s.tests) },
+          { label: "Questions", value: statValue(s.questions) },
+          { label: "Live now", value: statValue(s.liveAttempts), highlight: true },
         ]}
       />
 

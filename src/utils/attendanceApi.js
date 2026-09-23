@@ -1,5 +1,6 @@
 import axios from "axios";
 import { getCurrentUser, getSchoolId } from "./auth";
+import { dayHeaderToIso, isDayHeader, parseMonthFromText, attendanceHeaderKey } from "./attendanceMonth";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:4001";
 const CACHE_TTL_MS = 45_000;
@@ -182,6 +183,25 @@ export async function bulkUploadAttendance({
   return data;
 }
 
+export async function getMonthAttendance({ type, month, classId = null }) {
+  const schoolId = getSchoolId();
+  const { data } = await axios.post(
+    `${API_BASE}/attendance/getMonthAttendance`,
+    {
+      schoolId,
+      type,
+      month,
+      classId,
+      teacherId: getCurrentUser()?._id,
+    }
+  );
+
+  return {
+    month: data?.month || month,
+    marks: data?.marks || {},
+  };
+}
+
 export async function getAttendanceSummary({
   type,
   date = todayISO(),
@@ -249,17 +269,8 @@ export async function getAttendanceLogDetail(logId) {
 
 export { todayISO };
 
-function normalizeHeaderKey(value) {
-  return String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/\./g, "")
-    .replace(/\s+/g, "");
-}
-
 function isAttendanceHeaderRow(headers) {
-  const keys = new Set(headers.map(normalizeHeaderKey));
-  const hasStatus = keys.has("status") || keys.has("attendance");
+  const keys = new Set(headers.map((header) => attendanceHeaderKey(header)));
   const hasId =
     keys.has("employeeid") ||
     keys.has("staffid") ||
@@ -270,7 +281,10 @@ function isAttendanceHeaderRow(headers) {
     keys.has("email") ||
     keys.has("identifier") ||
     keys.has("id");
-  return hasStatus && hasId;
+  if (!hasId) return false;
+  const hasStatus = keys.has("status") || keys.has("attendance");
+  const hasDays = headers.some((header) => isDayHeader(header));
+  return hasStatus || hasDays;
 }
 
 /** Escape a CSV cell (quotes when needed). */
@@ -326,19 +340,19 @@ export function formatAttendanceSheetDate(date = todayISO()) {
 
 /** Parse CSV into objects. Skips title rows and finds the header line. */
 export function parseCsv(text) {
-  const lines = String(text || "")
-    .replace(/^\uFEFF/, "")
+  const source = String(text || "").replace(/^\uFEFF/, "");
+  const lines = source
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter(Boolean);
 
-  if (!lines.length) return [];
+  if (!lines.length) return { rows: [], monthKey: parseMonthFromText(source) };
 
   let headerIndex = -1;
   let headers = [];
 
   for (let i = 0; i < lines.length; i += 1) {
-    const candidate = splitCsvLine(lines[i]).map(normalizeHeaderKey);
+    const candidate = splitCsvLine(lines[i]).map(attendanceHeaderKey);
     if (isAttendanceHeaderRow(candidate)) {
       headerIndex = i;
       headers = candidate;
@@ -346,9 +360,11 @@ export function parseCsv(text) {
     }
   }
 
-  if (headerIndex < 0 || headerIndex >= lines.length - 1) return [];
+  if (headerIndex < 0 || headerIndex >= lines.length - 1) {
+    return { rows: [], monthKey: parseMonthFromText(source) };
+  }
 
-  return lines.slice(headerIndex + 1).map((line) => {
+  const rows = lines.slice(headerIndex + 1).map((line) => {
     const cols = splitCsvLine(line);
     const row = {};
     headers.forEach((header, idx) => {
@@ -356,6 +372,8 @@ export function parseCsv(text) {
     });
     return row;
   });
+
+  return { rows, monthKey: parseMonthFromText(source) };
 }
 
 function splitCsvLine(line) {
@@ -383,31 +401,63 @@ function splitCsvLine(line) {
   return result;
 }
 
-export function normalizeBulkRows(rawRows, type) {
-  return rawRows
-    .map((row) => {
-      const identifier =
-        row.identifier ||
-        row.employeeid ||
-        row.staffid ||
-        row.admissionnumber ||
-        row.admissionno ||
-        row.rollnumber ||
-        row.rollno ||
-        row.email ||
-        row.id ||
-        "";
+export function normalizeBulkRows(rawRows, type, monthKey = "") {
+  return rawRows.flatMap((row) => {
+    const identifier =
+      row.identifier ||
+      row.employeeid ||
+      row.staffid ||
+      row.admissionnumber ||
+      row.admissionno ||
+      row.rollnumber ||
+      row.rollno ||
+      row.email ||
+      row.id ||
+      "";
 
-      return {
-        identifier: String(identifier).trim(),
-        status: String(row.status || row.attendance || "").trim(),
-        remarks: String(row.remarks || row.note || row.notes || "").trim(),
-        staffName: String(
-          row.staffname || row.studentname || row.name || ""
-        ).trim(),
-        department: String(row.department || row.class || "").trim(),
+    const name = String(
+      row.staffname || row.studentname || row.name || ""
+    ).trim();
+    const extra = String(row.department || row.rollnumber || row.class || "").trim();
+    const remarks = String(row.remarks || row.note || row.notes || "").trim();
+    const id = String(identifier).trim();
+
+    const dayEntries = Object.entries(row).filter(([key]) => isDayHeader(key));
+    if (dayEntries.length) {
+      return dayEntries
+        .map(([key, value]) => {
+          const date = dayHeaderToIso(key, monthKey) || String(row.date || "").trim();
+          const status = String(value || "").trim();
+          if (!id && !status) return null;
+          if (!status) return null;
+          return {
+            identifier: id,
+            date,
+            status,
+            remarks,
+            staffName: name,
+            department: extra,
+            type,
+          };
+        })
+        .filter(Boolean);
+    }
+
+    const status = String(row.status || row.attendance || "").trim();
+    const date =
+      String(row.date || "").trim() ||
+      (monthKey && todayISO().startsWith(monthKey) ? todayISO() : "");
+    if (!id && !status && !remarks) return [];
+    return [
+      {
+        identifier: id,
+        date,
+        status,
+        remarks,
+        staffName: name,
+        department: extra,
         type,
-      };
-    })
-    .filter((row) => row.identifier || row.status || row.remarks);
+      },
+    ];
+  });
 }

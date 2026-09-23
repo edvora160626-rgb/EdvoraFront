@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import {
   NavLink,
   NavigationType,
@@ -29,9 +29,6 @@ import { getUserRole } from "../../utils/auth";
 import { getRoleConfig } from "../../utils/rolePermissions";
 import EdvoraLoader from "../../common/EdvoraLoader";
 import EdvoraLogo from "../../common/EdvoraLogo";
-import LogoutModal from "../../common/LogoutModal";
-import ProfileModal from "../../common/ProfileModal";
-import ThemeSettingsDrawer from "../../common/ThemeSettingsDrawer";
 import { useTheme } from "../../theme/ThemeContext";
 import { logoutUser } from "../../redux/slices/authSlice";
 import {
@@ -42,6 +39,9 @@ import {
 } from "../../utils/portalMode";
 import { openSnackbar } from "../../common/snackbar/snackbar";
 
+const LogoutModal = lazy(() => import("../../common/LogoutModal"));
+const ProfileModal = lazy(() => import("../../common/ProfileModal"));
+
 const ROLE_DISPLAY = {
   SUPER_ADMIN: "Principal",
   SCHOOL_ADMIN: "School Admin",
@@ -49,6 +49,18 @@ const ROLE_DISPLAY = {
   STUDENT: "Student",
   PARENT: "Parent",
 };
+
+function prefetchAdminRoute(to = "") {
+  if (to.includes("/dashboard")) void import("./Dashboard");
+  else if (to.includes("/requests")) void import("./UserRequests");
+  else if (to.includes("/departments")) void import("./Departments");
+  else if (to.includes("/classes")) void import("./Classes");
+  else if (to.includes("/subjects")) void import("./Subjects");
+  else if (to.includes("/teacher-attendance")) void import("./TeacherAttendance");
+  else if (to.includes("/student-attendance")) void import("./StudentAttendance");
+  else if (to.includes("/upcoming-events")) void import("./UpcomingEvents");
+  else if (to.includes("/timetable")) void import("./timetable/TimetableDashboard");
+}
 
 const NAV_ITEMS = [
   {
@@ -172,6 +184,8 @@ function SideNav({ onNavigate, onOpenProfile, compact = false }) {
           end={to.endsWith("/dashboard")}
           replace
           onClick={onNavigate}
+          onMouseEnter={() => prefetchAdminRoute(to)}
+          onFocus={() => prefetchAdminRoute(to)}
           title={label}
           className={({ isActive }) =>
             `group flex items-center rounded-2xl text-sm font-medium transition-all duration-200 ${
@@ -222,6 +236,10 @@ function AdminLayout() {
   const { isLoggedIn, user } = useSelector((state) => state.auth);
   const role = getUserRole();
   const displayRole = ROLE_DISPLAY[role] || role;
+  const outletContext = useMemo(
+    () => ({ sidebarOpen: isDesktop && sidebarOpen, isDesktop }),
+    [isDesktop, sidebarOpen]
+  );
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -360,11 +378,23 @@ function AdminLayout() {
         </div>
       </header>
 
-      <div className="flex flex-1 min-h-0 overflow-hidden">
-        {/* Push sidebar — no overlay, main content resizes */}
+      <div className="flex flex-1 min-h-0 overflow-hidden relative">
+        {!isDesktop && sidebarOpen ? (
+          <button
+            type="button"
+            className="fixed inset-0 top-16 z-40 bg-[color:var(--edvora-overlay)] backdrop-blur-[2px] lg:hidden"
+            onClick={closeSidebarOnMobile}
+            aria-label="Close menu"
+          />
+        ) : null}
+
         <aside
-          className="theme-sidebar relative shrink-0 overflow-hidden text-white transition-[width] duration-300 ease-out"
-          style={{ width: sidebarOpen ? SIDEBAR_WIDTH : 0 }}
+          className={`theme-sidebar overflow-hidden text-white duration-300 ease-out max-lg:fixed max-lg:top-16 max-lg:bottom-0 max-lg:left-0 max-lg:z-50 max-lg:shadow-2xl max-lg:transition-transform lg:relative lg:z-auto lg:shrink-0 lg:transition-[width] ${
+            !isDesktop && !sidebarOpen ? "-translate-x-full" : "translate-x-0"
+          }`}
+          style={{
+            width: isDesktop ? (sidebarOpen ? SIDEBAR_WIDTH : 0) : SIDEBAR_WIDTH,
+          }}
           aria-hidden={!sidebarOpen}
         >
           <div
@@ -406,12 +436,12 @@ function AdminLayout() {
         </aside>
 
         <main
-          className="flex-1 min-w-0 min-h-0 overflow-y-auto overflow-x-hidden rs-page transition-[flex-basis,width] duration-300 ease-out"
-          data-sidebar={sidebarOpen ? "expanded" : "compressed"}
+          className="flex-1 min-w-0 min-h-0 overflow-y-auto overflow-x-hidden rs-page"
+          data-sidebar={isDesktop && sidebarOpen ? "expanded" : "compressed"}
         >
           <div
             className={`w-full min-h-full transition-[padding,max-width] duration-300 ease-out ${
-              sidebarOpen
+              isDesktop && sidebarOpen
                 ? "max-w-[1600px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8"
                 : "max-w-none px-4 py-5 sm:px-6 sm:py-6 lg:px-8 xl:px-10 2xl:px-12"
             }`}
@@ -423,28 +453,34 @@ function AdminLayout() {
                 </div>
               }
             >
-              <Outlet context={{ sidebarOpen, isDesktop }} />
+              <Outlet context={outletContext} />
             </Suspense>
           </div>
         </main>
       </div>
 
-      <ThemeSettingsDrawer />
+      {logoutModalOpen ? (
+        <Suspense fallback={null}>
+          <LogoutModal
+            open={logoutModalOpen}
+            title="Logout Confirmation"
+            description="Are you sure you want to logout?"
+            confirmText="Logout"
+            cancelText="Cancel"
+            onConfirm={handleLogoutConfirm}
+            onCancel={() => setLogoutModalOpen(false)}
+          />
+        </Suspense>
+      ) : null}
 
-      <LogoutModal
-        open={logoutModalOpen}
-        title="Logout Confirmation"
-        description="Are you sure you want to logout?"
-        confirmText="Logout"
-        cancelText="Cancel"
-        onConfirm={handleLogoutConfirm}
-        onCancel={() => setLogoutModalOpen(false)}
-      />
-
-      <ProfileModal
-        open={profileModalOpen}
-        onClose={() => setProfileModalOpen(false)}
-      />
+      {profileModalOpen ? (
+        <Suspense fallback={null}>
+          <ProfileModal
+            open={profileModalOpen}
+            onClose={() => setProfileModalOpen(false)}
+          />
+        </Suspense>
+      ) : null}
     </div>
   );
 }

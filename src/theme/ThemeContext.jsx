@@ -1,5 +1,7 @@
 import {
   createContext,
+  lazy,
+  Suspense,
   useCallback,
   useContext,
   useEffect,
@@ -17,6 +19,18 @@ import {
 } from "./presets";
 
 const ThemeContext = createContext(null);
+const ThemeDrawerContext = createContext(null);
+const ThemeSettingsDrawer = lazy(() => import("../common/ThemeSettingsDrawer"));
+
+function ThemeDrawerHost() {
+  const { drawerOpen } = useThemeDrawer();
+  if (!drawerOpen) return null;
+  return (
+    <Suspense fallback={null}>
+      <ThemeSettingsDrawer />
+    </Suspense>
+  );
+}
 
 export function ThemeProvider({ children }) {
   const [mode, setModeState] = useState(() => readStoredMode());
@@ -62,6 +76,9 @@ export function ThemeProvider({ children }) {
     setCustomPrimaryState("");
   }, []);
 
+  const openThemeDrawer = useCallback(() => setDrawerOpen(true), []);
+  const closeThemeDrawer = useCallback(() => setDrawerOpen(false), []);
+
   const value = useMemo(
     () => ({
       mode,
@@ -70,9 +87,8 @@ export function ThemeProvider({ children }) {
       customPrimary,
       palette,
       presets: COLOR_PRESETS,
-      drawerOpen,
-      openThemeDrawer: () => setDrawerOpen(true),
-      closeThemeDrawer: () => setDrawerOpen(false),
+      openThemeDrawer,
+      closeThemeDrawer,
       setMode,
       toggleMode,
       setPreset,
@@ -84,7 +100,8 @@ export function ThemeProvider({ children }) {
       presetId,
       customPrimary,
       palette,
-      drawerOpen,
+      openThemeDrawer,
+      closeThemeDrawer,
       setMode,
       toggleMode,
       setPreset,
@@ -93,8 +110,21 @@ export function ThemeProvider({ children }) {
     ]
   );
 
+  const drawerValue = useMemo(
+    () => ({
+      drawerOpen,
+      closeThemeDrawer,
+    }),
+    [drawerOpen, closeThemeDrawer]
+  );
+
   return (
-    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+    <ThemeContext.Provider value={value}>
+      <ThemeDrawerContext.Provider value={drawerValue}>
+        {children}
+        <ThemeDrawerHost />
+      </ThemeDrawerContext.Provider>
+    </ThemeContext.Provider>
   );
 }
 
@@ -102,6 +132,14 @@ export function useTheme() {
   const ctx = useContext(ThemeContext);
   if (!ctx) {
     throw new Error("useTheme must be used within ThemeProvider");
+  }
+  return ctx;
+}
+
+export function useThemeDrawer() {
+  const ctx = useContext(ThemeDrawerContext);
+  if (!ctx) {
+    throw new Error("useThemeDrawer must be used within ThemeProvider");
   }
   return ctx;
 }

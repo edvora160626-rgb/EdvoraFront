@@ -1,10 +1,9 @@
 import { Check, Moon, Palette, RotateCcw, Sun, X } from "lucide-react";
-import { useTheme } from "../theme/ThemeContext";
+import { useTheme, useThemeDrawer } from "../theme/ThemeContext";
 
 function ThemeSettingsDrawer() {
+  const { drawerOpen, closeThemeDrawer } = useThemeDrawer();
   const {
-    drawerOpen,
-    closeThemeDrawer,
     mode,
     setMode,
     presetId,

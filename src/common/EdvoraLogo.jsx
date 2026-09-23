@@ -21,6 +21,10 @@ function EdvoraLogo({
       alt={decorative ? "" : alt}
       aria-hidden={decorative ? true : undefined}
       draggable={false}
+      decoding="async"
+      fetchPriority={isIcon ? "low" : "high"}
+      width={isIcon ? 64 : 220}
+      height={isIcon ? 64 : 72}
       className={
         isIcon
           ? "edvora-logo block select-none object-contain object-center"

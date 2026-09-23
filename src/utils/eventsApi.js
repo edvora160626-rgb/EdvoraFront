@@ -1,7 +1,9 @@
 import axios from "axios";
 import { getCurrentUser, getSchoolId, getUserRole } from "./auth";
+import { createTtlCache } from "./http";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:4001";
+const eventsCache = createTtlCache(45000);
 
 export const EVENT_STATUSES = [
   { value: "ALL", label: "All" },
@@ -46,6 +48,7 @@ export async function createEvent(payload) {
     createdBy: actor.createdBy,
   });
 
+  eventsCache.clear();
   return data?.data;
 }
 
@@ -60,6 +63,7 @@ export async function updateEvent(eventId, payload) {
     updatedBy: actor.updatedBy,
   });
 
+  eventsCache.clear();
   return data?.data;
 }
 
@@ -73,6 +77,7 @@ export async function publishEvent(eventId) {
     updatedBy: actor.updatedBy,
   });
 
+  eventsCache.clear();
   return data?.data;
 }
 
@@ -86,6 +91,7 @@ export async function cancelEvent(eventId) {
     updatedBy: actor.updatedBy,
   });
 
+  eventsCache.clear();
   return data?.data;
 }
 
@@ -98,6 +104,7 @@ export async function deleteEvent(eventId) {
     eventId,
   });
 
+  eventsCache.clear();
   return data;
 }
 
@@ -123,22 +130,27 @@ export async function getEventsByStatus(status = "ALL") {
     body.status = status;
   }
 
-  const { data } = await axios.post(
-    `${API_BASE}/events/getEventsBySchool`,
-    body
-  );
+  return eventsCache.wrap(
+    `${actor.schoolId}:${status}:${actor.role}:${actor.studentId || ""}:${actor.parentId || ""}`,
+    async () => {
+      const { data } = await axios.post(
+        `${API_BASE}/events/getEventsBySchool`,
+        body
+      );
 
-  return {
-    totalEvents: data?.totalEvents || 0,
-    counts: {
-      DRAFT: data?.counts?.DRAFT || 0,
-      PUBLISHED: data?.counts?.PUBLISHED || 0,
-      CANCELLED: data?.counts?.CANCELLED || 0,
-      ALL: data?.counts?.ALL || 0,
-    },
-    status: data?.status || status,
-    data: data?.data || [],
-  };
+      return {
+        totalEvents: data?.totalEvents || 0,
+        counts: {
+          DRAFT: data?.counts?.DRAFT || 0,
+          PUBLISHED: data?.counts?.PUBLISHED || 0,
+          CANCELLED: data?.counts?.CANCELLED || 0,
+          ALL: data?.counts?.ALL || 0,
+        },
+        status: data?.status || status,
+        data: data?.data || [],
+      };
+    }
+  );
 }
 
 export async function getEventById(eventId) {

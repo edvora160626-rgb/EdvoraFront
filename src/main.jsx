@@ -4,6 +4,7 @@ import { Provider } from "react-redux";
 import App from "./App";
 import store from "./redux/store";
 import { ThemeProvider } from "./theme/ThemeContext";
+import "./utils/http";
 import "./index.css";
 
 let scrollHideTimer;

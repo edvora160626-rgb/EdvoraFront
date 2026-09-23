@@ -1,3 +1,5 @@
+import { getCurrentUser } from "./auth";
+
 export const PORTAL_MODES = Object.freeze({
   SCHOOL: "school",
   EXAMINATION: "examination",
@@ -71,4 +73,35 @@ export function getPortalHomePath(mode = getPortalMode(), user = null) {
   const role = getExamRole(user);
   if (role === EXAM_ROLES.ADMIN) return "/exam/admin/dashboard";
   return "/exam/dashboard";
+}
+
+/** Warm the post-login chunks while the auth request is in flight. */
+export function prefetchPortalHome(mode = getPortalMode(), user = null) {
+  const resolvedUser = user || getCurrentUser();
+  if (mode === PORTAL_MODES.EXAMINATION) {
+    void import("../pages/exam/ExamLayout");
+    const role = getExamRole(resolvedUser);
+    if (role === EXAM_ROLES.ADMIN) {
+      void import("../pages/exam/admin/AdminDashboard");
+    } else {
+      void import("../pages/exam/ExamDashboard");
+    }
+    return;
+  }
+
+  void import("../pages/admin/AdminLayout");
+  void import("../pages/admin/Dashboard");
+
+  const role = resolvedUser?.role;
+  if (role === "SUPER_ADMIN") {
+    void import("../pages/admin/dashboards/PrincipalDashboard");
+  } else if (role === "SCHOOL_ADMIN") {
+    void import("../pages/admin/dashboards/SchoolAdminDashboard");
+  } else if (role === "TEACHER") {
+    void import("../pages/admin/dashboards/TeacherDashboard");
+  } else if (role === "PARENT") {
+    void import("../pages/admin/dashboards/ParentDashboard");
+  } else if (role === "STUDENT") {
+    void import("../pages/admin/dashboards/StudentDashboard");
+  }
 }

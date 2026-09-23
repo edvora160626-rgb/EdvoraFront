@@ -3,10 +3,9 @@ import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import DocumentSeo from "./components/DocumentSeo";
 import EdvoraLoader from "./common/EdvoraLoader";
 import SnackbarContainer from "./common/snackbar/SnackbarContainer";
-import AdminLayout from "./pages/admin/AdminLayout";
-import ExamLayout from "./pages/exam/ExamLayout";
-
-const Login = lazy(() => import("./components/Login"));
+import Login from "./components/Login";
+const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
+const ExamLayout = lazy(() => import("./pages/exam/ExamLayout"));
 const Register = lazy(() => import("./components/Register"));
 const ForgotPasswordConfirm = lazy(
   () => import("./components/ForgotPasswordConfirm")

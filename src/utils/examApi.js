@@ -1,5 +1,6 @@
 import axios from "axios";
 import { getToken } from "./auth";
+import { createTtlCache } from "./http";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:4001";
 
@@ -11,7 +12,10 @@ function authHeaders() {
 const client = axios.create({
   baseURL: `${API_BASE}/exam`,
   withCredentials: true,
+  timeout: 15000,
 });
+
+const examCache = createTtlCache(30000);
 
 client.interceptors.request.use((config) => {
   config.headers = {
@@ -50,13 +54,22 @@ async function unwrap(promise) {
 }
 
 export const examApi = {
-  getDashboard: () => unwrap(client.get("/dashboard")),
+  getDashboard: () =>
+    examCache.wrap("dashboard", () => unwrap(client.get("/dashboard"))),
   listTests: (type) =>
-    unwrap(client.get("/tests", { params: type ? { type } : undefined })),
+    examCache.wrap(`tests:${type || ""}`, () =>
+      unwrap(client.get("/tests", { params: type ? { type } : undefined }))
+    ),
   getTest: (testId) => unwrap(client.get(`/tests/${testId}`)),
-  enroll: (testId) => unwrap(client.post(`/tests/${testId}/enroll`)),
+  enroll: (testId) => {
+    examCache.clear();
+    return unwrap(client.post(`/tests/${testId}/enroll`));
+  },
   precheck: (testId) => unwrap(client.get(`/tests/${testId}/precheck`)),
-  start: (testId) => unwrap(client.post(`/tests/${testId}/start`)),
+  start: (testId) => {
+    examCache.clear();
+    return unwrap(client.post(`/tests/${testId}/start`));
+  },
   saveAnswer: (attemptId, questionId, selectedIndex) =>
     unwrap(
       client.post(`/attempts/${attemptId}/answer`, {
@@ -64,7 +77,10 @@ export const examApi = {
         selectedIndex,
       })
     ),
-  submit: (attemptId) => unwrap(client.post(`/attempts/${attemptId}/submit`)),
+  submit: (attemptId) => {
+    examCache.clear();
+    return unwrap(client.post(`/attempts/${attemptId}/submit`));
+  },
   getResult: (attemptId) =>
     unwrap(client.get(`/attempts/${attemptId}/result`)),
   listResults: () => unwrap(client.get("/results")),

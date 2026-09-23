@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { getCurrentUser } from "../../../utils/auth";
 import { ROLE_LABELS, getRoleConfig } from "../../../utils/rolePermissions";
-import EdvoraLoader from "../../../common/EdvoraLoader";
 import MiniCalendar from "./shared/MiniCalendar";
 import usePendingRequests from "./shared/usePendingRequests";
 
@@ -35,7 +34,7 @@ function greeting() {
 }
 
 const glass =
-  "rounded-3xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass)] shadow-[var(--edvora-glass-shadow)] backdrop-blur-[18px] saturate-[165%]";
+  "rounded-3xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass)] shadow-[var(--edvora-glass-shadow)]";
 
 function SchoolAdminDashboard() {
   const user = getCurrentUser();
@@ -44,6 +43,7 @@ function SchoolAdminDashboard() {
   const wide = !sidebarOpen;
   const { loading, totalPending, actionablePending, recentRequests, stats } =
     usePendingRequests();
+  const pendingValue = (n) => (loading ? "…" : n);
 
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -54,12 +54,12 @@ function SchoolAdminDashboard() {
   const pulseItems = [
     {
       label: "Pending overview",
-      value: totalPending,
+      value: pendingValue(totalPending),
       hint: "Across all roles",
     },
     {
       label: "Teacher approvals",
-      value: actionablePending,
+      value: pendingValue(actionablePending),
       hint: "Needs your decision",
       to: "/admin/requests",
     },
@@ -69,10 +69,6 @@ function SchoolAdminDashboard() {
       hint: "Modules ready",
     },
   ];
-
-  if (loading) {
-    return <EdvoraLoader message="Loading school admin dashboard…" />;
-  }
 
   return (
     <div

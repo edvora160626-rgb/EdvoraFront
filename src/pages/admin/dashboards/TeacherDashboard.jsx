@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { getCurrentUser } from "../../../utils/auth";
 import { ROLE_LABELS, getRoleConfig } from "../../../utils/rolePermissions";
-import EdvoraLoader from "../../../common/EdvoraLoader";
 import DashboardHero from "./shared/DashboardHero";
 import StatCard from "./shared/StatCard";
 import QuickLinks from "./shared/QuickLinks";
@@ -67,8 +66,7 @@ function TeacherDashboard() {
   const user = getCurrentUser();
   const config = getRoleConfig();
   const { loading, totalPending, actionablePending, recentRequests } = usePendingRequests();
-
-  if (loading) return <EdvoraLoader message="Loading teacher dashboard…" />;
+  const pendingValue = (n) => (loading ? "…" : n);
 
   return (
     <div className="space-y-6 sm:space-y-7">
@@ -81,8 +79,8 @@ function TeacherDashboard() {
             ctaLabel="Mark Attendance"
             ctaTo="/admin/student-attendance"
             accentStats={[
-              { label: "Pending Requests", value: totalPending },
-              { label: "Needs Action", value: actionablePending, highlight: true },
+              { label: "Pending Requests", value: pendingValue(totalPending) },
+              { label: "Needs Action", value: pendingValue(actionablePending), highlight: true },
             ]}
           />
         </div>
@@ -114,7 +112,7 @@ function TeacherDashboard() {
         <StatCard title="Today's Classes" value="3" subtitle="Next at 10:00 AM" icon={BookOpen} spark={[3, 4, 2, 5, 3, 4, 3]} />
         <StatCard title="Student Count" value="128" subtitle="Across 4 classes" icon={Users} accent="#8F6580" spark={[110, 118, 120, 122, 125, 126, 128]} />
         <StatCard title="To Grade" value="12" subtitle="Due within 3 days" icon={FileText} accent="#D4B87A" spark={[8, 10, 9, 14, 11, 13, 12]} />
-        <StatCard title="Pending Requests" value={String(actionablePending)} subtitle="Students & parents" icon={ClipboardList} accent="#735366" to="/admin/requests" spark={[2, 4, 3, 5, 4, 6, actionablePending || 2]} />
+        <StatCard title="Pending Requests" value={loading ? "…" : String(actionablePending)} subtitle="Students & parents" icon={ClipboardList} accent="#735366" to="/admin/requests" spark={[2, 4, 3, 5, 4, 6, actionablePending || 2]} />
       </div>
 
       <QuickLinks items={QUICK_LINKS} />

@@ -12,7 +12,6 @@ import DashboardHero from "../admin/dashboards/shared/DashboardHero";
 import { examApi, formatExamDate } from "../../utils/examApi";
 import { useExamSession } from "./context/ExamSessionContext";
 import { PageHeader, Pill, PrimaryButton, Surface } from "./components/ExamUI";
-import EdvoraLoader from "../../common/EdvoraLoader";
 import { openSnackbar } from "../../common/snackbar/snackbar";
 
 export default function ExamDashboard() {
@@ -52,20 +51,13 @@ export default function ExamDashboard() {
     navigate(`/exam/test-validation?testId=${exam.id}`);
   };
 
-  if (loading) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <EdvoraLoader message="Loading dashboard…" />
-      </div>
-    );
-  }
-
   const stats = data?.stats || {
     upcoming: 0,
     practiceDone: 0,
     avgScore: 0,
     certificates: 0,
   };
+  const statValue = (n, suffix = "") => (loading ? "…" : `${n}${suffix}`);
 
   return (
     <div className="space-y-5 sm:space-y-6 max-w-7xl mx-auto">
@@ -76,10 +68,10 @@ export default function ExamDashboard() {
         ctaLabel="Browse practice tests"
         ctaTo="/exam/practice"
         accentStats={[
-          { label: "Upcoming", value: stats.upcoming },
-          { label: "Practice done", value: stats.practiceDone },
-          { label: "Avg score", value: `${stats.avgScore}%` },
-          { label: "Certificates", value: stats.certificates },
+          { label: "Upcoming", value: statValue(stats.upcoming) },
+          { label: "Practice done", value: statValue(stats.practiceDone) },
+          { label: "Avg score", value: statValue(stats.avgScore, "%") },
+          { label: "Certificates", value: statValue(stats.certificates) },
         ]}
       />
 
@@ -117,7 +109,11 @@ export default function ExamDashboard() {
             </Link>
           }
         />
-        {(data?.upcoming || []).length === 0 ? (
+        {loading ? (
+          <Surface className="p-6 text-sm text-[#735366]/70">
+            Loading exams…
+          </Surface>
+        ) : (data?.upcoming || []).length === 0 ? (
           <Surface className="p-6 text-sm text-[#735366]/70">
             No scheduled exams right now. Try practice tests.
           </Surface>

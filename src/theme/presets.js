@@ -237,7 +237,7 @@ export function applyThemeToDocument(mode, palette) {
     "--edvora-glass-border-soft": isDark
       ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.28)`
       : `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.18)`,
-    "--edvora-glass-blur": isDark ? "20px" : "18px",
+    "--edvora-glass-blur": isDark ? "12px" : "10px",
     "--edvora-glass-saturate": isDark ? "150%" : "165%",
     "--edvora-glass-shadow": isDark
       ? "0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)"

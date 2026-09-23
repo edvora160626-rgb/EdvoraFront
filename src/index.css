@@ -69,7 +69,7 @@ html[data-theme="light"] {
   --edvora-glass-soft: rgba(255, 255, 255, 0.28);
   --edvora-glass-border: rgba(255, 255, 255, 0.55);
   --edvora-glass-border-soft: rgba(167, 122, 149, 0.18);
-  --edvora-glass-blur: 18px;
+  --edvora-glass-blur: 10px;
   --edvora-glass-saturate: 165%;
   --edvora-glass-shadow: 0 8px 32px rgba(115, 83, 102, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.55);
@@ -124,7 +124,7 @@ html[data-theme="dark"] {
   --edvora-glass-soft: rgba(255, 255, 255, 0.06);
   --edvora-glass-border: rgba(255, 255, 255, 0.1);
   --edvora-glass-border-soft: rgba(196, 154, 180, 0.22);
-  --edvora-glass-blur: 20px;
+  --edvora-glass-blur: 12px;
   --edvora-glass-saturate: 150%;
   --edvora-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
@@ -166,7 +166,7 @@ body {
       transparent 55%
     ),
     var(--edvora-surface);
-  background-attachment: fixed;
+  background-attachment: scroll;
   color: var(--edvora-ink);
   text-rendering: optimizeLegibility;
   transition: background-color 0.25s ease, color 0.25s ease;
@@ -237,7 +237,7 @@ input[type="radio"] {
       transparent 45%
     ),
     var(--edvora-surface);
-  background-attachment: fixed;
+  background-attachment: scroll;
   color: var(--edvora-ink);
 }
 
@@ -248,8 +248,8 @@ input[type="radio"] {
     var(--edvora-sidebar-via) 48%,
     var(--edvora-sidebar-to) 100%
   );
-  backdrop-filter: blur(22px) saturate(160%);
-  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
   border: 1px solid color-mix(in srgb, var(--edvora-accent) 28%, rgba(255, 255, 255, 0.18));
   color: #fff;
   box-shadow:
@@ -757,5 +757,46 @@ input::-webkit-strong-password-auto-fill-button {
     bottom: calc(-12 * var(--size));
     left: calc(100% + calc(16 * var(--size)));
     transform: rotate(220deg);
+  }
+}
+
+/* Phones/tablets: fixed backgrounds + heavy blur stall scrolling */
+@media (max-width: 1023px) {
+  html,
+  .theme-page {
+    background-attachment: scroll !important;
+  }
+
+  :root,
+  html[data-theme="light"],
+  html[data-theme="dark"] {
+    --edvora-glass-blur: 8px;
+  }
+
+  .theme-sidebar {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  header.sticky,
+  .sticky.top-0.z-30 {
+    backdrop-filter: blur(8px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(140%) !important;
+  }
+
+  .rs-page .bg-slate-50,
+  .rs-page .bg-slate-100,
+  .rs-page .bg-\[\#FCF9FB\],
+  .rs-page .bg-\[\#FAEEE9\] {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clock-colon,
+  .login-loader,
+  .login-loader:before {
+    animation: none !important;
   }
 }

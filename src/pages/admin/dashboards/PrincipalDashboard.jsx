@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { getCurrentUser } from "../../../utils/auth";
 import { ROLE_LABELS, getRoleConfig } from "../../../utils/rolePermissions";
-import EdvoraLoader from "../../../common/EdvoraLoader";
 import DashboardHero from "./shared/DashboardHero";
 import StatCard from "./shared/StatCard";
 import QuickLinks from "./shared/QuickLinks";
@@ -56,8 +55,7 @@ function PrincipalDashboard() {
   const config = getRoleConfig();
   const { loading, totalPending, actionablePending, recentRequests, stats } =
     usePendingRequests();
-
-  if (loading) return <EdvoraLoader message="Loading principal dashboard…" />;
+  const pendingValue = (n) => (loading ? "…" : n);
 
   return (
     <div className="space-y-6 sm:space-y-7">
@@ -68,8 +66,8 @@ function PrincipalDashboard() {
         ctaLabel="Review Office Requests"
         ctaTo="/admin/requests"
         accentStats={[
-          { label: "Campus Pending", value: totalPending },
-          { label: "Office Actions", value: actionablePending, highlight: true },
+          { label: "Campus Pending", value: pendingValue(totalPending) },
+          { label: "Office Actions", value: pendingValue(actionablePending), highlight: true },
         ]}
       />
 
@@ -77,7 +75,7 @@ function PrincipalDashboard() {
         <StatCard title="School Strength" value="1,412" subtitle="Students + staff" icon={Users} spark={[1380, 1390, 1400, 1405, 1410, 1412, 1412]} />
         <StatCard title="Academic Health" value="78%" subtitle="Avg across grades" icon={TrendingUp} accent="#8F6580" spark={[72, 74, 75, 76, 77, 78, 78]} />
         <StatCard title="Fee Realization" value="₹1.2Cr" subtitle="91% of annual target" icon={IndianRupee} accent="#D4B87A" spark={[80, 84, 86, 88, 89, 90, 91]} />
-        <StatCard title="Office Pending" value={String(actionablePending)} subtitle="Admins awaiting approval" icon={ShieldCheck} accent="#735366" to="/admin/requests" />
+        <StatCard title="Office Pending" value={loading ? "…" : String(actionablePending)} subtitle="Admins awaiting approval" icon={ShieldCheck} accent="#735366" to="/admin/requests" />
       </div>
 
       <QuickLinks items={QUICK_LINKS} />

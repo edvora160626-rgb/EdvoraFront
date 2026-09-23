@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Moon, Palette, Sun } from "lucide-react";
 import EdvoraLogo from "./EdvoraLogo";
-import ThemeSettingsDrawer from "./ThemeSettingsDrawer";
 import { useTheme } from "../theme/ThemeContext";
 
 /* ─── Clock hook ──────────────────────────────────────────────────── */
@@ -148,16 +147,50 @@ function DashboardVisual() {
 }
 
 /* ─── Left panel ─────────────────────────────────────────────────── */
-function LeftPanel() {
-  const now   = useClock();
-  const day   = DAYS[now.getDay()];
-  const date  = now.getDate();
-  const month = MONTHS[now.getMonth()];
-  const year  = now.getFullYear();
-  const hh    = String(now.getHours()).padStart(2, "0");
-  const mm    = String(now.getMinutes()).padStart(2, "0");
-  const ss    = String(now.getSeconds()).padStart(2, "0");
+function ClockPill() {
+  const now = useClock();
+  const hh = String(now.getHours()).padStart(2, "0");
+  const mm = String(now.getMinutes()).padStart(2, "0");
+  const ss = String(now.getSeconds()).padStart(2, "0");
 
+  return (
+    <div style={{
+      background: "rgba(255,255,255,0.10)",
+      border: "1px solid rgba(255,255,255,0.16)",
+      borderRadius: 999,
+      padding: "5px 14px",
+      fontFamily: "monospace",
+      fontSize: 13,
+      fontWeight: 600,
+      color: "rgba(255,255,255,0.85)",
+      letterSpacing: "0.05em",
+      flexShrink: 0,
+    }}>
+      {hh}
+      <span className="clock-colon" style={{ color: "rgba(245,214,155,0.9)" }}>:</span>
+      {mm}
+      <span className="clock-colon" style={{ color: "rgba(255,255,255,0.3)" }}>:</span>
+      <span style={{ color: "rgba(255,255,255,0.3)" }}>{ss}</span>
+    </div>
+  );
+}
+
+function DateLine() {
+  const now = useClock();
+  const day = DAYS[now.getDay()];
+  const date = now.getDate();
+  const month = MONTHS[now.getMonth()];
+  const year = now.getFullYear();
+
+  return (
+    <div className="flex items-baseline gap-2" style={{ marginBottom: 12 }}>
+      <span style={{ fontWeight: 900, color: "white", fontSize: "clamp(34px,4.5vw,52px)", lineHeight: 1 }}>{date}</span>
+      <span style={{ color: "rgba(255,255,255,0.45)", fontSize: 14, fontWeight: 300 }}>{day}, {month} {year}</span>
+    </div>
+  );
+}
+
+function LeftPanel() {
   return (
     <div
       className="relative h-full overflow-hidden select-none"
@@ -185,24 +218,7 @@ function LeftPanel() {
           />
         </div>
         {/* Clock pill */}
-        <div style={{
-          background: "rgba(255,255,255,0.10)",
-          border: "1px solid rgba(255,255,255,0.16)",
-          borderRadius: 999,
-          padding: "5px 14px",
-          fontFamily: "monospace",
-          fontSize: 13,
-          fontWeight: 600,
-          color: "rgba(255,255,255,0.85)",
-          letterSpacing: "0.05em",
-          flexShrink: 0,
-        }}>
-          {hh}
-          <span className="clock-colon" style={{ color: "rgba(245,214,155,0.9)" }}>:</span>
-          {mm}
-          <span className="clock-colon" style={{ color: "rgba(255,255,255,0.3)" }}>:</span>
-          <span style={{ color: "rgba(255,255,255,0.3)" }}>{ss}</span>
-        </div>
+        <ClockPill />
       </div>
 
       {/* ── Dashboard visual — fills remaining space ── */}
@@ -213,11 +229,7 @@ function LeftPanel() {
       {/* ── Bottom info bar ── */}
       <div className="relative z-10 flex-shrink-0" style={{ padding: "0 28px 22px" }}>
         <div style={{ width: 32, height: 1, background: "rgba(255,255,255,0.18)", marginBottom: 12 }} />
-        {/* Date */}
-        <div className="flex items-baseline gap-2" style={{ marginBottom: 12 }}>
-          <span style={{ fontWeight: 900, color: "white", fontSize: "clamp(34px,4.5vw,52px)", lineHeight: 1 }}>{date}</span>
-          <span style={{ color: "rgba(255,255,255,0.45)", fontSize: 14, fontWeight: 300 }}>{day}, {month} {year}</span>
-        </div>
+        <DateLine />
         {/* Feature lines */}
         <div style={{ display: "flex", flexDirection: "column", gap: 7, marginBottom: 14 }}>
           {[
@@ -329,8 +341,6 @@ function AuthShell({ children, className = "" }) {
           {children}
         </div>
       </div>
-
-      <ThemeSettingsDrawer />
     </div>
   );
 }

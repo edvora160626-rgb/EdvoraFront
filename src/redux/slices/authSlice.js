@@ -44,7 +44,7 @@ export const loginUser = createAsyncThunk(
       const { data } = await axios.post(
         `${API_BASE}/auth/login`,
         { emailid, password, portalMode },
-        { withCredentials: true }
+        { withCredentials: true, timeout: 12000 }
       );
 
       if (!data?.success) {
