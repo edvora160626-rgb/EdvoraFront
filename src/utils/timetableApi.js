@@ -229,6 +229,28 @@ export async function getTimetableByClass(academicYearId, classId) {
   return data?.data;
 }
 
+export async function saveScheduleBlock(payload) {
+  try {
+    const data = await post("/saveScheduleBlock", payload);
+    return { ok: true, data: data?.data };
+  } catch (error) {
+    const body = error?.response?.data;
+    if (body?.conflicts || error?.response?.status === 409) {
+      return {
+        ok: false,
+        conflicts: body?.conflicts || [],
+        message: body?.message || "That time overlaps another period.",
+      };
+    }
+    throw error;
+  }
+}
+
+export async function deleteScheduleBlock(payload) {
+  const data = await post("/deleteScheduleBlock", payload);
+  return data?.data;
+}
+
 export async function upsertTimetableEntry(payload) {
   try {
     const data = await post("/upsertEntry", payload);

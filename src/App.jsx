@@ -43,9 +43,6 @@ const TimetableSettings = lazy(
 const TimetableRooms = lazy(
   () => import("./pages/admin/timetable/TimetableRooms")
 );
-const TimetableAllocations = lazy(
-  () => import("./pages/admin/timetable/TimetableAllocations")
-);
 const ClassTimetableGrid = lazy(
   () => import("./pages/admin/timetable/ClassTimetableGrid")
 );
@@ -162,10 +159,6 @@ function App() {
             <Route path="timetable" element={<TimetableDashboard />} />
             <Route path="timetable/settings" element={<TimetableSettings />} />
             <Route path="timetable/rooms" element={<TimetableRooms />} />
-            <Route
-              path="timetable/allocations"
-              element={<TimetableAllocations />}
-            />
             <Route
               path="timetable/class/:classId"
               element={<ClassTimetableGrid />}

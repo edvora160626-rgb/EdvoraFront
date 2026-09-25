@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   BookOpen,
@@ -11,21 +11,21 @@ import {
   X,
 } from "lucide-react";
 import CustomSelect from "../../../common/CustomSelect";
+import CustomTimePicker from "../../../common/CustomTimePicker";
 import EdvoraLoader from "../../../common/EdvoraLoader";
 import { openSnackbar } from "../../../common/snackbar/snackbar";
-import { getActiveStaffBySchool } from "../../../utils/classesApi";
+import { getActiveStaffBySchool, getClassesByStatus } from "../../../utils/classesApi";
 import {
   classLabel,
-  clearTimetableEntry,
-  dayShortLabel,
+  deleteScheduleBlock,
   getTimetableByClass,
   listRooms,
   publishTimetable,
-  teacherName,
+  saveScheduleBlock,
   unpublishTimetable,
-  upsertTimetableEntry,
+  upsertTimetableSettings,
 } from "../../../utils/timetableApi";
-import TimetableGridView from "./TimetableGridView";
+import ScheduleBoard from "./ScheduleBoard";
 import { AcademicYearPicker, useAcademicYear } from "./useAcademicYear";
 
 const labelClass =
@@ -160,8 +160,7 @@ function AssignModal({
             />
             {!subjectOptions.length ? (
               <p className="mt-1.5 text-xs text-amber-700">
-                Assign subjects to this class in Subjects, or add them under
-                Timetable → Allocations.
+                Assign subjects to this class in Subjects.
               </p>
             ) : null}
           </div>
@@ -263,14 +262,18 @@ function AssignModal({
 
 export default function ClassTimetableGrid() {
   const { classId } = useParams();
+  const navigate = useNavigate();
   const { yearId, setYearId, yearOptions, loading: yearLoading } =
     useAcademicYear();
   const [payload, setPayload] = useState(null);
   const [rooms, setRooms] = useState([]);
   const [teachers, setTeachers] = useState([]);
+  const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [cell, setCell] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [schoolStart, setSchoolStart] = useState("08:00");
+  const [schoolEnd, setSchoolEnd] = useState("15:00");
+  const [savingHours, setSavingHours] = useState(false);
 
   const load = async () => {
     if (!yearId || !classId) return;
@@ -291,12 +294,14 @@ export default function ClassTimetableGrid() {
   useEffect(() => {
     (async () => {
       try {
-        const [roomResult, staffResult] = await Promise.all([
+        const [roomResult, staffResult, classResult] = await Promise.all([
           listRooms("ACTIVE"),
           getActiveStaffBySchool(),
+          getClassesByStatus("ACTIVE"),
         ]);
         setRooms(roomResult.data || []);
         setTeachers(staffResult.staff || []);
+        setClasses(classResult.data || []);
       } catch {
         /* optional */
       }
@@ -312,64 +317,105 @@ export default function ClassTimetableGrid() {
     [payload]
   );
 
+  useEffect(() => {
+    setSchoolStart(payload?.settings?.schoolStart || "08:00");
+    setSchoolEnd(payload?.settings?.schoolEnd || "15:00");
+  }, [payload?.settings?.schoolStart, payload?.settings?.schoolEnd]);
+
+  const handleApplyHours = async () => {
+    if (!yearId) return;
+    const start = schoolStart.split(":").map(Number);
+    const end = schoolEnd.split(":").map(Number);
+    const startMin = start[0] * 60 + (start[1] || 0);
+    const endMin = end[0] * 60 + (end[1] || 0);
+    if (!Number.isFinite(startMin) || !Number.isFinite(endMin) || endMin <= startMin) {
+      openSnackbar({
+        message: "School end time must be after the start time",
+        variant: "warning",
+      });
+      return;
+    }
+    try {
+      setSavingHours(true);
+      const settings = await upsertTimetableSettings({
+        academicYearId: yearId,
+        workingDays,
+        schoolStart,
+        schoolEnd,
+      });
+      setPayload((prev) => ({
+        ...prev,
+        settings: settings || {
+          ...(prev?.settings || {}),
+          schoolStart,
+          schoolEnd,
+          workingDays,
+        },
+      }));
+      openSnackbar({ message: "School hours saved", variant: "success" });
+    } catch (error) {
+      openSnackbar({
+        message: error?.response?.data?.message || "Failed to save school hours",
+        variant: "error",
+      });
+    } finally {
+      setSavingHours(false);
+    }
+  };
+
   const handleSave = async (form) => {
     try {
       setSaving(true);
-      const result = await upsertTimetableEntry({
+      const targetClassId = form.classId || classId;
+      const result = await saveScheduleBlock({
         academicYearId: yearId,
-        classId,
-        day: cell.day,
-        timeSlotId: cell.slot._id,
         ...form,
+        classId: targetClassId,
       });
       if (!result.ok) {
         openSnackbar({
           message:
-            result.conflicts?.map((c) => c.message).join(" ") ||
+            result.conflicts?.map((item) => item.message).join(" ") ||
             result.message ||
-            "Conflict detected",
+            "That time overlaps another period",
           variant: "error",
         });
-        return;
+        return false;
       }
-      if (result.warnings?.length) {
-        openSnackbar({
-          message: result.warnings.map((w) => w.message).join(" "),
-          variant: "warning",
-        });
-      } else {
-        openSnackbar({ message: "Period assigned", variant: "success" });
+      openSnackbar({ message: "Period saved", variant: "success" });
+      if (String(targetClassId) !== String(classId)) {
+        navigate(`/admin/timetable/class/${targetClassId}`);
+        return true;
       }
       setPayload((prev) => ({
         ...prev,
         timetable: result.data,
       }));
-      setCell(null);
+      return true;
     } catch (error) {
       openSnackbar({
-        message: error?.response?.data?.message || "Failed to save",
+        message: error?.response?.data?.message || "Failed to save period",
         variant: "error",
       });
+      return false;
     } finally {
       setSaving(false);
     }
   };
 
-  const handleClear = async () => {
+  const handleDelete = async (entryId) => {
     try {
       setSaving(true);
-      const data = await clearTimetableEntry({
+      const data = await deleteScheduleBlock({
         academicYearId: yearId,
         classId,
-        day: cell.day,
-        timeSlotId: cell.slot._id,
+        entryId,
       });
       setPayload((prev) => ({ ...prev, timetable: data }));
-      setCell(null);
-      openSnackbar({ message: "Period cleared", variant: "success" });
+      openSnackbar({ message: "Period deleted", variant: "success" });
     } catch (error) {
       openSnackbar({
-        message: error?.response?.data?.message || "Failed to clear",
+        message: error?.response?.data?.message || "Failed to delete period",
         variant: "error",
       });
     } finally {
@@ -456,7 +502,7 @@ export default function ClassTimetableGrid() {
               {classLabel(tt?.classId) || "Class Timetable"}
             </h1>
             <p className="mt-1.5 text-sm text-[color:var(--edvora-muted)]">
-              Click a cell to assign subject, teacher, and room.
+              Set the school day first, then drag any length of time to place a subject.
             </p>
           </div>
 
@@ -503,29 +549,61 @@ export default function ClassTimetableGrid() {
           Select an academic year.
         </div>
       ) : (
-        <TimetableGridView
-          workingDays={workingDays}
-          slots={payload?.slots || []}
-          entries={tt?.entries || []}
-          readOnly={false}
-          onCellClick={setCell}
-        />
-      )}
-
-      {cell && (
-        <AssignModal
-          day={cell.day}
-          slot={cell.slot}
-          entry={cell.entry}
-          subjects={payload?.subjects || []}
-          allocations={payload?.allocations || []}
-          rooms={rooms}
-          teachers={teachers}
-          saving={saving}
-          onClose={() => setCell(null)}
-          onSave={handleSave}
-          onClear={handleClear}
-        />
+        <>
+          <section className={`${glassCard} p-4 sm:p-5`}>
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <h2 className="text-base font-semibold text-[color:var(--edvora-ink-strong)]">
+                  School hours
+                </h2>
+                <p className="mt-1 text-sm text-[color:var(--edvora-muted)]">
+                  Periods can only be placed between these times.
+                </p>
+              </div>
+              <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_auto] lg:max-w-xl">
+                <div>
+                  <label className={labelClass}>From</label>
+                  <CustomTimePicker
+                    value={schoolStart}
+                    onChange={setSchoolStart}
+                    placeholder="School start"
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>To</label>
+                  <CustomTimePicker
+                    value={schoolEnd}
+                    onChange={setSchoolEnd}
+                    placeholder="School end"
+                  />
+                </div>
+                <button
+                  type="button"
+                  disabled={savingHours}
+                  onClick={handleApplyHours}
+                  className="h-[44px] self-end rounded-xl theme-btn-primary px-5 text-sm font-semibold disabled:opacity-60"
+                >
+                  {savingHours ? "Saving…" : "Apply"}
+                </button>
+              </div>
+            </div>
+          </section>
+          <ScheduleBoard
+            workingDays={workingDays}
+            schoolStart={payload?.settings?.schoolStart || schoolStart}
+            schoolEnd={payload?.settings?.schoolEnd || schoolEnd}
+            slots={payload?.slots || []}
+            entries={tt?.entries || []}
+            subjects={payload?.subjects || []}
+            teachers={teachers}
+            rooms={rooms}
+            classes={classes}
+            classId={classId}
+            saving={saving}
+            onSave={handleSave}
+            onDelete={handleDelete}
+          />
+        </>
       )}
     </div>
   );

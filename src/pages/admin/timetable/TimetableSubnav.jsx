@@ -5,18 +5,12 @@ import {
   LayoutGrid,
   Settings2,
   UserRound,
-  Users,
 } from "lucide-react";
 
 const LINKS = [
   { to: "/admin/timetable", label: "Dashboard", icon: LayoutGrid, end: true },
   { to: "/admin/timetable/settings", label: "Settings", icon: Settings2 },
   { to: "/admin/timetable/rooms", label: "Rooms", icon: DoorOpen },
-  {
-    to: "/admin/timetable/allocations",
-    label: "Allocations",
-    icon: Users,
-  },
   {
     to: "/admin/timetable/teacher",
     label: "Teacher View",

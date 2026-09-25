@@ -1,14 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  CalendarDays,
-  Clock3,
-  Copy,
-  Layers3,
-  Pencil,
-  Plus,
-  Trash2,
-  X,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { CalendarDays, Pencil, X } from "lucide-react";
 import CustomDatePicker from "../../../common/CustomDatePicker";
 import CustomSelect from "../../../common/CustomSelect";
 import CustomTimePicker from "../../../common/CustomTimePicker";
@@ -16,20 +7,13 @@ import EdvoraLoader from "../../../common/EdvoraLoader";
 import { openSnackbar } from "../../../common/snackbar/snackbar";
 import {
   DAYS,
-  SLOT_TYPES,
   createAcademicYear,
   createHoliday,
-  createTimeSlot,
-  dayShortLabel,
   deleteHoliday,
-  deleteTimeSlot,
   getTimetableSettings,
   listHolidays,
-  listTimeSlots,
   setCurrentAcademicYear,
-  slotAppliesToDay,
   updateAcademicYear,
-  updateTimeSlot,
   upsertTimetableSettings,
 } from "../../../utils/timetableApi";
 import TimetableSubnav from "./TimetableSubnav";
@@ -39,7 +23,7 @@ const inputClass =
   "w-full h-[44px] rounded-xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass)] backdrop-blur-md px-3.5 text-[14px] text-[color:var(--edvora-ink-strong)] outline-none focus:border-[color:var(--edvora-primary)] focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--edvora-primary)_16%,transparent)]";
 const labelClass =
   "block text-[12px] font-semibold tracking-wide uppercase text-[color:var(--edvora-muted)] mb-1.5";
-const TABS = ["Academic Year", "Working Days", "Period Template", "Holidays"];
+const TABS = ["Academic Year", "Working Days", "Holidays"];
 const glassCard =
   "rounded-2xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass)] p-5 shadow-[var(--edvora-glass-shadow)] backdrop-blur-[18px] saturate-[165%]";
 
@@ -60,22 +44,21 @@ function toDateInputValue(value) {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-function DayChipToggle({ days, selected, onToggle, size = "md" }) {
+function DayChipToggle({ days, selected, onToggle }) {
   return (
     <div className="flex flex-wrap gap-2">
-      {days.map((d) => {
-        const active = selected.includes(d.value);
-        const pad = size === "sm" ? "px-2.5 py-1.5 text-xs" : "px-3 py-2 text-sm";
+      {days.map((day) => {
+        const active = selected.includes(day.value);
         return (
           <button
-            key={d.value}
+            key={day.value}
             type="button"
-            onClick={() => onToggle(d.value)}
-            className={`rounded-xl font-semibold transition ${pad} ${
+            onClick={() => onToggle(day.value)}
+            className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
               active ? "theme-chip-on" : "theme-chip-off"
             }`}
           >
-            {d.label.slice(0, 3)}
+            {day.label.slice(0, 3)}
           </button>
         );
       })}
@@ -103,22 +86,8 @@ export default function TimetableSettings() {
     workingDays: ["MON", "TUE", "WED", "THU", "FRI"],
     schoolStart: "08:00",
     schoolEnd: "15:00",
-    defaultPeriodMinutes: 45,
   });
   const [savingSettings, setSavingSettings] = useState(false);
-
-  const [slots, setSlots] = useState([]);
-  const [selectedDay, setSelectedDay] = useState("MON");
-  const [slotForm, setSlotForm] = useState({
-    name: "",
-    startTime: "08:00",
-    endTime: "08:45",
-    type: "PERIOD",
-    days: ["MON"],
-  });
-  const [savingSlot, setSavingSlot] = useState(false);
-  const [copyFromDay, setCopyFromDay] = useState("");
-  const [copyingDay, setCopyingDay] = useState(false);
 
   const [holidays, setHolidays] = useState([]);
   const [holidayForm, setHolidayForm] = useState({
@@ -128,11 +97,6 @@ export default function TimetableSettings() {
   });
   const [savingHoliday, setSavingHoliday] = useState(false);
 
-  const workingDayOptions = useMemo(
-    () => DAYS.filter((d) => (settings.workingDays || []).includes(d.value)),
-    [settings.workingDays]
-  );
-
   useEffect(() => {
     if (!yearId || tab === "Academic Year") return;
     let cancelled = false;
@@ -140,26 +104,8 @@ export default function TimetableSettings() {
       try {
         setLoading(true);
         if (tab === "Working Days") {
-          const s = await getTimetableSettings(yearId);
-          if (!cancelled && s) setSettings(s);
-        } else if (tab === "Period Template") {
-          const [s, list] = await Promise.all([
-            getTimetableSettings(yearId),
-            listTimeSlots(yearId),
-          ]);
-          if (cancelled) return;
-          if (s) setSettings(s);
-          setSlots(list);
-          const wd = s?.workingDays?.length
-            ? s.workingDays
-            : ["MON", "TUE", "WED", "THU", "FRI"];
-          setSelectedDay((prev) => (wd.includes(prev) ? prev : wd[0]));
-          setSlotForm((prev) => ({
-            ...prev,
-            days: prev.days?.length
-              ? prev.days.filter((d) => wd.includes(d))
-              : [wd[0]],
-          }));
+          const saved = await getTimetableSettings(yearId);
+          if (!cancelled && saved) setSettings(saved);
         } else if (tab === "Holidays") {
           const list = await listHolidays(yearId);
           if (!cancelled) setHolidays(list);
@@ -179,30 +125,6 @@ export default function TimetableSettings() {
       cancelled = true;
     };
   }, [yearId, tab]);
-
-  useEffect(() => {
-    setSlotForm((prev) => {
-      if (prev.days?.length === 1 && prev.days[0] !== selectedDay) {
-        return { ...prev, days: [selectedDay] };
-      }
-      if (!prev.days?.includes(selectedDay) && prev.days?.length <= 1) {
-        return { ...prev, days: [selectedDay] };
-      }
-      return prev;
-    });
-  }, [selectedDay]);
-
-  const daySlots = useMemo(
-    () =>
-      slots
-        .filter((s) => slotAppliesToDay(s, selectedDay))
-        .sort(
-          (a, b) =>
-            a.order - b.order ||
-            String(a.startTime).localeCompare(String(b.startTime))
-        ),
-    [slots, selectedDay]
-  );
 
   const resetYearForm = () => {
     setEditingYearId(null);
@@ -271,11 +193,26 @@ export default function TimetableSettings() {
     }
   };
 
+  const toggleWorkingDay = (day) => {
+    setSettings((prev) => {
+      const has = prev.workingDays?.includes(day);
+      const workingDays = has
+        ? prev.workingDays.filter((item) => item !== day)
+        : [...(prev.workingDays || []), day];
+      return { ...prev, workingDays };
+    });
+  };
+
   const handleSaveSettings = async () => {
     if (!yearId) return;
     try {
       setSavingSettings(true);
-      await upsertTimetableSettings({ academicYearId: yearId, ...settings });
+      await upsertTimetableSettings({
+        academicYearId: yearId,
+        workingDays: settings.workingDays,
+        schoolStart: settings.schoolStart,
+        schoolEnd: settings.schoolEnd,
+      });
       openSnackbar({ message: "Settings saved", variant: "success" });
     } catch (error) {
       openSnackbar({
@@ -284,196 +221,6 @@ export default function TimetableSettings() {
       });
     } finally {
       setSavingSettings(false);
-    }
-  };
-
-  const toggleWorkingDay = (day) => {
-    setSettings((prev) => {
-      const has = prev.workingDays?.includes(day);
-      const workingDays = has
-        ? prev.workingDays.filter((d) => d !== day)
-        : [...(prev.workingDays || []), day];
-      return { ...prev, workingDays };
-    });
-  };
-
-  const toggleSlotDay = (day) => {
-    setSlotForm((prev) => {
-      const has = prev.days?.includes(day);
-      const days = has
-        ? prev.days.filter((d) => d !== day)
-        : [...(prev.days || []), day];
-      return { ...prev, days };
-    });
-  };
-
-  const selectAllWorkingDays = () => {
-    setSlotForm((prev) => ({
-      ...prev,
-      days: [...(settings.workingDays || [])],
-    }));
-  };
-
-  const handleAddSlot = async () => {
-    if (!yearId || !slotForm.name.trim()) {
-      return openSnackbar({
-        message: "Slot name is required",
-        variant: "warning",
-      });
-    }
-    if (!slotForm.days?.length) {
-      return openSnackbar({
-        message: "Select at least one day for this slot",
-        variant: "warning",
-      });
-    }
-    try {
-      setSavingSlot(true);
-      const created = await createTimeSlot({
-        academicYearId: yearId,
-        name: slotForm.name,
-        startTime: slotForm.startTime,
-        endTime: slotForm.endTime,
-        type: slotForm.type,
-        days: slotForm.days,
-      });
-      setSlots((prev) => [...prev, created].sort((a, b) => a.order - b.order));
-      setSlotForm((prev) => ({
-        name: "",
-        startTime: prev.endTime,
-        endTime: prev.endTime,
-        type: "PERIOD",
-        days: [selectedDay],
-      }));
-      openSnackbar({ message: "Period added", variant: "success" });
-    } catch (error) {
-      openSnackbar({
-        message: error?.response?.data?.message || "Failed to add slot",
-        variant: "error",
-      });
-    } finally {
-      setSavingSlot(false);
-    }
-  };
-
-  const handleDeleteSlot = async (id) => {
-    try {
-      await deleteTimeSlot(id);
-      setSlots((prev) => prev.filter((s) => s._id !== id));
-      openSnackbar({ message: "Slot deleted", variant: "success" });
-    } catch (error) {
-      openSnackbar({
-        message: error?.response?.data?.message || "Failed to delete",
-        variant: "error",
-      });
-    }
-  };
-
-  const handleRemoveFromDay = async (slot) => {
-    const days = Array.isArray(slot.days) ? slot.days : [];
-    if (!days.length) {
-      const nextDays = (settings.workingDays || []).filter(
-        (d) => d !== selectedDay
-      );
-      if (!nextDays.length) {
-        return handleDeleteSlot(slot._id);
-      }
-      try {
-        const updated = await updateTimeSlot({
-          timeSlotId: slot._id,
-          days: nextDays,
-        });
-        setSlots((prev) =>
-          prev.map((s) => (String(s._id) === String(slot._id) ? updated : s))
-        );
-        openSnackbar({
-          message: `Removed from ${dayShortLabel(selectedDay)}`,
-          variant: "success",
-        });
-      } catch (error) {
-        openSnackbar({
-          message: error?.response?.data?.message || "Failed to update",
-          variant: "error",
-        });
-      }
-      return;
-    }
-
-    const nextDays = days.filter((d) => d !== selectedDay);
-    if (!nextDays.length) {
-      return handleDeleteSlot(slot._id);
-    }
-
-    try {
-      const updated = await updateTimeSlot({
-        timeSlotId: slot._id,
-        days: nextDays,
-      });
-      setSlots((prev) =>
-        prev.map((s) => (String(s._id) === String(slot._id) ? updated : s))
-      );
-      openSnackbar({
-        message: `Removed from ${dayShortLabel(selectedDay)}`,
-        variant: "success",
-      });
-    } catch (error) {
-      openSnackbar({
-        message: error?.response?.data?.message || "Failed to update",
-        variant: "error",
-      });
-    }
-  };
-
-  const handleCopyDay = async () => {
-    if (!yearId || !copyFromDay || copyFromDay === selectedDay) {
-      return openSnackbar({
-        message: "Pick a different source day to copy from",
-        variant: "warning",
-      });
-    }
-
-    const sourceSlots = slots.filter((s) =>
-      slotAppliesToDay(s, copyFromDay)
-    );
-    if (!sourceSlots.length) {
-      return openSnackbar({
-        message: `No slots on ${dayShortLabel(copyFromDay)} to copy`,
-        variant: "warning",
-      });
-    }
-
-    try {
-      setCopyingDay(true);
-      for (const src of sourceSlots) {
-        if (slotAppliesToDay(src, selectedDay)) continue;
-
-        const srcDays =
-          Array.isArray(src.days) && src.days.length
-            ? src.days
-            : settings.workingDays || [];
-
-        if (!srcDays.includes(selectedDay)) {
-          await updateTimeSlot({
-            timeSlotId: src._id,
-            days: [...srcDays, selectedDay],
-          });
-        }
-      }
-
-      const list = await listTimeSlots(yearId);
-      setSlots(list);
-      openSnackbar({
-        message: `Copied ${dayShortLabel(copyFromDay)} → ${dayShortLabel(selectedDay)}`,
-        variant: "success",
-      });
-      setCopyFromDay("");
-    } catch (error) {
-      openSnackbar({
-        message: error?.response?.data?.message || "Failed to copy day",
-        variant: "error",
-      });
-    } finally {
-      setCopyingDay(false);
     }
   };
 
@@ -488,18 +235,16 @@ export default function TimetableSettings() {
       setSavingHoliday(true);
       const created = await createHoliday({
         academicYearId: yearId,
-        ...holidayForm,
+        name: holidayForm.name.trim(),
+        date: holidayForm.date,
+        type: holidayForm.type,
       });
-      setHolidays((prev) =>
-        [...prev, created].sort(
-          (a, b) => new Date(a.date) - new Date(b.date)
-        )
-      );
+      setHolidays((prev) => [...prev, created]);
       setHolidayForm({ name: "", date: "", type: "HOLIDAY" });
       openSnackbar({ message: "Holiday added", variant: "success" });
     } catch (error) {
       openSnackbar({
-        message: error?.response?.data?.message || "Failed to add",
+        message: error?.response?.data?.message || "Failed to add holiday",
         variant: "error",
       });
     } finally {
@@ -507,52 +252,36 @@ export default function TimetableSettings() {
     }
   };
 
-  const handleDeleteHoliday = async (id) => {
+  const handleDeleteHoliday = async (holidayId) => {
     try {
-      await deleteHoliday(id);
-      setHolidays((prev) => prev.filter((h) => h._id !== id));
+      await deleteHoliday(holidayId);
+      setHolidays((prev) => prev.filter((item) => item._id !== holidayId));
       openSnackbar({ message: "Holiday removed", variant: "success" });
     } catch (error) {
       openSnackbar({
-        message: error?.response?.data?.message || "Failed to delete",
+        message: error?.response?.data?.message || "Failed to remove holiday",
         variant: "error",
       });
     }
   };
 
-  if (yearLoading) {
-    return (
-      <div className="flex min-h-[40vh] items-center justify-center">
-        <EdvoraLoader message="Loading settings…" />
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-5 sm:space-y-6">
-      <section className="relative overflow-hidden rounded-3xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass)] p-5 sm:p-6 shadow-[var(--edvora-glass-shadow)] backdrop-blur-[20px] saturate-[165%]">
-        <div
-          className="pointer-events-none absolute -right-16 -top-20 h-52 w-52 rounded-full blur-2xl"
-          style={{
-            background:
-              "radial-gradient(circle, color-mix(in srgb, var(--edvora-primary) 28%, transparent), transparent 70%)",
-          }}
-        />
-        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0">
-            <div className="inline-flex items-center gap-2 rounded-full bg-[color:var(--edvora-glass-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[color:var(--edvora-primary)] ring-1 ring-[color:var(--edvora-glass-border-soft)]">
-              <Clock3 size={13} />
+    <div className="space-y-5">
+      <section className={glassCard}>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[color:var(--edvora-primary)]">
+              <CalendarDays size={13} />
               Schedule
             </div>
-            <h1 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-[color:var(--edvora-ink-strong)]">
+            <h1 className="mt-2 text-2xl font-bold text-[color:var(--edvora-ink-strong)]">
               Timetable Settings
             </h1>
-            <p className="mt-1.5 text-sm text-[color:var(--edvora-muted)]">
-              Academic year, working days, day-wise period templates, and
-              holidays.
+            <p className="mt-1 text-sm text-[color:var(--edvora-muted)]">
+              Academic year, working days, and holidays. Place periods on the class timetable.
             </p>
           </div>
-          {tab !== "Academic Year" && (
+          {yearLoading ? null : (
             <AcademicYearPicker
               yearId={yearId}
               yearOptions={yearOptions}
@@ -565,14 +294,14 @@ export default function TimetableSettings() {
       <TimetableSubnav />
 
       <div className="theme-segment flex-wrap">
-        {TABS.map((t) => (
+        {TABS.map((item) => (
           <button
-            key={t}
+            key={item}
             type="button"
-            onClick={() => setTab(t)}
-            className={`theme-segment-btn ${tab === t ? "is-active" : ""}`}
+            onClick={() => setTab(item)}
+            className={`theme-segment-btn ${tab === item ? "is-active" : ""}`}
           >
-            {t}
+            {item}
           </button>
         ))}
       </div>
@@ -585,21 +314,14 @@ export default function TimetableSettings() {
         <div className="grid gap-5 lg:grid-cols-2">
           <div className={glassCard}>
             <div className="mb-4 flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-base font-semibold text-[color:var(--edvora-ink-strong)]">
-                  {editingYearId ? "Edit Academic Year" : "Add Academic Year"}
-                </h2>
-                {editingYearId ? (
-                  <p className="mt-1 text-xs text-[color:var(--edvora-muted)]">
-                    Update name, dates, or current status.
-                  </p>
-                ) : null}
-              </div>
+              <h2 className="text-base font-semibold text-[color:var(--edvora-ink-strong)]">
+                {editingYearId ? "Edit Academic Year" : "Add Academic Year"}
+              </h2>
               {editingYearId ? (
                 <button
                   type="button"
                   onClick={resetYearForm}
-                  className="inline-flex h-8 items-center gap-1 rounded-lg px-2.5 text-xs font-semibold text-[color:var(--edvora-muted)] hover:bg-[color:var(--edvora-glass-soft)] hover:text-[color:var(--edvora-ink)]"
+                  className="inline-flex h-8 items-center gap-1 rounded-lg px-2.5 text-xs font-semibold text-[color:var(--edvora-muted)]"
                 >
                   <X size={14} />
                   Cancel
@@ -612,8 +334,8 @@ export default function TimetableSettings() {
                 <input
                   className={inputClass}
                   value={yearForm.name}
-                  onChange={(e) =>
-                    setYearForm((p) => ({ ...p, name: e.target.value }))
+                  onChange={(event) =>
+                    setYearForm((prev) => ({ ...prev, name: event.target.value }))
                   }
                   placeholder="2026-2027"
                 />
@@ -622,8 +344,8 @@ export default function TimetableSettings() {
                 <label className={labelClass}>Start Date</label>
                 <CustomDatePicker
                   value={yearForm.startDate}
-                  onChange={(v) =>
-                    setYearForm((p) => ({ ...p, startDate: v }))
+                  onChange={(value) =>
+                    setYearForm((prev) => ({ ...prev, startDate: value }))
                   }
                 />
               </div>
@@ -631,7 +353,9 @@ export default function TimetableSettings() {
                 <label className={labelClass}>End Date</label>
                 <CustomDatePicker
                   value={yearForm.endDate}
-                  onChange={(v) => setYearForm((p) => ({ ...p, endDate: v }))}
+                  onChange={(value) =>
+                    setYearForm((prev) => ({ ...prev, endDate: value }))
+                  }
                 />
               </div>
               <label className="flex items-center gap-2 text-sm text-[color:var(--edvora-muted)]">
@@ -639,10 +363,10 @@ export default function TimetableSettings() {
                   type="checkbox"
                   className="h-4 w-4 accent-[color:var(--edvora-primary)]"
                   checked={yearForm.isCurrent}
-                  onChange={(e) =>
-                    setYearForm((p) => ({
-                      ...p,
-                      isCurrent: e.target.checked,
+                  onChange={(event) =>
+                    setYearForm((prev) => ({
+                      ...prev,
+                      isCurrent: event.target.checked,
                     }))
                   }
                 />
@@ -668,38 +392,36 @@ export default function TimetableSettings() {
               Existing Years
             </h2>
             {!years.length ? (
-              <p className="text-sm text-[color:var(--edvora-muted)]">
-                No years yet.
-              </p>
+              <p className="text-sm text-[color:var(--edvora-muted)]">No years yet.</p>
             ) : (
               <ul className="space-y-2">
-                {years.map((y) => (
+                {years.map((year) => (
                   <li
-                    key={y._id}
+                    key={year._id}
                     className={`flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5 ${
-                      editingYearId === y._id
+                      editingYearId === year._id
                         ? "border-[color:var(--edvora-primary)]/40 bg-[color:var(--edvora-primary)]/8"
                         : "border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass-soft)]"
                     }`}
                   >
                     <div className="min-w-0">
-                      <p className="font-medium text-[color:var(--edvora-ink-strong)] truncate">
-                        {y.name}
+                      <p className="truncate font-medium text-[color:var(--edvora-ink-strong)]">
+                        {year.name}
                       </p>
                       <p className="text-xs text-[color:var(--edvora-muted)]">
-                        {new Date(y.startDate).toLocaleDateString()} –{" "}
-                        {new Date(y.endDate).toLocaleDateString()}
+                        {new Date(year.startDate).toLocaleDateString()} –{" "}
+                        {new Date(year.endDate).toLocaleDateString()}
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
-                      {y.isCurrent ? (
-                        <span className="rounded-full bg-[color:var(--edvora-success-soft)] px-2.5 py-0.5 text-[11px] font-semibold text-[color:var(--edvora-success-ink)] ring-1 ring-[color:var(--edvora-success)]/20">
+                      {year.isCurrent ? (
+                        <span className="rounded-full bg-[color:var(--edvora-success-soft)] px-2.5 py-0.5 text-[11px] font-semibold text-[color:var(--edvora-success-ink)]">
                           Current
                         </span>
                       ) : (
                         <button
                           type="button"
-                          onClick={() => handleSetCurrent(y._id)}
+                          onClick={() => handleSetCurrent(year._id)}
                           className="text-xs font-semibold text-[color:var(--edvora-primary)] hover:underline"
                         >
                           Make current
@@ -707,10 +429,9 @@ export default function TimetableSettings() {
                       )}
                       <button
                         type="button"
-                        onClick={() => handleEditYear(y)}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[color:var(--edvora-glass-border-soft)] text-[color:var(--edvora-primary)] transition hover:bg-[color:var(--edvora-primary)]/10"
-                        aria-label={`Edit ${y.name}`}
-                        title="Edit"
+                        onClick={() => handleEditYear(year)}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[color:var(--edvora-glass-border-soft)] text-[color:var(--edvora-primary)]"
+                        aria-label={`Edit ${year.name}`}
                       >
                         <Pencil size={14} />
                       </button>
@@ -740,8 +461,8 @@ export default function TimetableSettings() {
                   <label className={labelClass}>School Start</label>
                   <CustomTimePicker
                     value={settings.schoolStart}
-                    onChange={(v) =>
-                      setSettings((p) => ({ ...p, schoolStart: v }))
+                    onChange={(value) =>
+                      setSettings((prev) => ({ ...prev, schoolStart: value }))
                     }
                   />
                 </div>
@@ -749,27 +470,11 @@ export default function TimetableSettings() {
                   <label className={labelClass}>School End</label>
                   <CustomTimePicker
                     value={settings.schoolEnd}
-                    onChange={(v) =>
-                      setSettings((p) => ({ ...p, schoolEnd: v }))
+                    onChange={(value) =>
+                      setSettings((prev) => ({ ...prev, schoolEnd: value }))
                     }
                   />
                 </div>
-              </div>
-              <div>
-                <label className={labelClass}>Default Period (minutes)</label>
-                <input
-                  type="number"
-                  min={15}
-                  max={180}
-                  className={inputClass}
-                  value={settings.defaultPeriodMinutes || 45}
-                  onChange={(e) =>
-                    setSettings((p) => ({
-                      ...p,
-                      defaultPeriodMinutes: Number(e.target.value) || 45,
-                    }))
-                  }
-                />
               </div>
               <button
                 type="button"
@@ -780,228 +485,6 @@ export default function TimetableSettings() {
                 {savingSettings ? "Saving…" : "Save Settings"}
               </button>
             </div>
-          )}
-        </div>
-      ) : tab === "Period Template" ? (
-        <div className="space-y-5">
-          {!yearId ? (
-            <div className={glassCard}>
-              <p className="text-sm text-amber-700">Select an academic year.</p>
-            </div>
-          ) : (
-            <>
-              <div className={glassCard}>
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
-                    <div className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--edvora-primary)]">
-                      <CalendarDays size={13} />
-                      Day schedule
-                    </div>
-                    <p className="mt-1 text-sm text-[color:var(--edvora-muted)]">
-                      Each weekday can have its own periods, breaks, and times.
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <CustomSelect
-                      options={workingDayOptions
-                        .filter((d) => d.value !== selectedDay)
-                        .map((d) => ({
-                          value: d.value,
-                          label: `Copy from ${d.label}`,
-                        }))}
-                      placeholder="Copy from…"
-                      isSearchable={false}
-                      value={copyFromDay || null}
-                      onChange={(opt) => setCopyFromDay(opt?.value || "")}
-                    />
-                    <button
-                      type="button"
-                      disabled={copyingDay || !copyFromDay}
-                      onClick={handleCopyDay}
-                      className="inline-flex h-[42px] items-center gap-2 rounded-xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass-soft)] px-3 text-sm font-semibold text-[color:var(--edvora-ink)] hover:border-[color:var(--edvora-primary)]/40 disabled:opacity-50"
-                    >
-                      <Copy size={14} />
-                      {copyingDay ? "Copying…" : "Apply"}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <DayChipToggle
-                    days={workingDayOptions.length ? workingDayOptions : DAYS}
-                    selected={[selectedDay]}
-                    onToggle={(day) => setSelectedDay(day)}
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-5 lg:grid-cols-2">
-                <div className={glassCard}>
-                  <h2 className="mb-1 text-base font-semibold text-[color:var(--edvora-ink-strong)]">
-                    Add Slot
-                  </h2>
-                  <p className="mb-4 text-xs text-[color:var(--edvora-muted)]">
-                    Creating for{" "}
-                    <span className="font-semibold text-[color:var(--edvora-ink)]">
-                      {DAYS.find((d) => d.value === selectedDay)?.label ||
-                        selectedDay}
-                    </span>
-                    — pick more days below if this slot repeats.
-                  </p>
-                  <div className="space-y-3">
-                    <div>
-                      <label className={labelClass}>Name</label>
-                      <input
-                        className={inputClass}
-                        value={slotForm.name}
-                        onChange={(e) =>
-                          setSlotForm((p) => ({ ...p, name: e.target.value }))
-                        }
-                        placeholder="Period 1"
-                      />
-                    </div>
-                    <div>
-                      <label className={labelClass}>Type</label>
-                      <CustomSelect
-                        options={SLOT_TYPES}
-                        value={slotForm.type}
-                        onChange={(opt) =>
-                          setSlotForm((p) => ({
-                            ...p,
-                            type: opt?.value || "PERIOD",
-                          }))
-                        }
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className={labelClass}>Start</label>
-                        <CustomTimePicker
-                          value={slotForm.startTime}
-                          onChange={(v) =>
-                            setSlotForm((p) => ({ ...p, startTime: v }))
-                          }
-                        />
-                      </div>
-                      <div>
-                        <label className={labelClass}>End</label>
-                        <CustomTimePicker
-                          value={slotForm.endTime}
-                          onChange={(v) =>
-                            setSlotForm((p) => ({ ...p, endTime: v }))
-                          }
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <div className="mb-1.5 flex items-center justify-between gap-2">
-                        <label className={`${labelClass} !mb-0`}>
-                          Applies to
-                        </label>
-                        <button
-                          type="button"
-                          onClick={selectAllWorkingDays}
-                          className="text-[11px] font-semibold text-[color:var(--edvora-primary)] hover:underline"
-                        >
-                          All working days
-                        </button>
-                      </div>
-                      <DayChipToggle
-                        days={
-                          workingDayOptions.length ? workingDayOptions : DAYS
-                        }
-                        selected={slotForm.days || []}
-                        onToggle={toggleSlotDay}
-                        size="sm"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      disabled={savingSlot || !yearId}
-                      onClick={handleAddSlot}
-                      className="inline-flex h-[44px] items-center gap-2 rounded-xl theme-btn-primary px-5 text-sm font-semibold disabled:opacity-60"
-                    >
-                      <Plus size={16} />
-                      {savingSlot ? "Adding…" : "Add Slot"}
-                    </button>
-                  </div>
-                </div>
-
-                <div className={glassCard}>
-                  <div className="mb-4 flex items-center justify-between gap-2">
-                    <h2 className="text-base font-semibold text-[color:var(--edvora-ink-strong)]">
-                      {dayShortLabel(selectedDay)} template
-                    </h2>
-                    <span className="rounded-full bg-[color:var(--edvora-glass-soft)] px-2.5 py-1 text-[11px] font-semibold text-[color:var(--edvora-muted)] ring-1 ring-[color:var(--edvora-glass-border-soft)]">
-                      {daySlots.length} slot{daySlots.length === 1 ? "" : "s"}
-                    </span>
-                  </div>
-                  {!daySlots.length ? (
-                    <div className="rounded-xl border border-dashed border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass-soft)]/50 px-4 py-8 text-center">
-                      <Layers3
-                        size={22}
-                        className="mx-auto mb-2 text-[color:var(--edvora-primary)]"
-                      />
-                      <p className="text-sm font-medium text-[color:var(--edvora-ink)]">
-                        No slots for {dayShortLabel(selectedDay)}
-                      </p>
-                      <p className="mt-1 text-xs text-[color:var(--edvora-muted)]">
-                        Add periods for this day, or copy from another day.
-                      </p>
-                    </div>
-                  ) : (
-                    <ul className="space-y-2">
-                      {daySlots.map((s) => {
-                        const applies =
-                          Array.isArray(s.days) && s.days.length
-                            ? s.days
-                            : settings.workingDays || [];
-                        return (
-                          <li
-                            key={s._id}
-                            className="flex items-start justify-between gap-3 rounded-xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass-soft)] px-3 py-2.5"
-                          >
-                            <div className="min-w-0">
-                              <p className="font-medium text-[color:var(--edvora-ink-strong)]">
-                                {s.name}{" "}
-                                <span className="text-[10px] font-bold uppercase tracking-wide text-[color:var(--edvora-muted)]">
-                                  {s.type}
-                                </span>
-                              </p>
-                              <p className="text-xs text-[color:var(--edvora-muted)]">
-                                {s.startTime} – {s.endTime}
-                              </p>
-                              <div className="mt-1.5 flex flex-wrap gap-1">
-                                {applies.map((d) => (
-                                  <span
-                                    key={d}
-                                    className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold ${
-                                      d === selectedDay
-                                        ? "bg-[color:var(--edvora-primary)]/15 text-[color:var(--edvora-primary)]"
-                                        : "bg-[color:var(--edvora-glass)] text-[color:var(--edvora-muted)]"
-                                    }`}
-                                  >
-                                    {dayShortLabel(d)}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveFromDay(s)}
-                              title={`Remove from ${dayShortLabel(selectedDay)}`}
-                              className="rounded-lg p-2 text-[color:var(--edvora-muted)] hover:bg-red-500/10 hover:text-red-600"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
-                </div>
-              </div>
-            </>
           )}
         </div>
       ) : (
@@ -1016,8 +499,8 @@ export default function TimetableSettings() {
                 <input
                   className={inputClass}
                   value={holidayForm.name}
-                  onChange={(e) =>
-                    setHolidayForm((p) => ({ ...p, name: e.target.value }))
+                  onChange={(event) =>
+                    setHolidayForm((prev) => ({ ...prev, name: event.target.value }))
                   }
                   placeholder="Independence Day"
                 />
@@ -1026,8 +509,8 @@ export default function TimetableSettings() {
                 <label className={labelClass}>Date</label>
                 <CustomDatePicker
                   value={holidayForm.date}
-                  onChange={(v) =>
-                    setHolidayForm((p) => ({ ...p, date: v }))
+                  onChange={(value) =>
+                    setHolidayForm((prev) => ({ ...prev, date: value }))
                   }
                 />
               </div>
@@ -1039,10 +522,10 @@ export default function TimetableSettings() {
                     { value: "SPECIAL_WORKING", label: "Special Working Day" },
                   ]}
                   value={holidayForm.type}
-                  onChange={(opt) =>
-                    setHolidayForm((p) => ({
-                      ...p,
-                      type: opt?.value || "HOLIDAY",
+                  onChange={(option) =>
+                    setHolidayForm((prev) => ({
+                      ...prev,
+                      type: option?.value || "HOLIDAY",
                     }))
                   }
                 />
@@ -1068,23 +551,24 @@ export default function TimetableSettings() {
               </p>
             ) : (
               <ul className="space-y-2">
-                {holidays.map((h) => (
+                {holidays.map((holiday) => (
                   <li
-                    key={h._id}
+                    key={holiday._id}
                     className="flex items-center justify-between rounded-xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass-soft)] px-3 py-2.5"
                   >
                     <div>
                       <p className="font-medium text-[color:var(--edvora-ink-strong)]">
-                        {h.name}
+                        {holiday.name}
                       </p>
                       <p className="text-xs text-[color:var(--edvora-muted)]">
-                        {new Date(h.date).toLocaleDateString()} · {h.type}
+                        {new Date(holiday.date).toLocaleDateString()} · {holiday.type}
                       </p>
                     </div>
                     <button
                       type="button"
-                      onClick={() => handleDeleteHoliday(h._id)}
+                      onClick={() => handleDeleteHoliday(holiday._id)}
                       className="rounded-lg p-2 text-[color:var(--edvora-muted)] hover:bg-red-500/10 hover:text-red-600"
+                      aria-label={`Remove ${holiday.name}`}
                     >
                       <X size={16} />
                     </button>

@@ -6,7 +6,6 @@ import {
   DoorOpen,
   FileEdit,
   Settings2,
-  Users,
 } from "lucide-react";
 import EdvoraLoader from "../../../common/EdvoraLoader";
 import { openSnackbar } from "../../../common/snackbar/snackbar";
@@ -87,7 +86,7 @@ export default function TimetableDashboard() {
             Timetable
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            Manage periods, rooms, allocations, and weekly class grids.
+            Manage periods, rooms, and weekly class grids.
           </p>
         </div>
         <AcademicYearPicker
@@ -151,12 +150,6 @@ export default function TimetableDashboard() {
               className="inline-flex h-[42px] items-center gap-2 rounded-lg border border-[color:var(--edvora-border)] bg-white px-4 text-sm font-medium text-[color:var(--edvora-ink-strong)] hover:border-[color:var(--edvora-primary)]/50"
             >
               <DoorOpen size={16} /> Rooms
-            </Link>
-            <Link
-              to="/admin/timetable/allocations"
-              className="inline-flex h-[42px] items-center gap-2 rounded-lg border border-[color:var(--edvora-border)] bg-white px-4 text-sm font-medium text-[color:var(--edvora-ink-strong)] hover:border-[color:var(--edvora-primary)]/50"
-            >
-              <Users size={16} /> Allocations
             </Link>
           </div>
 

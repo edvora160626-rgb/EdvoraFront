@@ -7,7 +7,7 @@ import {
   getTeacherTimetable,
   teacherName,
 } from "../../../utils/timetableApi";
-import TimetableGridView from "./TimetableGridView";
+import ScheduleBoard from "./ScheduleBoard";
 import TimetableSubnav from "./TimetableSubnav";
 import { AcademicYearPicker, useAcademicYear } from "./useAcademicYear";
 
@@ -20,7 +20,7 @@ export default function TeacherTimetable() {
   const [teacherId, setTeacherId] = useState("");
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [includeDrafts, setIncludeDrafts] = useState(false);
+  const [includeDrafts, setIncludeDrafts] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -91,8 +91,8 @@ export default function TeacherTimetable() {
         <h1 className="text-xl font-semibold text-[color:var(--edvora-ink-strong)] sm:text-2xl">
           Teacher Timetable
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          View a teacher&apos;s weekly schedule and free periods.
+        <p className="mt-1 text-sm text-[color:var(--edvora-muted)]">
+          See which subject and class this teacher is assigned to.
         </p>
       </div>
 
@@ -129,23 +129,31 @@ export default function TeacherTimetable() {
           <EdvoraLoader message="Loading…" />
         </div>
       ) : !teacherId ? (
-        <div className="rounded-xl border border-slate-100 bg-white p-8 text-center text-sm text-slate-500 shadow-sm">
+        <div className="rounded-2xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass)] p-8 text-center text-sm text-[color:var(--edvora-muted)]">
           Select a teacher to view their timetable.
         </div>
       ) : (
         <>
-          {data?.teacher && (
+          {data?.teacher ? (
             <p className="mb-3 text-sm font-medium text-[color:var(--edvora-ink-strong)]">
               Schedule for {teacherName(data.teacher)}
             </p>
+          ) : null}
+          {(data?.entries || []).length === 0 ? (
+            <div className="rounded-2xl border border-[color:var(--edvora-glass-border-soft)] bg-[color:var(--edvora-glass)] p-8 text-center text-sm text-[color:var(--edvora-muted)]">
+              No periods are assigned to this teacher yet.
+            </div>
+          ) : (
+            <ScheduleBoard
+              readOnly
+              showClass
+              workingDays={workingDays}
+              schoolStart={data?.settings?.schoolStart || "08:00"}
+              schoolEnd={data?.settings?.schoolEnd || "15:00"}
+              slots={data?.slots || []}
+              entries={data?.entries || []}
+            />
           )}
-          <TimetableGridView
-            workingDays={workingDays}
-            slots={data?.slots || []}
-            entries={data?.entries || []}
-            readOnly
-            showClass
-          />
         </>
       )}
     </div>
